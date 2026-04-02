@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MCP — Model Context Protocol Explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────────────────────────── */
+:root {
+  --bg-0:       #050507;
+  --bg-1:       #0a0a0e;
+  --bg-2:       #0d1117;
+  --bg-3:       #161b22;
+  --bg-card:    #0d1117;
+  --bg-hover:   #161b22;
+
+  --border-dim: #21262d;
+  --border-mid: #30363d;
+  --border-hi:  #444c56;
+
+  --text-0:     #f0f6fc;
+  --text-1:     #c9d1d9;
+  --text-2:     #8b949e;
+  --text-3:     #484f58;
+
+  --blue:       #58a6ff;
+  --blue-dim:   #1f6feb;
+  --blue-glow:  rgba(88,166,255,0.12);
+  --green:      #3fb950;
+  --green-dim:  #238636;
+  --purple:     #bc8cff;
+  --orange:     #d29922;
+  --red:        #f85149;
+  --teal:       #39c5cf;
+  --pink:       #f778ba;
+
+  --gh-bg:      #0d1117;
+  --gh-border:  #30363d;
+  --gh-text:    #e6edf3;
+  --gh-comment: #8b949e;
+  --gh-keyword: #ff7b72;
+  --gh-string:  #a5d6ff;
+  --gh-func:    #d2a8ff;
+  --gh-class:   #ffa657;
+  --gh-number:  #79c0ff;
+  --gh-const:   #79c0ff;
+  --gh-prop:    #e6edf3;
+  --gh-op:      #ff7b72;
+  --gh-tag:     #7ee787;
+  --gh-punc:    #c9d1d9;
+
+  --sidebar-w:  280px;
+  --content-max: 860px;
+  --radius:     8px;
+  --radius-lg:  12px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(88,166,255,0.25); color: var(--text-0); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ─────────────────────────────────────────────────────────────
+   PROGRESS BAR
+───────────────────────────────────────────────────────────── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--bg-3); z-index: 1000;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  transition: width 0.1s linear;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 90px 48px 70px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-dim);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+}
+.hero-glow {
+  position: absolute; top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(188,140,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: var(--content-max); }
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800; line-height: 1.1; color: var(--text-0);
+  margin-bottom: 20px;
+}
+.hero h1 span { color: var(--purple); }
+.hero-desc {
+  font-size: 1.05rem; color: var(--text-2); max-width: 600px;
+  margin-bottom: 28px; font-style: italic;
+}
+.hero-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid;
+  letter-spacing: 0.04em;
+}
+.pill.what    { color: var(--purple); border-color: rgba(188,140,255,0.3); background: rgba(188,140,255,0.08); }
+.pill.why     { color: var(--blue);   border-color: rgba(88,166,255,0.3);  background: rgba(88,166,255,0.08); }
+.pill.how     { color: var(--teal);   border-color: rgba(57,197,207,0.3);  background: rgba(57,197,207,0.08); }
+.pill.arch    { color: var(--orange); border-color: rgba(210,153,34,0.3);  background: rgba(210,153,34,0.08); }
+.pill.tools   { color: var(--green);  border-color: rgba(63,185,80,0.3);   background: rgba(63,185,80,0.08);  }
+
+/* ─────────────────────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: calc(100vh - 200px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border-dim);
+  padding: 0 0 40px;
+}
+.sidebar-header {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border-dim);
+}
+.nav-section { padding: 16px 0 4px; }
+.nav-group-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 20px 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 20px; font-size: 0.82rem; color: var(--text-2);
+  text-decoration: none; transition: all 0.15s; border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text-0); background: var(--bg-3); border-left-color: var(--purple); }
+.nav-item.active { color: var(--purple); background: rgba(188,140,255,0.06); border-left-color: var(--purple); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hi); flex-shrink: 0; }
+.nav-item.active .nav-dot, .nav-item:hover .nav-dot { background: var(--purple); }
+
+.mobile-toggle {
+  display: none; position: fixed; bottom: 24px; left: 24px; z-index: 600;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--purple); color: #fff; border: none; cursor: pointer;
+  font-size: 1.1rem; box-shadow: 0 4px 20px rgba(188,140,255,0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────────────────────────── */
+.main {
+  padding: 48px 56px 80px;
+  max-width: calc(var(--content-max) + 112px);
+}
+
+.section {
+  margin-bottom: 64px; padding-bottom: 48px;
+  border-bottom: 1px solid var(--border-dim);
+  scroll-margin-top: 24px;
+}
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+  color: var(--text-0); margin-bottom: 20px; line-height: 1.2;
+}
+p { margin-bottom: 16px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--text-0); font-weight: 500; }
+em { color: var(--purple); font-style: italic; }
+
+/* ─────────────────────────────────────────────────────────────
+   CALLOUT BOXES
+───────────────────────────────────────────────────────────── */
+.callout {
+  border-left: 3px solid; border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 16px 20px; margin: 24px 0; font-size: 0.9rem;
+}
+.callout.funny  { border-color: var(--orange); background: rgba(210,153,34,0.07); }
+.callout.info   { border-color: var(--blue);   background: rgba(88,166,255,0.07); }
+.callout.tip    { border-color: var(--green);  background: rgba(63,185,80,0.07);  }
+.callout.danger { border-color: var(--red);    background: rgba(248,81,73,0.07);  }
+.callout-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+}
+.callout.funny  .callout-label { color: var(--orange); }
+.callout.info   .callout-label { color: var(--blue);   }
+.callout.tip    .callout-label { color: var(--green);  }
+.callout.danger .callout-label { color: var(--red);    }
+
+/* ─────────────────────────────────────────────────────────────
+   CODE BLOCKS
+───────────────────────────────────────────────────────────── */
+.code-block {
+  background: var(--gh-bg);
+  border: 1px solid var(--gh-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden; margin: 24px 0;
+}
+.code-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-3); border-bottom: 1px solid var(--border-dim);
+}
+.code-lang {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--text-3); letter-spacing: 0.06em;
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-2);
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+  padding: 2px 6px; border-radius: 4px;
+}
+.copy-btn:hover { color: var(--text-0); background: rgba(255,255,255,0.06); }
+.copy-btn.copied { color: var(--green); }
+pre {
+  padding: 20px 24px; overflow-x: auto;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65;
+}
+code { font-family: var(--font-mono); }
+
+/* Syntax colours */
+.kw  { color: var(--gh-keyword); }
+.fn  { color: var(--gh-func);    }
+.str { color: var(--gh-string);  }
+.cm  { color: var(--gh-comment); font-style: italic; }
+.cl  { color: var(--gh-class);   }
+.nm  { color: var(--gh-number);  }
+.cn  { color: var(--gh-const);   }
+.tg  { color: var(--gh-tag);     }
+.at  { color: var(--gh-attr);    }
+.pu  { color: var(--gh-punc);    }
+.tx  { color: var(--gh-text);    }
+
+/* ─────────────────────────────────────────────────────────────
+   ANALOGY / DIAGRAM CARDS
+───────────────────────────────────────────────────────────── */
+.analogy-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin: 24px 0;
+}
+.analogy-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg); padding: 20px; text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.analogy-card:hover { border-color: var(--purple); transform: translateY(-2px); }
+.analogy-card .icon { font-size: 2rem; margin-bottom: 10px; }
+.analogy-card h4 {
+  font-family: var(--font-display); font-size: 0.9rem; font-weight: 700;
+  color: var(--text-0); margin-bottom: 8px;
+}
+.analogy-card p { font-size: 0.8rem; color: var(--text-2); margin: 0; }
+
+/* ─────────────────────────────────────────────────────────────
+   FLOW DIAGRAM
+───────────────────────────────────────────────────────────── */
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin: 24px 0;
+}
+.flow-box {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius); padding: 10px 18px;
+  font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-1);
+  text-align: center;
+}
+.flow-box.highlight { border-color: var(--purple); color: var(--purple); background: rgba(188,140,255,0.07); }
+.flow-box.server    { border-color: var(--blue);   color: var(--blue);   background: rgba(88,166,255,0.07);  }
+.flow-box.tool      { border-color: var(--teal);   color: var(--teal);   background: rgba(57,197,207,0.07);  }
+.flow-arrow { color: var(--text-3); font-size: 1rem; }
+
+/* ─────────────────────────────────────────────────────────────
+   COMPARISON TABLE
+───────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 24px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-2); text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 10px 16px; text-align: left;
+  border-bottom: 1px solid var(--border-mid);
+  background: var(--bg-3);
+}
+tbody tr { border-bottom: 1px solid var(--border-dim); transition: background 0.1s; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody td { padding: 12px 16px; color: var(--text-1); vertical-align: top; }
+tbody td:first-child { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-0); }
+.badge {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.65rem;
+  font-weight: 500; padding: 2px 8px; border-radius: 10px; border: 1px solid;
+}
+.badge.good  { color: var(--green);  border-color: rgba(63,185,80,0.3);  background: rgba(63,185,80,0.08);  }
+.badge.bad   { color: var(--red);    border-color: rgba(248,81,73,0.3);  background: rgba(248,81,73,0.08);  }
+.badge.meh   { color: var(--orange); border-color: rgba(210,153,34,0.3); background: rgba(210,153,34,0.08); }
+
+/* ─────────────────────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border-dim); padding: 28px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-1); font-size: 0.78rem; color: var(--text-3);
+}
+.footer-brand { font-family: var(--font-mono); font-weight: 500; color: var(--text-2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--purple); }
+
+/* ─────────────────────────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.section { animation: fade-up 0.4s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.10s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.20s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+
+/* ─────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; left: -100%; top: 0; height: 100%;
+    width: 280px; z-index: 500; transition: left 0.3s ease;
+  }
+  .sidebar.open { left: 0; }
+  .main { padding: 28px 24px 60px; }
+  .analogy-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-toggle { display: flex; }
+  .hero { padding: 60px 24px 50px; }
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+  .flow { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- ── HERO ────────────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">AI Infrastructure — Deep Dive</div>
+    <h1>MCP<br><span>Model Context Protocol</span></h1>
+    <p class="hero-desc">The USB-C port for AI. Finally, a standard way to plug your tools into any LLM — without writing a new integration every single time.</p>
+    <div class="hero-pills">
+      <span class="pill what">What is it?</span>
+      <span class="pill why">Why we need it</span>
+      <span class="pill how">How it works</span>
+      <span class="pill arch">Architecture</span>
+      <span class="pill tools">Real-world tools</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── LAYOUT ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">Navigation</div>
+    <nav id="navList">
+      <div class="nav-section">
+        <div class="nav-group-label">Introduction</div>
+        <a class="nav-item" href="#problem"><span class="nav-dot"></span>The Problem</a>
+        <a class="nav-item" href="#what"><span class="nav-dot"></span>What is MCP?</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Deep Dive</div>
+        <a class="nav-item" href="#why"><span class="nav-dot"></span>Why We Need It</a>
+        <a class="nav-item" href="#how"><span class="nav-dot"></span>How It Works</a>
+        <a class="nav-item" href="#arch"><span class="nav-dot"></span>Architecture</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Practical</div>
+        <a class="nav-item" href="#tools"><span class="nav-dot"></span>Tools &amp; Resources</a>
+        <a class="nav-item" href="#tldr"><span class="nav-dot"></span>TL;DR</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── THE PROBLEM ──────────────────────────────────────────────── -->
+    <section class="section" id="problem">
+      <div class="section-label">01 — The Problem</div>
+      <h2 class="section-title">AI Is Smart But Blind</h2>
+
+      <p>Picture the smartest person you know. Now lock them in a room with no phone, no internet, no windows — just a notepad with everything they knew up until a year ago. That's your LLM without tool integrations.</p>
+
+      <p>Your AI knows Shakespeare <em>and</em> Kubernetes — but it can't check your Jira tickets, read your database, or tell you what the weather is right now. It's basically a <strong>galaxy-brained amnesiac</strong>.</p>
+
+      <div class="callout funny">
+        <div class="callout-label">Real Talk</div>
+        Before MCP, connecting an LLM to a tool meant writing a custom integration every. single. time. GitHub? Custom code. Slack? More custom code. Your internal database? Oh buddy, strap in.
+      </div>
+
+      <p>Every team was reinventing the wheel. But not just any wheel — a square wheel. With splinters. The result was a <strong>N×M integration nightmare</strong>: N AI models × M tools = absolute chaos.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Before MCP</th>
+              <th>Reality</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Connect GPT to GitHub</td>
+              <td>Write GitHub integration for GPT</td>
+              <td><span class="badge bad">Pain</span></td>
+            </tr>
+            <tr>
+              <td>Connect Claude to GitHub</td>
+              <td>Write GitHub integration <em>again</em> for Claude</td>
+              <td><span class="badge bad">More Pain</span></td>
+            </tr>
+            <tr>
+              <td>Swap LLM providers</td>
+              <td>Rewrite all your integrations from scratch</td>
+              <td><span class="badge bad">Suffering</span></td>
+            </tr>
+            <tr>
+              <td>Add a new tool to your AI stack</td>
+              <td>Wire it up for every AI model separately</td>
+              <td><span class="badge bad">Cry</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── WHAT IS MCP ──────────────────────────────────────────────── -->
+    <section class="section" id="what">
+      <div class="section-label">02 — What Is It?</div>
+      <h2 class="section-title">MCP: The USB-C Port for AI</h2>
+
+      <p><strong>Model Context Protocol (MCP)</strong> is an open standard introduced by Anthropic in late 2024. It defines a <em>universal interface</em> between AI models (LLMs) and external tools, data sources, and services.</p>
+
+      <p>Think of it like this:</p>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🔌</div>
+          <h4>USB-C</h4>
+          <p>One port. Works with your charger, monitor, headphones, and hard drive. MCP is USB-C for AI.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🍔</div>
+          <h4>Restaurant Menu</h4>
+          <p>The AI is the customer. The menu is MCP. The kitchen is your tools. You don't rewire the kitchen for each customer.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🧩</div>
+          <h4>LEGO Interface</h4>
+          <p>Any LEGO brick fits any other. MCP standardizes the studs so every tool snaps into every model.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-label">Official Definition</div>
+        MCP is a client-server protocol that lets AI models discover and call tools, read resources, and receive contextual information from external servers — in a standardized, model-agnostic way.
+      </div>
+
+      <p>The magic word is <strong>model-agnostic</strong>. Build one MCP server for your GitHub integration, and <em>every</em> AI that speaks MCP can use it — Claude, GPT, Gemini, your neighbour's fine-tuned Llama model, whatever.</p>
+    </section>
+
+    <!-- ── WHY WE NEED IT ───────────────────────────────────────────── -->
+    <section class="section" id="why">
+      <div class="section-label">03 — Why We Need It</div>
+      <h2 class="section-title">Because Nobody Wants to Be a Human API Wrapper</h2>
+
+      <p>Without MCP, the workflow looks like this: user asks AI a question → AI gives a (possibly hallucinated) answer → user manually checks 6 different tools → user copy-pastes context back into the AI → repeat until either the answer is correct or someone quits their job.</p>
+
+      <div class="callout funny">
+        <div class="callout-label">Hot Take</div>
+        Before MCP, you were basically the world's most overqualified copy-paste machine. A $200K human glue layer between an AI and a database.
+      </div>
+
+      <p>MCP solves four real problems:</p>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🔄</div>
+          <h4>No More N×M</h4>
+          <p>Instead of N models × M tools integrations, you write one MCP server per tool. Done.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🧠</div>
+          <h4>Live Context</h4>
+          <p>AI gets real-time data — your actual DB, your real files, your live Slack messages. No stale knowledge cutoffs.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🛡️</div>
+          <h4>Controlled Access</h4>
+          <p>MCP servers decide what the AI can see and do. Your AI can query a DB without getting root access to your server.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🚀</div>
+          <h4>Composability</h4>
+          <p>Combine MCP servers like building blocks. GitHub + Jira + Slack + your internal tools. One AI, full stack awareness.</p>
+        </div>
+      </div>
+
+      <p>The bottom line: MCP turns your AI from a <em>"very smart chatbot that needs to be spoon-fed everything"</em> into an <em>"autonomous agent that actually knows what's going on in your codebase at 3am."</em></p>
+
+      <div class="callout tip">
+        <div class="callout-label">Real World Impact</div>
+        Major tools already have official MCP servers: GitHub, Slack, Google Drive, Postgres, Brave Search, Puppeteer, and more. The ecosystem is growing fast.
+      </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ─────────────────────────────────────────────── -->
+    <section class="section" id="how">
+      <div class="section-label">04 — How It Works</div>
+      <h2 class="section-title">The Protocol in Plain English</h2>
+
+      <p>MCP is a client-server architecture built on top of <strong>JSON-RPC 2.0</strong> over <code>stdio</code> or HTTP+SSE transport. But forget that for a second — here's the vibe:</p>
+
+      <div class="flow">
+        <div class="flow-box highlight">🤖 AI Model (Client)</div>
+        <div class="flow-arrow">⟷</div>
+        <div class="flow-box">MCP Protocol</div>
+        <div class="flow-arrow">⟷</div>
+        <div class="flow-box server">MCP Server</div>
+        <div class="flow-arrow">⟷</div>
+        <div class="flow-box tool">Your Tools / Data</div>
+      </div>
+
+      <p>An MCP server exposes three types of things:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Primitive</th>
+              <th>What it is</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tools</td>
+              <td>Functions the AI can call (with side effects)</td>
+              <td>create_issue(), send_message(), run_query()</td>
+            </tr>
+            <tr>
+              <td>Resources</td>
+              <td>Data the AI can read (no side effects)</td>
+              <td>file://readme.md, db://users/schema</td>
+            </tr>
+            <tr>
+              <td>Prompts</td>
+              <td>Pre-written prompt templates</td>
+              <td>"Summarize this PR", "Review this SQL"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The AI connects to one or more MCP servers at startup. It then uses them during a conversation — calling tools, reading resources, using prompts — like a developer using an SDK.</p>
+
+      <div class="code-block">
+        <div class="code-bar">
+          <span class="code-lang">json — MCP Tool Call</span>
+          <button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button>
+        </div>
+        <pre><span class="cm">// AI asks MCP server: "what tools do you have?"</span>
+<span class="pu">{</span>
+  <span class="at">"jsonrpc"</span><span class="pu">:</span> <span class="str">"2.0"</span><span class="pu">,</span>
+  <span class="at">"method"</span><span class="pu">:</span>  <span class="str">"tools/list"</span><span class="pu">,</span>
+  <span class="at">"id"</span><span class="pu">:</span>      <span class="nm">1</span>
+<span class="pu">}</span>
+
+<span class="cm">// MCP server responds with available tools</span>
+<span class="pu">{</span>
+  <span class="at">"result"</span><span class="pu">:</span> <span class="pu">{</span>
+    <span class="at">"tools"</span><span class="pu">:</span> <span class="pu">[{</span>
+      <span class="at">"name"</span><span class="pu">:</span>        <span class="str">"create_github_issue"</span><span class="pu">,</span>
+      <span class="at">"description"</span><span class="pu">:</span> <span class="str">"Creates a new issue in a GitHub repo"</span><span class="pu">,</span>
+      <span class="at">"inputSchema"</span><span class="pu">:</span> <span class="pu">{</span>
+        <span class="at">"type"</span><span class="pu">:</span>       <span class="str">"object"</span><span class="pu">,</span>
+        <span class="at">"properties"</span><span class="pu">:</span> <span class="pu">{</span>
+          <span class="at">"title"</span><span class="pu">:</span> <span class="pu">{</span> <span class="at">"type"</span><span class="pu">:</span> <span class="str">"string"</span> <span class="pu">},</span>
+          <span class="at">"body"</span><span class="pu">:</span>  <span class="pu">{</span> <span class="at">"type"</span><span class="pu">:</span> <span class="str">"string"</span> <span class="pu">}</span>
+        <span class="pu">}</span>
+      <span class="pu">}</span>
+    <span class="pu">}]</span>
+  <span class="pu">}</span>
+<span class="pu">}</span>
+
+<span class="cm">// AI then calls the tool when needed</span>
+<span class="pu">{</span>
+  <span class="at">"method"</span><span class="pu">:</span> <span class="str">"tools/call"</span><span class="pu">,</span>
+  <span class="at">"params"</span><span class="pu">:</span> <span class="pu">{</span>
+    <span class="at">"name"</span><span class="pu">:</span>      <span class="str">"create_github_issue"</span><span class="pu">,</span>
+    <span class="at">"arguments"</span><span class="pu">:</span> <span class="pu">{</span>
+      <span class="at">"title"</span><span class="pu">:</span> <span class="str">"Bug: users can't log in after 3am"</span><span class="pu">,</span>
+      <span class="at">"body"</span><span class="pu">:</span>  <span class="str">"Reproduced on prod. It's always 3am."</span>
+    <span class="pu">}</span>
+  <span class="pu">}</span>
+<span class="pu">}</span></pre>
+      </div>
+    </section>
+
+    <!-- ── ARCHITECTURE ─────────────────────────────────────────────── -->
+    <section class="section" id="arch">
+      <div class="section-label">05 — Architecture</div>
+      <h2 class="section-title">How the Pieces Fit Together</h2>
+
+      <p>A typical MCP setup has three layers:</p>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🖥️</div>
+          <h4>MCP Host</h4>
+          <p>The app running the AI — Claude Desktop, VS Code, your custom chatbot. It manages connections to MCP servers.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🔗</div>
+          <h4>MCP Client</h4>
+          <p>Embedded in the host. Maintains a 1:1 connection per server, handles the JSON-RPC communication.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">⚙️</div>
+          <h4>MCP Server</h4>
+          <p>Lightweight process exposing your tool. It wraps the GitHub API, your DB, your filesystem — whatever you need.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-label">Transport Options</div>
+        <strong>stdio:</strong> Server runs as a child process. Good for local tools.<br/>
+        <strong>HTTP + SSE:</strong> Server runs remotely. Good for shared/cloud tools.<br/>
+        Both speak the same protocol — the host doesn't care which.
+      </div>
+
+      <p>The beauty: your MCP server doesn't know or care which AI is calling it. Your AI doesn't know or care how the server is implemented. They just speak MCP and everyone's happy. That's the <strong>Unix philosophy</strong> applied to AI tooling.</p>
+
+      <div class="code-block">
+        <div class="code-bar">
+          <span class="code-lang">typescript — minimal MCP server</span>
+          <button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button>
+        </div>
+        <pre><span class="kw">import</span> <span class="pu">{</span> <span class="cl">McpServer</span> <span class="pu">}</span> <span class="kw">from</span> <span class="str">"@modelcontextprotocol/sdk/server/mcp.js"</span><span class="pu">;</span>
+<span class="kw">import</span> <span class="pu">{</span> <span class="cl">StdioServerTransport</span> <span class="pu">}</span> <span class="kw">from</span> <span class="str">"@modelcontextprotocol/sdk/server/stdio.js"</span><span class="pu">;</span>
+<span class="kw">import</span> <span class="pu">{</span> z <span class="pu">}</span> <span class="kw">from</span> <span class="str">"zod"</span><span class="pu">;</span>
+
+<span class="kw">const</span> server <span class="pu">=</span> <span class="kw">new</span> <span class="cl">McpServer</span><span class="pu">({</span>
+  name<span class="pu">:</span>    <span class="str">"my-tool-server"</span><span class="pu">,</span>
+  version<span class="pu">:</span> <span class="str">"1.0.0"</span>
+<span class="pu">});</span>
+
+<span class="cm">// Expose a tool — AI can call this</span>
+server<span class="pu">.</span><span class="fn">tool</span><span class="pu">(</span>
+  <span class="str">"get_weather"</span><span class="pu">,</span>
+  <span class="str">"Get current weather for a city"</span><span class="pu">,</span>
+  <span class="pu">{</span> city<span class="pu">:</span> z<span class="pu">.</span><span class="fn">string</span><span class="pu">().</span><span class="fn">describe</span><span class="pu">(</span><span class="str">"City name"</span><span class="pu">) },</span>
+  <span class="kw">async</span> <span class="pu">({</span> city <span class="pu">}) => ({</span>
+    content<span class="pu">:</span> <span class="pu">[{</span>
+      type<span class="pu">:</span> <span class="str">"text"</span><span class="pu">,</span>
+      text<span class="pu">:</span> <span class="kw">await</span> <span class="fn">fetchWeather</span><span class="pu">(</span>city<span class="pu">)</span>  <span class="cm">// your actual logic</span>
+    <span class="pu">}]</span>
+  <span class="pu">})</span>
+<span class="pu">);</span>
+
+<span class="cm">// Start listening</span>
+<span class="kw">const</span> transport <span class="pu">=</span> <span class="kw">new</span> <span class="cl">StdioServerTransport</span><span class="pu">();</span>
+<span class="kw">await</span> server<span class="pu">.</span><span class="fn">connect</span><span class="pu">(</span>transport<span class="pu">);</span></pre>
+      </div>
+    </section>
+
+    <!-- ── TOOLS & RESOURCES ────────────────────────────────────────── -->
+    <section class="section" id="tools">
+      <div class="section-label">06 — Tools &amp; Resources</div>
+      <h2 class="section-title">The Ecosystem Is Already Huge</h2>
+
+      <p>Anthropic open-sourced the protocol and the ecosystem exploded. Notable MCP servers already available:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Server</th><th>What it gives your AI</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>@modelcontextprotocol/server-github</td><td>Read repos, manage issues, PRs, files</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>@modelcontextprotocol/server-filesystem</td><td>Read/write local files safely</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>@modelcontextprotocol/server-postgres</td><td>Query your Postgres DB</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>@modelcontextprotocol/server-slack</td><td>Send/read Slack messages and channels</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>@modelcontextprotocol/server-brave-search</td><td>Real-time web search</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>@modelcontextprotocol/server-puppeteer</td><td>Browser automation, screenshot capture</td><td><span class="badge good">Official</span></td></tr>
+            <tr><td>mcp-server-figma</td><td>Read Figma designs directly</td><td><span class="badge meh">Community</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Pro Tip</div>
+        Claude Desktop supports MCP out of the box. Add servers in <code>claude_desktop_config.json</code> and your local Claude instantly gains superpowers — file access, DB queries, browser control — no API key juggling needed.
+      </div>
+    </section>
+
+    <!-- ── TL;DR ────────────────────────────────────────────────────── -->
+    <section class="section" id="tldr">
+      <div class="section-label">07 — TL;DR</div>
+      <h2 class="section-title">The Five-Second Summary</h2>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">😩</div>
+          <h4>Before MCP</h4>
+          <p>Every AI × every tool = a custom integration. You're the glue. It's miserable.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🎉</div>
+          <h4>After MCP</h4>
+          <p>One server per tool. Works with any AI that supports MCP. You're building, not gluing.</p>
+        </div>
+      </div>
+
+      <div class="callout funny">
+        <div class="callout-label">One-Liner to Impress at Standups</div>
+        "MCP is the HTTP of AI tool integrations — a boring protocol that makes everything else possible."
+      </div>
+
+      <p>MCP won't make your AI smarter. But it will make it <strong>dramatically more useful</strong> — connected to the real world, your real data, and your real tools. That's the gap between a demo that wows at a conference and an agent that actually ships value.</p>
+
+      <p>The future of AI isn't smarter models locked in a box. It's <em>connected</em> models with well-defined, safe interfaces to the world. MCP is how we get there.</p>
+    </section>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <span class="footer-brand">&copy; 2026 <a href="https://www.linkedin.com/in/praveen-raghupatruni/" target="_blank" style="color:inherit;text-decoration:none;">Praveen Raghupatruni</a></span>
+  <div class="footer-links">
+    <a href="https://modelcontextprotocol.io" target="_blank">MCP Docs</a>
+    <a href="https://github.com/modelcontextprotocol" target="_blank">GitHub</a>
+    <a href="index.html">← Back</a>
+  </div>
+</footer>
+
+<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">☰</button>
+
+<script>
+/* ── Progress bar ── */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+/* ── Sidebar active link ── */
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => observer.observe(s));
+
+/* ── Mobile sidebar ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── Copy code ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
