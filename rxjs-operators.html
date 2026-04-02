@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RxJS Operators — Angular Complete Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS — Black + GitHub Dark
+───────────────────────────────────────────────────────────── */
+:root {
+  /* Base */
+  --bg-0:       #050507;
+  --bg-1:       #0a0a0e;
+  --bg-2:       #0d1117;
+  --bg-3:       #161b22;
+  --bg-card:    #0d1117;
+  --bg-hover:   #161b22;
+
+  /* Borders */
+  --border-dim: #21262d;
+  --border-mid: #30363d;
+  --border-hi:  #444c56;
+
+  /* Text */
+  --text-0:     #f0f6fc;
+  --text-1:     #c9d1d9;
+  --text-2:     #8b949e;
+  --text-3:     #484f58;
+
+  /* Accents */
+  --blue:       #58a6ff;
+  --blue-dim:   #1f6feb;
+  --blue-glow:  rgba(88,166,255,0.12);
+  --green:      #3fb950;
+  --green-dim:  #238636;
+  --purple:     #bc8cff;
+  --orange:     #d29922;
+  --red:        #f85149;
+  --teal:       #39c5cf;
+  --pink:       #f778ba;
+
+  /* GitHub Dark code colours */
+  --gh-bg:      #0d1117;
+  --gh-border:  #30363d;
+  --gh-text:    #e6edf3;
+  --gh-comment: #8b949e;
+  --gh-keyword: #ff7b72;
+  --gh-string:  #a5d6ff;
+  --gh-func:    #d2a8ff;
+  --gh-class:   #ffa657;
+  --gh-number:  #79c0ff;
+  --gh-const:   #79c0ff;
+  --gh-prop:    #e6edf3;
+  --gh-op:      #ff7b72;
+  --gh-tag:     #7ee787;
+  --gh-attr:    #79c0ff;
+  --gh-punc:    #c9d1d9;
+
+  /* Layout */
+  --sidebar-w:  280px;
+  --content-max: 860px;
+  --radius:     8px;
+  --radius-lg:  12px;
+
+  /* Fonts */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 15px; }
+
+body {
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(88,166,255,0.25); color: var(--text-0); }
+
+/* ─────────────────────────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ─────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: 100px 40px 80px;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+  opacity: 0.4;
+}
+
+.hero-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px; z-index: 0;
+  background: radial-gradient(ellipse at center, rgba(88,166,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
+  color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase;
+  background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 24px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--blue); border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 800;
+  color: var(--text-0);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+
+.hero h1 span {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  font-size: 1.05rem; color: var(--text-2);
+  max-width: 520px; margin: 0 auto 36px;
+  font-weight: 300; line-height: 1.8;
+}
+
+.hero-pills {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+}
+
+.pill {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  padding: 4px 12px; border-radius: 100px;
+  border: 1px solid var(--border-mid);
+  color: var(--text-2);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.pill:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-glow); }
+.pill.creation  { border-color: rgba(63,185,80,0.3); color: var(--green); }
+.pill.transform { border-color: rgba(210,169,34,0.3); color: var(--orange); }
+.pill.filter    { border-color: rgba(188,140,255,0.3); color: var(--purple); }
+.pill.combine   { border-color: rgba(248,85,73,0.3); color: var(--red); }
+.pill.error     { border-color: rgba(88,166,255,0.3); color: var(--blue); }
+.pill.utility   { border-color: rgba(57,197,207,0.3); color: var(--teal); }
+.pill.multi     { border-color: rgba(247,120,186,0.3); color: var(--pink); }
+
+/* ─────────────────────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-dim);
+  background: var(--bg-1);
+  padding: 28px 0 40px;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 0 20px 16px;
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.12em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border-dim); margin-bottom: 12px;
+}
+
+.nav-section { margin-bottom: 4px; }
+
+.nav-group-label {
+  padding: 10px 20px 4px;
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 20px;
+  color: var(--text-2); font-size: 0.82rem; font-weight: 400;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.nav-item:hover { color: var(--text-0); background: var(--bg-hover); border-left-color: var(--border-mid); }
+.nav-item.active { color: var(--blue); border-left-color: var(--blue); background: rgba(88,166,255,0.06); }
+
+.nav-dot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  background: var(--text-3);
+  transition: background 0.15s;
+}
+
+.nav-item:hover .nav-dot { background: var(--text-1); }
+.nav-item.active .nav-dot { background: var(--blue); }
+
+/* ─────────────────────────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────────────────────────── */
+.main { padding: 48px 48px 80px; min-width: 0; }
+
+/* ─────────────────────────────────────────────────────────────
+   SECTION
+───────────────────────────────────────────────────────────── */
+.section { margin-bottom: 64px; }
+
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.section-icon {
+  width: 38px; height: 38px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+.section-icon.creation  { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.2); }
+.section-icon.transform { background: rgba(210,169,34,0.12); color: var(--orange); border: 1px solid rgba(210,169,34,0.2); }
+.section-icon.filter    { background: rgba(188,140,255,0.12); color: var(--purple); border: 1px solid rgba(188,140,255,0.2); }
+.section-icon.combine   { background: rgba(248,85,73,0.12); color: var(--red); border: 1px solid rgba(248,85,73,0.2); }
+.section-icon.error     { background: rgba(88,166,255,0.12); color: var(--blue); border: 1px solid rgba(88,166,255,0.2); }
+.section-icon.utility   { background: rgba(57,197,207,0.12); color: var(--teal); border: 1px solid rgba(57,197,207,0.2); }
+.section-icon.multi     { background: rgba(247,120,186,0.12); color: var(--pink); border: 1px solid rgba(247,120,186,0.2); }
+.section-icon.subject   { background: rgba(88,166,255,0.12); color: var(--blue); border: 1px solid rgba(88,166,255,0.2); }
+.section-icon.best      { background: rgba(63,185,80,0.12); color: var(--green); border: 1px solid rgba(63,185,80,0.2); }
+
+.section-meta { flex: 1; }
+.section-title {
+  font-family: var(--font-display); font-size: 1.45rem; font-weight: 700;
+  color: var(--text-0); line-height: 1.2; margin-bottom: 2px;
+}
+.section-sub { font-size: 0.82rem; color: var(--text-2); }
+
+.section-count {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  color: var(--text-3);
+  background: var(--bg-3); border: 1px solid var(--border-dim);
+  padding: 3px 10px; border-radius: 100px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   OPERATOR CARD
+───────────────────────────────────────────────────────────── */
+.op-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.op-card:hover {
+  border-color: var(--border-mid);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+.op-card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--border-dim);
+  cursor: pointer;
+  user-select: none;
+}
+
+.op-name {
+  font-family: var(--font-mono); font-size: 0.88rem; font-weight: 600;
+  color: var(--blue);
+  flex: 1;
+}
+
+.op-badge {
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 500;
+  padding: 2px 8px; border-radius: 100px;
+  background: rgba(88,166,255,0.1); color: var(--blue);
+  border: 1px solid rgba(88,166,255,0.2);
+}
+
+.op-badge.green  { background: rgba(63,185,80,0.1); color: var(--green); border-color: rgba(63,185,80,0.2); }
+.op-badge.orange { background: rgba(210,169,34,0.1); color: var(--orange); border-color: rgba(210,169,34,0.2); }
+.op-badge.purple { background: rgba(188,140,255,0.1); color: var(--purple); border-color: rgba(188,140,255,0.2); }
+.op-badge.red    { background: rgba(248,85,73,0.1); color: var(--red); border-color: rgba(248,85,73,0.2); }
+.op-badge.teal   { background: rgba(57,197,207,0.1); color: var(--teal); border-color: rgba(57,197,207,0.2); }
+.op-badge.pink   { background: rgba(247,120,186,0.1); color: var(--pink); border-color: rgba(247,120,186,0.2); }
+
+.op-chevron {
+  color: var(--text-3); font-size: 0.75rem;
+  transition: transform 0.25s ease;
+}
+
+.op-card.open .op-chevron { transform: rotate(90deg); }
+
+.op-body { display: none; padding: 20px; }
+.op-card.open .op-body { display: block; }
+
+.op-desc {
+  font-size: 0.88rem; color: var(--text-2); line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.op-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+
+.op-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border-dim);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CODE BLOCK — GitHub Dark theme
+───────────────────────────────────────────────────────────── */
+.code-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--gh-border);
+  margin-bottom: 16px;
+}
+
+.code-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  background: #161b22;
+  border-bottom: 1px solid var(--gh-border);
+}
+
+.code-lang {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.05em;
+}
+
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); background: none; border: none; cursor: pointer;
+  padding: 2px 8px; border-radius: 4px; transition: all 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+
+.copy-btn:hover { color: var(--text-1); background: rgba(255,255,255,0.06); }
+.copy-btn.copied { color: var(--green); }
+
+pre {
+  background: var(--gh-bg);
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 400;
+  line-height: 1.7;
+  color: var(--gh-text);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SYNTAX HIGHLIGHTING
+───────────────────────────────────────────────────────────── */
+.kw  { color: var(--gh-keyword); font-weight: 500; }
+.str { color: var(--gh-string); }
+.fn  { color: var(--gh-func); }
+.cls { color: var(--gh-class); }
+.num { color: var(--gh-number); }
+.cm  { color: var(--gh-comment); font-style: italic; }
+.tag { color: var(--gh-tag); }
+.op  { color: var(--gh-op); }
+.at  { color: var(--gh-attr); }
+.pn  { color: var(--gh-punc); }
+.dec { color: var(--gh-class); }
+
+/* ─────────────────────────────────────────────────────────────
+   OUTPUT NOTE
+───────────────────────────────────────────────────────────── */
+.output-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(63,185,80,0.06);
+  border: 1px solid rgba(63,185,80,0.15);
+  border-radius: var(--radius);
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--green);
+  margin-top: -4px;
+}
+
+.output-note::before { content: '▶'; font-size: 0.6rem; margin-top: 2px; flex-shrink: 0; }
+
+/* ─────────────────────────────────────────────────────────────
+   INTRO SECTION
+───────────────────────────────────────────────────────────── */
+.intro-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 28px;
+}
+
+.concept-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius); padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.concept-card:hover { border-color: var(--border-mid); }
+
+.concept-title {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
+  color: var(--blue); margin-bottom: 6px;
+}
+
+.concept-desc { font-size: 0.8rem; color: var(--text-2); line-height: 1.6; }
+
+/* ─────────────────────────────────────────────────────────────
+   BEST PRACTICES SECTION
+───────────────────────────────────────────────────────────── */
+.bp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+
+.bp-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius); padding: 16px 18px;
+  transition: border-color 0.2s;
+}
+
+.bp-card:hover { border-color: var(--border-mid); }
+
+.bp-scenario {
+  font-size: 0.8rem; color: var(--text-2); margin-bottom: 6px; font-weight: 400;
+}
+
+.bp-solution {
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--orange);
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SUBJECT COMPARISON TABLE
+───────────────────────────────────────────────────────────── */
+.subject-table-wrap { overflow-x: auto; margin-bottom: 28px; }
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+th {
+  text-align: left; padding: 10px 14px;
+  background: var(--bg-3); color: var(--text-0);
+  font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-mid);
+}
+
+td {
+  padding: 10px 14px; color: var(--text-2);
+  border-bottom: 1px solid var(--border-dim);
+  vertical-align: top; line-height: 1.5;
+}
+
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+td:first-child { font-family: var(--font-mono); font-size: 0.75rem; color: var(--blue); }
+td code { font-family: var(--font-mono); font-size: 0.75rem; color: var(--orange); }
+
+/* ─────────────────────────────────────────────────────────────
+   ASYNC PIPE CALLOUT
+───────────────────────────────────────────────────────────── */
+.callout {
+  display: flex; gap: 14px;
+  padding: 16px 18px;
+  background: rgba(88,166,255,0.06);
+  border: 1px solid rgba(88,166,255,0.18);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+
+.callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+.callout-content { flex: 1; }
+
+.callout-title {
+  font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+  color: var(--blue); margin-bottom: 4px;
+}
+
+.callout-body { font-size: 0.83rem; color: var(--text-2); line-height: 1.6; }
+
+/* ─────────────────────────────────────────────────────────────
+   SEARCH
+───────────────────────────────────────────────────────────── */
+.search-wrap {
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 4px;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--bg-2); border: 1px solid var(--border-mid);
+  border-radius: var(--radius); color: var(--text-1);
+  font-family: var(--font-body); font-size: 0.8rem;
+  padding: 7px 12px 7px 30px;
+  outline: none; transition: border-color 0.15s;
+}
+
+.search-input:focus { border-color: var(--blue); }
+.search-input::placeholder { color: var(--text-3); }
+
+.search-icon {
+  position: absolute; left: 27px; margin-top: -23px;
+  font-size: 0.7rem; color: var(--text-3);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE TOGGLE
+───────────────────────────────────────────────────────────── */
+.mobile-toggle {
+  display: none;
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--blue); border: none; cursor: pointer;
+  color: white; font-size: 1.2rem;
+  box-shadow: 0 4px 20px rgba(88,166,255,0.4);
+  align-items: center; justify-content: center;
+  transition: transform 0.2s;
+}
+
+.mobile-toggle:hover { transform: scale(1.1); }
+
+/* ─────────────────────────────────────────────────────────────
+   PROGRESS BAR
+───────────────────────────────────────────────────────────── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 1000;
+  background: var(--border-dim);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  width: 0%; transition: width 0.1s linear;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border-dim);
+  padding: 28px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-1);
+  font-size: 0.78rem; color: var(--text-3);
+}
+
+.footer-brand { font-family: var(--font-mono); font-weight: 500; color: var(--text-2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--blue); }
+
+/* ─────────────────────────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section { animation: fade-up 0.4s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+
+/* ─────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: fixed; left: -100%; top: 0; height: 100%;
+    width: 280px; z-index: 500; transition: left 0.3s ease;
+  }
+
+  .sidebar.open { left: 0; }
+
+  .main { padding: 28px 24px 60px; }
+
+  .intro-grid, .bp-grid { grid-template-columns: 1fr; }
+
+  .mobile-toggle { display: flex; }
+
+  .hero { padding: 60px 24px 50px; }
+
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- ── HERO ────────────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Complete Reference Guide</div>
+    <h1>RxJS Operators<br><span>for Angular</span></h1>
+    <p class="hero-desc">Master every operator with practical Angular examples. From creation to multicasting — 50+ operators explained with real-world code.</p>
+    <div class="hero-pills">
+      <span class="pill creation">Creation</span>
+      <span class="pill transform">Transformation</span>
+      <span class="pill filter">Filtering</span>
+      <span class="pill combine">Combination</span>
+      <span class="pill error">Error Handling</span>
+      <span class="pill utility">Utility</span>
+      <span class="pill multi">Multicasting</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── LAYOUT ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">Navigation</div>
+
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" type="text" placeholder="Search operators…"/>
+      <div class="search-icon">⌕</div>
+    </div>
+
+    <nav id="navList">
+      <div class="nav-section">
+        <div class="nav-group-label">Introduction</div>
+        <a class="nav-item" href="#intro">
+          <span class="nav-dot"></span>Core Concepts
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Operators</div>
+        <a class="nav-item" href="#creation"><span class="nav-dot"></span>Creation</a>
+        <a class="nav-item" href="#transformation"><span class="nav-dot"></span>Transformation</a>
+        <a class="nav-item" href="#filtering"><span class="nav-dot"></span>Filtering</a>
+        <a class="nav-item" href="#combination"><span class="nav-dot"></span>Combination</a>
+        <a class="nav-item" href="#error-handling"><span class="nav-dot"></span>Error Handling</a>
+        <a class="nav-item" href="#utility"><span class="nav-dot"></span>Utility</a>
+        <a class="nav-item" href="#multicasting"><span class="nav-dot"></span>Multicasting</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Advanced</div>
+        <a class="nav-item" href="#subjects"><span class="nav-dot"></span>Subject Types</a>
+        <a class="nav-item" href="#best-practices"><span class="nav-dot"></span>Best Practices</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+
+    <!-- ── INTRO ─────────────────────────────────────────────────────── -->
+    <section class="section" id="intro">
+      <div class="section-header">
+        <div class="section-icon best">◈</div>
+        <div class="section-meta">
+          <div class="section-title">Core Concepts</div>
+          <div class="section-sub">Understanding the RxJS mental model</div>
+        </div>
+      </div>
+
+      <div class="intro-grid">
+        <div class="concept-card">
+          <div class="concept-title">Observable</div>
+          <div class="concept-desc">A lazy push-based data producer. Starts emitting only when subscribed. The foundation of all RxJS streams.</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-title">Observer</div>
+          <div class="concept-desc">Consumer of Observable values. Has three callbacks: <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.78rem">next</code>, <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.78rem">error</code>, and <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.78rem">complete</code>.</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-title">Subscription</div>
+          <div class="concept-desc">Represents an Observable execution. Call <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.78rem">.unsubscribe()</code> to cancel and free resources.</div>
+        </div>
+        <div class="concept-card">
+          <div class="concept-title">Operator</div>
+          <div class="concept-desc">Pure functions that enable functional-style transformations. Used inside <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.78rem">pipe()</code> to compose behaviour.</div>
+        </div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+        <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">Observable</span><span class="pn">,</span> <span class="fn">Subject</span><span class="pn">,</span> <span class="fn">BehaviorSubject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">map</span><span class="pn">,</span> <span class="fn">filter</span><span class="pn">,</span> <span class="fn">switchMap</span><span class="pn">,</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Create an Observable</span>
+<span class="kw">const</span> <span class="fn">obs$</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Observable</span><span class="pn">&lt;</span><span class="cls">number</span><span class="pn">&gt;(</span><span class="fn">subscriber</span> <span class="op">=&gt;</span> <span class="pn">{</span>
+  <span class="fn">subscriber</span><span class="pn">.</span><span class="fn">next</span><span class="pn">(</span><span class="num">1</span><span class="pn">);</span>
+  <span class="fn">subscriber</span><span class="pn">.</span><span class="fn">next</span><span class="pn">(</span><span class="num">2</span><span class="pn">);</span>
+  <span class="fn">subscriber</span><span class="pn">.</span><span class="fn">complete</span><span class="pn">();</span>
+<span class="pn">});</span>
+
+<span class="cm">// Compose operators with pipe()</span>
+<span class="fn">obs$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">filter</span><span class="pn">(</span><span class="fn">n</span> <span class="op">=&gt;</span> <span class="fn">n</span> <span class="op">&gt;</span> <span class="num">1</span><span class="pn">),</span>
+  <span class="fn">map</span><span class="pn">(</span><span class="fn">n</span> <span class="op">=&gt;</span> <span class="fn">n</span> <span class="op">*</span> <span class="num">10</span><span class="pn">)</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">({</span>
+  <span class="fn">next</span><span class="pn">:</span>     <span class="fn">val</span>  <span class="op">=&gt;</span> <span class="fn">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="fn">val</span><span class="pn">),</span>   <span class="cm">// 20</span>
+  <span class="fn">error</span><span class="pn">:</span>    <span class="fn">err</span>  <span class="op">=&gt;</span> <span class="fn">console</span><span class="pn">.</span><span class="fn">error</span><span class="pn">(</span><span class="fn">err</span><span class="pn">),</span>
+  <span class="fn">complete</span><span class="pn">:</span> <span class="pn">()</span>   <span class="op">=&gt;</span> <span class="fn">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">'Done'</span><span class="pn">)</span>
+<span class="pn">});</span></pre>
+      </div>
+    </section>
+
+    <!-- ── CREATION ────────────────────────────────────────────────────── -->
+    <section class="section" id="creation">
+      <div class="section-header">
+        <div class="section-icon creation">✦</div>
+        <div class="section-meta">
+          <div class="section-title">Creation Operators</div>
+          <div class="section-sub">Create new Observables from various data sources</div>
+        </div>
+        <span class="section-count">10 operators</span>
+      </div>
+
+      <!-- of -->
+      <div class="op-card open" id="card-of">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">of(...values)</span>
+          <span class="op-badge green">Synchronous</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Emits a finite list of values synchronously, then completes. Perfect for converting static values or returning defaults in services.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">of</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Return a default value when API fails</span>
+<span class="fn">getUser</span><span class="pn">(</span><span class="fn">id</span><span class="pn">:</span> <span class="cls">number</span><span class="pn">):</span> <span class="cls">Observable</span><span class="pn">&lt;</span><span class="cls">User</span><span class="pn">&gt;</span> <span class="pn">{</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">User</span><span class="pn">&gt;(</span><span class="str">`/api/users/<span class="pn">${</span><span class="fn">id</span><span class="pn">}</span>`</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">catchError</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="fn">of</span><span class="pn">({</span> <span class="fn">id</span><span class="pn">:</span> <span class="num">0</span><span class="pn">,</span> <span class="fn">name</span><span class="pn">:</span> <span class="str">'Guest'</span><span class="pn">,</span> <span class="fn">role</span><span class="pn">:</span> <span class="str">'viewer'</span> <span class="pn">}))</span>
+  <span class="pn">);</span>
+<span class="pn">}</span>
+
+<span class="cm">// Emit multiple static values</span>
+<span class="fn">of</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="str">'Angular'</span><span class="pn">,</span> <span class="kw">true</span><span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">val</span> <span class="op">=&gt;</span> <span class="fn">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="fn">val</span><span class="pn">));</span></pre>
+          </div>
+          <div class="output-note">Emits: 1, 2, 3, 'Angular', true — then completes</div>
+        </div>
+      </div>
+
+      <!-- from -->
+      <div class="op-card" id="card-from">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">from(source)</span>
+          <span class="op-badge green">Array / Promise / Iterable</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Converts an Array, Promise, iterable, or another Observable into an Observable. One of the most versatile creation operators.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">from</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">mergeMap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// From an Array — emit each element</span>
+<span class="fn">from</span><span class="pn">([</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">]).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">console</span><span class="pn">.</span><span class="fn">log</span><span class="pn">);</span>   <span class="cm">// 10, 20, 30</span>
+
+<span class="cm">// From a Promise (e.g. native fetch)</span>
+<span class="fn">from</span><span class="pn">(</span><span class="fn">fetch</span><span class="pn">(</span><span class="str">'/api/profile'</span><span class="pn">).</span><span class="fn">then</span><span class="pn">(</span><span class="fn">r</span> <span class="op">=&gt;</span> <span class="fn">r</span><span class="pn">.</span><span class="fn">json</span><span class="pn">()))</span>
+  <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">profile</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">profile</span> <span class="op">=</span> <span class="fn">profile</span><span class="pn">);</span>
+
+<span class="cm">// Upload multiple files</span>
+<span class="fn">uploadAll</span><span class="pn">(</span><span class="fn">files</span><span class="pn">:</span> <span class="cls">File</span><span class="pn">[]) {</span>
+  <span class="kw">return</span> <span class="fn">from</span><span class="pn">(</span><span class="fn">files</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">mergeMap</span><span class="pn">(</span><span class="fn">file</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">upload</span><span class="pn">.</span><span class="fn">send</span><span class="pn">(</span><span class="fn">file</span><span class="pn">))</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Emits each array element / Promise resolution sequentially</div>
+        </div>
+      </div>
+
+      <!-- interval -->
+      <div class="op-card" id="card-interval">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">interval(periodMs)</span>
+          <span class="op-badge green">Infinite / Timer</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Creates an Observable that emits sequential integers (0, 1, 2...) at a specified interval. Runs indefinitely — always combine with <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">takeUntil</code>.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">interval</span><span class="pn">,</span> <span class="cls">Subject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">takeUntil</span><span class="pn">,</span> <span class="fn">switchMap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">LiveDashboardComponent</span> <span class="kw">implements</span> <span class="cls">OnDestroy</span> <span class="pn">{</span>
+  <span class="kw">private</span> <span class="fn">destroy$</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Subject</span><span class="pn">&lt;</span><span class="kw">void</span><span class="pn">&gt;();</span>
+
+  <span class="fn">ngOnInit</span><span class="pn">() {</span>
+    <span class="fn">interval</span><span class="pn">(</span><span class="num">5000</span><span class="pn">)</span>                       <span class="cm">// every 5 seconds</span>
+      <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+        <span class="fn">switchMap</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">statsService</span><span class="pn">.</span><span class="fn">getMetrics</span><span class="pn">()),</span>
+        <span class="fn">takeUntil</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">)</span>        <span class="cm">// auto-cleanup</span>
+      <span class="pn">)</span>
+      <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">metrics</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">metrics</span> <span class="op">=</span> <span class="fn">metrics</span><span class="pn">);</span>
+  <span class="pn">}</span>
+
+  <span class="fn">ngOnDestroy</span><span class="pn">() {</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">.</span><span class="fn">next</span><span class="pn">();</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">.</span><span class="fn">complete</span><span class="pn">();</span> <span class="pn">}</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Polls every 5s, stops automatically when component destroys</div>
+        </div>
+      </div>
+
+      <!-- timer -->
+      <div class="op-card" id="card-timer">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">timer(delay, period?)</span>
+          <span class="op-badge green">Delayed / Periodic</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Waits an initial delay before emitting, then optionally continues at a fixed interval. Useful for deferred one-shot actions or delayed polling.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">timer</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">switchMap</span><span class="pn">,</span> <span class="fn">takeUntil</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// One-shot: auto-dismiss notification after 3s</span>
+<span class="fn">showNotification</span><span class="pn">(</span><span class="fn">msg</span><span class="pn">:</span> <span class="cls">string</span><span class="pn">) {</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">notification</span> <span class="op">=</span> <span class="fn">msg</span><span class="pn">;</span>
+  <span class="fn">timer</span><span class="pn">(</span><span class="num">3000</span><span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">notification</span> <span class="op">=</span> <span class="kw">null</span><span class="pn">);</span>
+<span class="pn">}</span>
+
+<span class="cm">// Delayed polling: start after 3s, then every 10s</span>
+<span class="fn">startPolling</span><span class="pn">() {</span>
+  <span class="fn">timer</span><span class="pn">(</span><span class="num">3000</span><span class="pn">,</span> <span class="num">10000</span><span class="pn">)</span>
+    <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">switchMap</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">api</span><span class="pn">.</span><span class="fn">getStatus</span><span class="pn">()),</span>
+           <span class="fn">takeUntil</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">))</span>
+    <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">status</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">status</span> <span class="op">=</span> <span class="fn">status</span><span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Notification cleared after 3s; polling begins after 3s delay, then repeats every 10s</div>
+        </div>
+      </div>
+
+      <!-- fromEvent -->
+      <div class="op-card" id="card-fromevent">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">fromEvent(target, event)</span>
+          <span class="op-badge green">DOM / Node Events</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Creates an Observable from DOM events, Node.js EventEmitters, or anything event-like. Pairs perfectly with <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">debounceTime</code> for search inputs.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">fromEvent</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">debounceTime</span><span class="pn">,</span> <span class="fn">map</span><span class="pn">,</span> <span class="fn">distinctUntilChanged</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({</span> <span class="fn">template</span><span class="pn">:</span> <span class="str">'&lt;input #searchBox /&gt;'</span> <span class="pn">})</span>
+<span class="kw">export class</span> <span class="cls">SearchComponent</span> <span class="kw">implements</span> <span class="cls">AfterViewInit</span> <span class="pn">{</span>
+  <span class="dec">@ViewChild</span><span class="pn">(</span><span class="str">'searchBox'</span><span class="pn">)</span> <span class="fn">box</span><span class="op">!</span><span class="pn">:</span> <span class="cls">ElementRef</span><span class="pn">;</span>
+
+  <span class="fn">ngAfterViewInit</span><span class="pn">() {</span>
+    <span class="fn">fromEvent</span><span class="pn">&lt;</span><span class="cls">InputEvent</span><span class="pn">&gt;(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">box</span><span class="pn">.</span><span class="fn">nativeElement</span><span class="pn">,</span> <span class="str">'input'</span><span class="pn">)</span>
+      <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+        <span class="fn">map</span><span class="pn">(</span><span class="fn">e</span> <span class="op">=&gt;</span> <span class="pn">(</span><span class="fn">e</span><span class="pn">.</span><span class="fn">target</span> <span class="kw">as</span> <span class="cls">HTMLInputElement</span><span class="pn">).</span><span class="fn">value</span><span class="pn">),</span>
+        <span class="fn">debounceTime</span><span class="pn">(</span><span class="num">350</span><span class="pn">),</span>
+        <span class="fn">distinctUntilChanged</span><span class="pn">(),</span>
+        <span class="fn">takeUntil</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">)</span>
+      <span class="pn">)</span>
+      <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">query</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">search</span><span class="pn">(</span><span class="fn">query</span><span class="pn">));</span>
+  <span class="pn">}</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">API search triggered only after 350ms pause with a new value</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TRANSFORMATION ─────────────────────────────────────────────── -->
+    <section class="section" id="transformation">
+      <div class="section-header">
+        <div class="section-icon transform">⇄</div>
+        <div class="section-meta">
+          <div class="section-title">Transformation Operators</div>
+          <div class="section-sub">Transform emitted values into new shapes</div>
+        </div>
+        <span class="section-count">11 operators</span>
+      </div>
+
+      <!-- map -->
+      <div class="op-card open" id="card-map">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">map(projectionFn)</span>
+          <span class="op-badge orange">Core Transform</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Applies a projection function to each emitted value. The most fundamental transformation — mirrors <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">Array.prototype.map</code>.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">map</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="fn">getUsers</span><span class="pn">():</span> <span class="cls">Observable</span><span class="pn">&lt;</span><span class="cls">User</span><span class="pn">[]&gt; {</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">ApiResponse</span><span class="pn">&gt;(</span><span class="str">'/api/users'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">map</span><span class="pn">(</span><span class="fn">res</span> <span class="op">=&gt;</span> <span class="fn">res</span><span class="pn">.</span><span class="fn">data</span><span class="pn">),</span>                      <span class="cm">// unwrap nested data</span>
+    <span class="fn">map</span><span class="pn">(</span><span class="fn">users</span> <span class="op">=&gt;</span> <span class="fn">users</span><span class="pn">.</span><span class="fn">map</span><span class="pn">(</span><span class="fn">u</span> <span class="op">=&gt;</span> <span class="pn">({</span>           <span class="cm">// transform each</span>
+      <span class="pn">...</span><span class="fn">u</span><span class="pn">,</span>
+      <span class="fn">fullName</span><span class="pn">:</span> <span class="str">`<span class="pn">${</span><span class="fn">u</span><span class="pn">.</span><span class="fn">firstName</span><span class="pn">}</span> <span class="pn">${</span><span class="fn">u</span><span class="pn">.</span><span class="fn">lastName</span><span class="pn">}</span>`</span><span class="pn">,</span>
+      <span class="fn">isAdmin</span><span class="pn">:</span> <span class="fn">u</span><span class="pn">.</span><span class="fn">role</span> <span class="op">===</span> <span class="str">'ADMIN'</span>
+    <span class="pn">})))</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Each user object enriched with fullName and isAdmin properties</div>
+        </div>
+      </div>
+
+      <!-- switchMap -->
+      <div class="op-card" id="card-switchmap">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">switchMap(project)</span>
+          <span class="op-badge orange">Cancels Previous</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Maps each value to an Observable, cancelling the previous inner subscription when a new source value arrives. The go-to for search and navigation — only the latest matters.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">switchMap</span><span class="pn">,</span> <span class="fn">debounceTime</span><span class="pn">,</span> <span class="fn">distinctUntilChanged</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">ProductSearchComponent</span> <span class="pn">{</span>
+  <span class="fn">searchControl</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">FormControl</span><span class="pn">(</span><span class="str">''</span><span class="pn">);</span>
+
+  <span class="fn">results$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">searchControl</span><span class="pn">.</span><span class="fn">valueChanges</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">debounceTime</span><span class="pn">(</span><span class="num">300</span><span class="pn">),</span>
+    <span class="fn">distinctUntilChanged</span><span class="pn">(),</span>
+    <span class="fn">switchMap</span><span class="pn">(</span><span class="fn">query</span> <span class="op">=&gt;</span>          <span class="cm">// cancels previous request</span>
+      <span class="fn">query</span><span class="pn">?.</span><span class="fn">trim</span><span class="pn">()</span>
+        <span class="op">?</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">productService</span><span class="pn">.</span><span class="fn">search</span><span class="pn">(</span><span class="fn">query</span><span class="pn">)</span>
+        <span class="op">:</span> <span class="fn">of</span><span class="pn">([]))</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Only the latest search HTTP request is active — previous ones auto-cancelled</div>
+        </div>
+      </div>
+
+      <!-- mergeMap -->
+      <div class="op-card" id="card-mergemap">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">mergeMap(project)</span>
+          <span class="op-badge orange">Concurrent</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Maps each value to an Observable and merges all resulting Observables concurrently. Also called <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">flatMap</code>. Use when order doesn't matter and you need maximum parallelism.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">from</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">mergeMap</span><span class="pn">,</span> <span class="fn">toArray</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Upload multiple files simultaneously</span>
+<span class="fn">uploadFiles</span><span class="pn">(</span><span class="fn">files</span><span class="pn">:</span> <span class="cls">File</span><span class="pn">[]) {</span>
+  <span class="kw">return</span> <span class="fn">from</span><span class="pn">(</span><span class="fn">files</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">mergeMap</span><span class="pn">(</span>
+      <span class="fn">file</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">storage</span><span class="pn">.</span><span class="fn">upload</span><span class="pn">(</span><span class="fn">file</span><span class="pn">),</span>
+      <span class="num">3</span>   <span class="cm">// concurrency limit: max 3 at once</span>
+    <span class="pn">),</span>
+    <span class="fn">toArray</span><span class="pn">()</span>   <span class="cm">// collect all results</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">All uploads run in parallel (max 3 concurrent), results collected into array</div>
+        </div>
+      </div>
+
+      <!-- concatMap -->
+      <div class="op-card" id="card-concatmap">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">concatMap(project)</span>
+          <span class="op-badge orange">Sequential / Ordered</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Maps to an Observable and queues them strictly in order — each must complete before the next starts. Use when order is critical (sequential API calls, processing queues).</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">from</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">concatMap</span><span class="pn">,</span> <span class="fn">tap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Process migration steps in strict order</span>
+<span class="fn">runMigrations</span><span class="pn">(</span><span class="fn">steps</span><span class="pn">:</span> <span class="cls">MigrationStep</span><span class="pn">[]) {</span>
+  <span class="kw">return</span> <span class="fn">from</span><span class="pn">(</span><span class="fn">steps</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">concatMap</span><span class="pn">(</span><span class="fn">step</span> <span class="op">=&gt;</span>            <span class="cm">// step 2 waits for step 1</span>
+      <span class="kw">this</span><span class="pn">.</span><span class="fn">migrationService</span><span class="pn">.</span><span class="fn">run</span><span class="pn">(</span><span class="fn">step</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+        <span class="fn">tap</span><span class="pn">(</span><span class="fn">result</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">log</span><span class="pn">.</span><span class="fn">push</span><span class="pn">(</span><span class="fn">result</span><span class="pn">))</span>
+      <span class="pn">)</span>
+    <span class="pn">)</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Steps execute in strict order; step 2 only begins when step 1 completes</div>
+        </div>
+      </div>
+
+      <!-- exhaustMap -->
+      <div class="op-card" id="card-exhaustmap">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">exhaustMap(project)</span>
+          <span class="op-badge orange">Ignores While Busy</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Ignores new source values while the current inner Observable is still active. The ideal choice for form submissions — prevents double-submits entirely.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="cls">Subject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">exhaustMap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">CheckoutComponent</span> <span class="pn">{</span>
+  <span class="kw">private</span> <span class="fn">submit$</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Subject</span><span class="pn">&lt;</span><span class="cls">OrderPayload</span><span class="pn">&gt;();</span>
+
+  <span class="fn">ngOnInit</span><span class="pn">() {</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">submit$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+      <span class="fn">exhaustMap</span><span class="pn">(</span><span class="fn">order</span> <span class="op">=&gt;</span>      <span class="cm">// extra clicks ignored</span>
+        <span class="kw">this</span><span class="pn">.</span><span class="fn">orderService</span><span class="pn">.</span><span class="fn">place</span><span class="pn">(</span><span class="fn">order</span><span class="pn">)</span>
+      <span class="pn">)</span>
+    <span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">result</span> <span class="op">=&gt;</span>
+      <span class="kw">this</span><span class="pn">.</span><span class="fn">router</span><span class="pn">.</span><span class="fn">navigate</span><span class="pn">([</span><span class="str">'/confirmation'</span><span class="pn">,</span> <span class="fn">result</span><span class="pn">.</span><span class="fn">orderId</span><span class="pn">]));</span>
+  <span class="pn">}</span>
+
+  <span class="fn">onSubmit</span><span class="pn">() {</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">submit$</span><span class="pn">.</span><span class="fn">next</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">form</span><span class="pn">.</span><span class="fn">value</span><span class="pn">);</span> <span class="pn">}</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Double-clicks and impatient re-submits are silently dropped</div>
+        </div>
+      </div>
+
+      <!-- scan -->
+      <div class="op-card" id="card-scan">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">scan(accumulator, seed)</span>
+          <span class="op-badge orange">Running State</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Like <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">Array.reduce</code> but emits the running accumulation after every value. Perfect for building reactive state from events.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">scan</span><span class="pn">,</span> <span class="fn">map</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Reactive shopping cart with scan</span>
+<span class="fn">cart$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">cartActions$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">scan</span><span class="pn">((</span><span class="fn">items</span><span class="pn">,</span> <span class="fn">action</span><span class="pn">) => {</span>
+    <span class="kw">switch</span> <span class="pn">(</span><span class="fn">action</span><span class="pn">.</span><span class="fn">type</span><span class="pn">) {</span>
+      <span class="kw">case</span> <span class="str">'ADD'</span><span class="pn">:</span>    <span class="kw">return</span> <span class="pn">[...</span><span class="fn">items</span><span class="pn">,</span> <span class="fn">action</span><span class="pn">.</span><span class="fn">item</span><span class="pn">];</span>
+      <span class="kw">case</span> <span class="str">'REMOVE'</span><span class="pn">:</span> <span class="kw">return</span> <span class="fn">items</span><span class="pn">.</span><span class="fn">filter</span><span class="pn">(</span><span class="fn">i</span> <span class="op">=&gt;</span> <span class="fn">i</span><span class="pn">.</span><span class="fn">id</span> <span class="op">!==</span> <span class="fn">action</span><span class="pn">.</span><span class="fn">item</span><span class="pn">.</span><span class="fn">id</span><span class="pn">);</span>
+      <span class="kw">default</span><span class="pn">:</span>       <span class="kw">return</span> <span class="fn">items</span><span class="pn">;</span>
+    <span class="pn">}</span>
+  <span class="pn">},</span> <span class="pn">[]</span> <span class="kw">as</span> <span class="cls">CartItem</span><span class="pn">[]),</span>
+  <span class="fn">map</span><span class="pn">(</span><span class="fn">items</span> <span class="op">=&gt;</span> <span class="pn">({</span> <span class="fn">items</span><span class="pn">,</span> <span class="fn">total</span><span class="pn">:</span> <span class="fn">items</span><span class="pn">.</span><span class="fn">reduce</span><span class="pn">((</span><span class="fn">s</span><span class="pn">,</span><span class="fn">i</span><span class="pn">) =&gt;</span> <span class="fn">s</span><span class="op">+</span><span class="fn">i</span><span class="pn">.</span><span class="fn">price</span><span class="pn">,</span> <span class="num">0</span><span class="pn">) }))</span>
+<span class="pn">);</span></pre>
+          </div>
+          <div class="output-note">Cart state and total update reactively with each ADD/REMOVE action</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FILTERING ───────────────────────────────────────────────────── -->
+    <section class="section" id="filtering">
+      <div class="section-header">
+        <div class="section-icon filter">⊘</div>
+        <div class="section-meta">
+          <div class="section-title">Filtering Operators</div>
+          <div class="section-sub">Selectively emit values from source</div>
+        </div>
+        <span class="section-count">10 operators</span>
+      </div>
+
+      <!-- filter -->
+      <div class="op-card open" id="card-filter">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">filter(predicate)</span>
+          <span class="op-badge purple">Conditional</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Only emits items that satisfy the predicate function. The reactive equivalent of <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">Array.prototype.filter</code>.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">filter</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Only save valid forms</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">form</span><span class="pn">.</span><span class="fn">valueChanges</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">filter</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">form</span><span class="pn">.</span><span class="fn">valid</span><span class="pn">),</span>    <span class="cm">// skip invalid</span>
+  <span class="fn">debounceTime</span><span class="pn">(</span><span class="num">500</span><span class="pn">),</span>
+  <span class="fn">distinctUntilChanged</span><span class="pn">(</span><span class="cls">JSON</span><span class="pn">.</span><span class="fn">stringify</span><span class="pn">)</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">v</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">autosave</span><span class="pn">(</span><span class="fn">v</span><span class="pn">));</span>
+
+<span class="cm">// Skip empty search results</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">Order</span><span class="pn">[]&gt;(</span><span class="str">'/api/orders'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">filter</span><span class="pn">(</span><span class="fn">orders</span> <span class="op">=&gt;</span> <span class="fn">orders</span><span class="pn">.</span><span class="fn">length</span> <span class="op">&gt;</span> <span class="num">0</span><span class="pn">)</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">orders</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">orders</span> <span class="op">=</span> <span class="fn">orders</span><span class="pn">);</span></pre>
+          </div>
+          <div class="output-note">Auto-save only triggered for valid, changed forms</div>
+        </div>
+      </div>
+
+      <!-- takeUntil -->
+      <div class="op-card" id="card-takeuntil">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">takeUntil(notifier$)</span>
+          <span class="op-badge purple">Memory Safety</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Emits values until the notifier Observable emits, then completes and unsubscribes. The canonical Angular pattern for preventing memory leaks.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="cls">Subject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">takeUntil</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">DataComponent</span> <span class="kw">implements</span> <span class="cls">OnDestroy</span> <span class="pn">{</span>
+  <span class="kw">private</span> <span class="fn">destroy$</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">Subject</span><span class="pn">&lt;</span><span class="kw">void</span><span class="pn">&gt;();</span>
+
+  <span class="fn">ngOnInit</span><span class="pn">() {</span>
+    <span class="cm">// All subscriptions cleaned up automatically</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">dataService</span><span class="pn">.</span><span class="fn">stream$</span>
+      <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">takeUntil</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">))</span>
+      <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">d</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">data</span> <span class="op">=</span> <span class="fn">d</span><span class="pn">);</span>
+
+    <span class="fn">interval</span><span class="pn">(</span><span class="num">1000</span><span class="pn">)</span>
+      <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">takeUntil</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">))</span>
+      <span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">t</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">tick</span> <span class="op">=</span> <span class="fn">t</span><span class="pn">);</span>
+  <span class="pn">}</span>
+
+  <span class="fn">ngOnDestroy</span><span class="pn">() {</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">.</span><span class="fn">next</span><span class="pn">();</span>     <span class="cm">// signal all takeUntils</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">destroy$</span><span class="pn">.</span><span class="fn">complete</span><span class="pn">();</span>
+  <span class="pn">}</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">All subscriptions complete when ngOnDestroy fires — zero memory leaks</div>
+        </div>
+      </div>
+
+      <!-- debounceTime -->
+      <div class="op-card" id="card-debouncetime">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">debounceTime(ms)</span>
+          <span class="op-badge purple">Rate Control</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Delays emitting until a specified quiet period has passed after the last emission. Resets the timer if a new value arrives. The essential operator for search inputs.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">debounceTime</span><span class="pn">,</span> <span class="fn">distinctUntilChanged</span><span class="pn">,</span> <span class="fn">switchMap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="fn">results$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">searchControl</span><span class="pn">.</span><span class="fn">valueChanges</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">debounceTime</span><span class="pn">(</span><span class="num">400</span><span class="pn">),</span>              <span class="cm">// wait 400ms after last keystroke</span>
+  <span class="fn">distinctUntilChanged</span><span class="pn">(),</span>         <span class="cm">// skip unchanged values</span>
+  <span class="fn">switchMap</span><span class="pn">(</span><span class="fn">q</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">api</span><span class="pn">.</span><span class="fn">search</span><span class="pn">(</span><span class="fn">q</span><span class="pn">))</span>
+<span class="pn">);</span>
+
+<span class="cm">// Validation feedback with shorter debounce</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">emailControl</span><span class="pn">.</span><span class="fn">valueChanges</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">debounceTime</span><span class="pn">(</span><span class="num">200</span><span class="pn">),</span>
+  <span class="fn">switchMap</span><span class="pn">(</span><span class="fn">email</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">auth</span><span class="pn">.</span><span class="fn">checkEmailTaken</span><span class="pn">(</span><span class="fn">email</span><span class="pn">))</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">taken</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">emailTaken</span> <span class="op">=</span> <span class="fn">taken</span><span class="pn">);</span></pre>
+          </div>
+          <div class="output-note">Search fires 400ms after typing stops — saves many unnecessary API calls</div>
+        </div>
+      </div>
+
+      <!-- distinctUntilChanged -->
+      <div class="op-card" id="card-distinct">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">distinctUntilChanged(comparator?)</span>
+          <span class="op-badge purple">Deduplication</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Suppresses consecutive duplicate emissions. Only emits when the current value differs from the previous. Accepts an optional comparator for deep equality.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">distinctUntilChanged</span><span class="pn">,</span> <span class="fn">map</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Re-load user only when route ID actually changes</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">route</span><span class="pn">.</span><span class="fn">params</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">map</span><span class="pn">(</span><span class="fn">p</span> <span class="op">=&gt;</span> <span class="fn">p</span><span class="pn">[</span><span class="str">'id'</span><span class="pn">]),</span>
+  <span class="fn">distinctUntilChanged</span><span class="pn">()</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">id</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">loadUser</span><span class="pn">(</span><span class="fn">id</span><span class="pn">));</span>
+
+<span class="cm">// Object comparison with custom comparator</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">store</span><span class="pn">.</span><span class="fn">select</span><span class="pn">(</span><span class="str">'user'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">distinctUntilChanged</span><span class="pn">((</span><span class="fn">a</span><span class="pn">,</span> <span class="fn">b</span><span class="pn">) =&gt;</span> <span class="fn">a</span><span class="pn">.</span><span class="fn">id</span> <span class="op">===</span> <span class="fn">b</span><span class="pn">.</span><span class="fn">id</span> <span class="op">&amp;&amp;</span> <span class="fn">a</span><span class="pn">.</span><span class="fn">role</span> <span class="op">===</span> <span class="fn">b</span><span class="pn">.</span><span class="fn">role</span><span class="pn">)</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">user</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">refreshView</span><span class="pn">(</span><span class="fn">user</span><span class="pn">));</span></pre>
+          </div>
+          <div class="output-note">loadUser only called when route ID actually changes, not on repeated navigations</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMBINATION ─────────────────────────────────────────────────── -->
+    <section class="section" id="combination">
+      <div class="section-header">
+        <div class="section-icon combine">⊕</div>
+        <div class="section-meta">
+          <div class="section-title">Combination Operators</div>
+          <div class="section-sub">Combine multiple Observables into one</div>
+        </div>
+        <span class="section-count">8 operators</span>
+      </div>
+
+      <!-- forkJoin -->
+      <div class="op-card open" id="card-forkjoin">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">forkJoin([obs1$, obs2$, ...])</span>
+          <span class="op-badge red">Parallel Wait-All</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Waits for ALL source Observables to complete, then emits an array/object of their last values. The Angular go-to for parallel HTTP requests that must all complete before proceeding.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">forkJoin</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+
+<span class="fn">ngOnInit</span><span class="pn">() {</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">loading</span> <span class="op">=</span> <span class="kw">true</span><span class="pn">;</span>
+
+  <span class="fn">forkJoin</span><span class="pn">({</span>                             <span class="cm">// named object form</span>
+    <span class="fn">user</span><span class="pn">:</span>     <span class="kw">this</span><span class="pn">.</span><span class="fn">userService</span><span class="pn">.</span><span class="fn">getProfile</span><span class="pn">(),</span>
+    <span class="fn">orders</span><span class="pn">:</span>   <span class="kw">this</span><span class="pn">.</span><span class="fn">orderService</span><span class="pn">.</span><span class="fn">getOrders</span><span class="pn">(),</span>
+    <span class="fn">settings</span><span class="pn">:</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">settingsService</span><span class="pn">.</span><span class="fn">get</span><span class="pn">(),</span>
+    <span class="fn">flags</span><span class="pn">:</span>    <span class="kw">this</span><span class="pn">.</span><span class="fn">featureService</span><span class="pn">.</span><span class="fn">getFlags</span><span class="pn">()</span>
+  <span class="pn">}).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">finalize</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">loading</span> <span class="op">=</span> <span class="kw">false</span><span class="pn">)</span>
+  <span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(({</span> <span class="fn">user</span><span class="pn">,</span> <span class="fn">orders</span><span class="pn">,</span> <span class="fn">settings</span><span class="pn">,</span> <span class="fn">flags</span> <span class="pn">})</span> <span class="op">=&gt;</span> <span class="pn">{</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">user</span>     <span class="op">=</span> <span class="fn">user</span><span class="pn">;</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">orders</span>   <span class="op">=</span> <span class="fn">orders</span><span class="pn">;</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">settings</span> <span class="op">=</span> <span class="fn">settings</span><span class="pn">;</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">flags</span>    <span class="op">=</span> <span class="fn">flags</span><span class="pn">;</span>
+  <span class="pn">});</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">4 HTTP requests run in parallel; page renders only when all complete</div>
+        </div>
+      </div>
+
+      <!-- combineLatest -->
+      <div class="op-card" id="card-combinelatest">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">combineLatest([obs1$, obs2$])</span>
+          <span class="op-badge red">Reactive Sync</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Combines multiple Observables using their latest values, emitting a new array whenever ANY source emits. All sources must have emitted at least once. Great for derived view models.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">combineLatest</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+
+<span class="cm">// Derive view model from multiple sources</span>
+<span class="fn">viewModel$</span> <span class="op">=</span> <span class="fn">combineLatest</span><span class="pn">([</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">route</span><span class="pn">.</span><span class="fn">params</span><span class="pn">,</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">authService</span><span class="pn">.</span><span class="fn">currentUser$</span><span class="pn">,</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">featureFlags$</span>
+<span class="pn">]).</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">map</span><span class="pn">(([</span><span class="fn">params</span><span class="pn">,</span> <span class="fn">user</span><span class="pn">,</span> <span class="fn">flags</span><span class="pn">]) => ({</span>
+    <span class="fn">resourceId</span><span class="pn">:</span> <span class="fn">params</span><span class="pn">[</span><span class="str">'id'</span><span class="pn">],</span>
+    <span class="fn">canEdit</span><span class="pn">:</span>    <span class="fn">user</span><span class="pn">.</span><span class="fn">role</span> <span class="op">===</span> <span class="str">'ADMIN'</span> <span class="op">&amp;&amp;</span> <span class="fn">flags</span><span class="pn">.</span><span class="fn">editEnabled</span><span class="pn">,</span>
+    <span class="fn">canDelete</span><span class="pn">:</span>  <span class="fn">user</span><span class="pn">.</span><span class="fn">role</span> <span class="op">===</span> <span class="str">'ADMIN'</span>
+  <span class="pn">}))</span>
+<span class="pn">);</span></pre>
+          </div>
+          <div class="output-note">View model re-computed whenever route, user, or flags change</div>
+        </div>
+      </div>
+
+      <!-- withLatestFrom -->
+      <div class="op-card" id="card-withlatestfrom">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">withLatestFrom(obs$)</span>
+          <span class="op-badge red">Sample on Trigger</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">When the source emits, combine with the latest value from another Observable. The secondary is only sampled — it doesn't drive emissions.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">withLatestFrom</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// On save click, grab current form + logged-in user</span>
+<span class="kw">this</span><span class="pn">.</span><span class="fn">saveClicks$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+  <span class="fn">withLatestFrom</span><span class="pn">(</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">form</span><span class="pn">.</span><span class="fn">valueChanges</span><span class="pn">,</span>
+    <span class="kw">this</span><span class="pn">.</span><span class="fn">authService</span><span class="pn">.</span><span class="fn">currentUser$</span>
+  <span class="pn">)</span>
+<span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(([</span><span class="fn">_click</span><span class="pn">,</span> <span class="fn">formVal</span><span class="pn">,</span> <span class="fn">user</span><span class="pn">]) => {</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">api</span><span class="pn">.</span><span class="fn">save</span><span class="pn">({</span> <span class="pn">...</span><span class="fn">formVal</span><span class="pn">,</span> <span class="fn">updatedBy</span><span class="pn">:</span> <span class="fn">user</span><span class="pn">.</span><span class="fn">id</span> <span class="pn">});</span>
+<span class="pn">});</span></pre>
+          </div>
+          <div class="output-note">Save always uses latest form values and user context at click time</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ERROR HANDLING ─────────────────────────────────────────────── -->
+    <section class="section" id="error-handling">
+      <div class="section-header">
+        <div class="section-icon error">⚠</div>
+        <div class="section-meta">
+          <div class="section-title">Error Handling Operators</div>
+          <div class="section-sub">Handle and recover from errors gracefully</div>
+        </div>
+        <span class="section-count">4 operators</span>
+      </div>
+
+      <!-- catchError -->
+      <div class="op-card open" id="card-catcherror">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">catchError(handler)</span>
+          <span class="op-badge">Error Recovery</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Catches errors on the source and allows you to return a fallback Observable, re-throw selectively, or route to different error flows. Essential for HTTP error handling.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">of</span><span class="pn">,</span> <span class="cls">EMPTY</span><span class="pn">,</span> <span class="fn">throwError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+
+<span class="fn">getUser</span><span class="pn">(</span><span class="fn">id</span><span class="pn">:</span> <span class="cls">number</span><span class="pn">):</span> <span class="cls">Observable</span><span class="pn">&lt;</span><span class="cls">User</span> <span class="op">|</span> <span class="kw">null</span><span class="pn">&gt; {</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">User</span><span class="pn">&gt;(</span><span class="str">`/api/users/<span class="pn">${</span><span class="fn">id</span><span class="pn">}</span>`</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">catchError</span><span class="pn">((</span><span class="fn">err</span><span class="pn">:</span> <span class="cls">HttpErrorResponse</span><span class="pn">) => {</span>
+      <span class="kw">if</span> <span class="pn">(</span><span class="fn">err</span><span class="pn">.</span><span class="fn">status</span> <span class="op">===</span> <span class="num">404</span><span class="pn">)</span>
+        <span class="kw">return</span> <span class="fn">of</span><span class="pn">(</span><span class="kw">null</span><span class="pn">);</span>             <span class="cm">// not found → null</span>
+      <span class="kw">if</span> <span class="pn">(</span><span class="fn">err</span><span class="pn">.</span><span class="fn">status</span> <span class="op">===</span> <span class="num">401</span><span class="pn">) {</span>
+        <span class="kw">this</span><span class="pn">.</span><span class="fn">auth</span><span class="pn">.</span><span class="fn">logout</span><span class="pn">();</span>
+        <span class="kw">return</span> <span class="cls">EMPTY</span><span class="pn">;</span>               <span class="cm">// unauthorized → logout</span>
+      <span class="pn">}</span>
+      <span class="kw">return</span> <span class="fn">throwError</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="fn">err</span><span class="pn">);</span>  <span class="cm">// others → re-throw</span>
+    <span class="pn">})</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">404 → null; 401 → logout + EMPTY; other errors propagate</div>
+        </div>
+      </div>
+
+      <!-- retry -->
+      <div class="op-card" id="card-retry">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">retry(count | config)</span>
+          <span class="op-badge">Auto Retry</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Resubscribes to the source Observable on error, up to N times. In RxJS 7+ accepts a config object for delay and reset-on-success options.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">retry</span><span class="pn">,</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">of</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+
+<span class="fn">fetchCritical</span><span class="pn">() {</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">(</span><span class="str">'/api/critical'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">retry</span><span class="pn">({</span>
+      <span class="fn">count</span><span class="pn">:</span> <span class="num">3</span><span class="pn">,</span>
+      <span class="fn">delay</span><span class="pn">:</span> <span class="num">1000</span><span class="pn">,</span>                 <span class="cm">// 1s between retries</span>
+      <span class="fn">resetOnSuccess</span><span class="pn">:</span> <span class="kw">true</span>
+    <span class="pn">}),</span>
+    <span class="fn">catchError</span><span class="pn">(</span><span class="fn">err</span> <span class="op">=&gt;</span> <span class="pn">{</span>
+      <span class="kw">this</span><span class="pn">.</span><span class="fn">notif</span><span class="pn">.</span><span class="fn">error</span><span class="pn">(</span><span class="str">'Failed after 3 retries'</span><span class="pn">);</span>
+      <span class="kw">return</span> <span class="fn">of</span><span class="pn">(</span><span class="kw">null</span><span class="pn">);</span>
+    <span class="pn">})</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Retries 3× with 1s delay; falls back to null after exhausting attempts</div>
+        </div>
+      </div>
+
+      <!-- finalize -->
+      <div class="op-card" id="card-finalize">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">finalize(callback)</span>
+          <span class="op-badge">Guaranteed Cleanup</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Executes a callback when the Observable terminates for ANY reason: completion, error, or unsubscription. The reactive equivalent of <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">finally</code> in try/catch.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">finalize</span><span class="pn">,</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="fn">save</span><span class="pn">(</span><span class="fn">data</span><span class="pn">:</span> <span class="cls">FormData</span><span class="pn">) {</span>
+  <span class="kw">this</span><span class="pn">.</span><span class="fn">saving</span> <span class="op">=</span> <span class="kw">true</span><span class="pn">;</span>
+
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">post</span><span class="pn">(</span><span class="str">'/api/save'</span><span class="pn">,</span> <span class="fn">data</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">catchError</span><span class="pn">(</span><span class="fn">err</span> <span class="op">=&gt;</span> <span class="pn">{</span>
+      <span class="kw">this</span><span class="pn">.</span><span class="fn">notif</span><span class="pn">.</span><span class="fn">error</span><span class="pn">(</span><span class="fn">err</span><span class="pn">.</span><span class="fn">message</span><span class="pn">);</span>
+      <span class="kw">return</span> <span class="fn">of</span><span class="pn">(</span><span class="kw">null</span><span class="pn">);</span>
+    <span class="pn">}),</span>
+    <span class="fn">finalize</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">saving</span> <span class="op">=</span> <span class="kw">false</span><span class="pn">)</span>  <span class="cm">// ALWAYS runs</span>
+  <span class="pn">);</span>
+<span class="pn">}</span>
+<span class="cm">// Template: &lt;button [disabled]="saving"&gt;Save&lt;/button&gt;</span></pre>
+          </div>
+          <div class="output-note">Spinner/disabled state reset whether save succeeds, errors, or is cancelled</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── UTILITY ─────────────────────────────────────────────────────── -->
+    <section class="section" id="utility">
+      <div class="section-header">
+        <div class="section-icon utility">⚙</div>
+        <div class="section-meta">
+          <div class="section-title">Utility Operators</div>
+          <div class="section-sub">Toolbox for common Observable tasks</div>
+        </div>
+        <span class="section-count">5 operators</span>
+      </div>
+
+      <!-- tap -->
+      <div class="op-card open" id="card-tap">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">tap(observer)</span>
+          <span class="op-badge teal">Side Effects</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Performs side effects for each emission without modifying the stream. Perfect for logging, debugging, analytics tracking, and state updates that don't transform data.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">tap</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="fn">getOrders</span><span class="pn">():</span> <span class="cls">Observable</span><span class="pn">&lt;</span><span class="cls">Order</span><span class="pn">[]&gt; {</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">Order</span><span class="pn">[]&gt;(</span><span class="str">'/api/orders'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">tap</span><span class="pn">(</span><span class="fn">orders</span> <span class="op">=&gt;</span> <span class="cm">// short-circuit logging</span>
+      <span class="fn">console</span><span class="pn">.</span><span class="fn">debug</span><span class="pn">(</span><span class="str">`[Orders] fetched <span class="pn">${</span><span class="fn">orders</span><span class="pn">.</span><span class="fn">length</span><span class="pn">}</span>`</span><span class="pn">)</span>
+    <span class="pn">),</span>
+    <span class="fn">tap</span><span class="pn">(</span><span class="fn">orders</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">analytics</span><span class="pn">.</span><span class="fn">track</span><span class="pn">(</span><span class="str">'orders_loaded'</span><span class="pn">,</span> <span class="fn">orders</span><span class="pn">.</span><span class="fn">length</span><span class="pn">)),</span>
+    <span class="fn">tap</span><span class="pn">({</span>                             <span class="cm">// full observer form</span>
+      <span class="fn">next</span><span class="pn">:</span>     <span class="fn">v</span>  <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">cache</span><span class="pn">.</span><span class="fn">set</span><span class="pn">(</span><span class="fn">v</span><span class="pn">),</span>
+      <span class="fn">error</span><span class="pn">:</span>    <span class="fn">e</span>  <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">logger</span><span class="pn">.</span><span class="fn">error</span><span class="pn">(</span><span class="fn">e</span><span class="pn">),</span>
+      <span class="fn">complete</span><span class="pn">:</span> <span class="pn">()</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">logger</span><span class="pn">.</span><span class="fn">log</span><span class="pn">(</span><span class="str">'done'</span><span class="pn">)</span>
+    <span class="pn">})</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Logging, analytics, and caching applied without modifying the Order[] stream</div>
+        </div>
+      </div>
+
+      <!-- shareReplay (under utility but also multicasting) -->
+      <div class="op-card" id="card-timeout">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">timeout(ms | config)</span>
+          <span class="op-badge teal">Time Limit</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Errors if the source doesn't emit within the specified time. Enforces a maximum wait — essential for critical paths where a hung request should fail fast.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">timeout</span><span class="pn">,</span> <span class="fn">catchError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="cls">TimeoutError</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+
+<span class="fn">fetchWithTimeout</span><span class="pn">(</span><span class="fn">url</span><span class="pn">:</span> <span class="cls">string</span><span class="pn">) {</span>
+  <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">(</span><span class="fn">url</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">timeout</span><span class="pn">(</span><span class="num">8000</span><span class="pn">),</span>             <span class="cm">// must respond within 8s</span>
+    <span class="fn">catchError</span><span class="pn">(</span><span class="fn">err</span> <span class="op">=&gt;</span> <span class="pn">{</span>
+      <span class="kw">if</span> <span class="pn">(</span><span class="fn">err</span> <span class="kw">instanceof</span> <span class="cls">TimeoutError</span><span class="pn">)</span>
+        <span class="kw">return</span> <span class="fn">of</span><span class="pn">({</span> <span class="fn">error</span><span class="pn">:</span> <span class="str">'timeout'</span><span class="pn">,</span> <span class="fn">data</span><span class="pn">:</span> <span class="kw">null</span> <span class="pn">});</span>
+      <span class="kw">return</span> <span class="fn">throwError</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="fn">err</span><span class="pn">);</span>
+    <span class="pn">})</span>
+  <span class="pn">);</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Fallback response returned if API takes longer than 8 seconds</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MULTICASTING ────────────────────────────────────────────────── -->
+    <section class="section" id="multicasting">
+      <div class="section-header">
+        <div class="section-icon multi">◎</div>
+        <div class="section-meta">
+          <div class="section-title">Multicasting Operators</div>
+          <div class="section-sub">Share a single subscription among multiple subscribers</div>
+        </div>
+        <span class="section-count">3 operators</span>
+      </div>
+
+      <!-- shareReplay -->
+      <div class="op-card open" id="card-sharereplay">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">shareReplay(bufferSize)</span>
+          <span class="op-badge pink">HTTP Cache</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Multicasts and replays the last N values to any subscriber — including late ones. The go-to pattern for caching HTTP responses in Angular services.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">shareReplay</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Injectable</span><span class="pn">({</span> <span class="fn">providedIn</span><span class="pn">:</span> <span class="str">'root'</span> <span class="pn">})</span>
+<span class="kw">export class</span> <span class="cls">ConfigService</span> <span class="pn">{</span>
+  <span class="cm">// HTTP called ONCE, result cached and replayed to all subscribers</span>
+  <span class="kw">readonly</span> <span class="fn">config$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span>
+    <span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">AppConfig</span><span class="pn">&gt;(</span><span class="str">'/api/config'</span><span class="pn">)</span>
+    <span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">shareReplay</span><span class="pn">(</span><span class="num">1</span><span class="pn">));</span>
+
+  <span class="kw">constructor</span><span class="pn">(</span><span class="kw">private</span> <span class="fn">http</span><span class="pn">:</span> <span class="cls">HttpClient</span><span class="pn">) {}</span>
+<span class="pn">}</span>
+
+<span class="cm">// Any component subscribing later gets cached value immediately</span>
+<span class="cm">// — no additional HTTP request ever made</span>
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">HeaderComponent</span> <span class="pn">{</span>
+  <span class="fn">config$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">configService</span><span class="pn">.</span><span class="fn">config$</span><span class="pn">;</span>  <span class="cm">// cached</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">HTTP fetched once at app start; every component reuses the cached value</div>
+        </div>
+      </div>
+
+      <!-- share -->
+      <div class="op-card" id="card-share">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">share()</span>
+          <span class="op-badge pink">Ref-Counted</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Multicasts to multiple subscribers using a Subject. Reference-counted — subscribes on first subscriber, unsubscribes when none remain. Unlike <code style="color:var(--orange);font-family:var(--font-mono);font-size:0.8rem">shareReplay</code>, does not cache for late subscribers.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">share</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="cm">// Without share: two HTTP requests!</span>
+<span class="kw">const</span> <span class="fn">data$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">(</span><span class="str">'/api/data'</span><span class="pn">);</span>
+<span class="fn">data$</span><span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">d</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">view1</span> <span class="op">=</span> <span class="fn">d</span><span class="pn">);</span>   <span class="cm">// request 1</span>
+<span class="fn">data$</span><span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">d</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">view2</span> <span class="op">=</span> <span class="fn">d</span><span class="pn">);</span>   <span class="cm">// request 2!</span>
+
+<span class="cm">// With share: single HTTP request, two receivers</span>
+<span class="kw">const</span> <span class="fn">shared$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">(</span><span class="str">'/api/data'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">share</span><span class="pn">());</span>
+<span class="fn">shared$</span><span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">d</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">view1</span> <span class="op">=</span> <span class="fn">d</span><span class="pn">);</span>   <span class="cm">// same request</span>
+<span class="fn">shared$</span><span class="pn">.</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">d</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">view2</span> <span class="op">=</span> <span class="fn">d</span><span class="pn">);</span>   <span class="cm">// same request</span></pre>
+          </div>
+          <div class="output-note">One HTTP request shared between view1 and view2</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SUBJECTS ────────────────────────────────────────────────────── -->
+    <section class="section" id="subjects">
+      <div class="section-header">
+        <div class="section-icon subject">◈</div>
+        <div class="section-meta">
+          <div class="section-title">Subject Types</div>
+          <div class="section-sub">Observable + Observer bridge for imperative ↔ reactive</div>
+        </div>
+        <span class="section-count">4 types</span>
+      </div>
+
+      <div class="subject-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Initial Value</th>
+              <th>Replay to Late Subscribers</th>
+              <th>Best Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Subject</td>
+              <td>None required</td>
+              <td>No</td>
+              <td>Event bus, cross-component messages</td>
+            </tr>
+            <tr>
+              <td>BehaviorSubject</td>
+              <td>Required</td>
+              <td>Last value (1)</td>
+              <td>Current state — auth user, theme, cart</td>
+            </tr>
+            <tr>
+              <td>ReplaySubject</td>
+              <td>None</td>
+              <td>Last N values</td>
+              <td>Notification history, audit logs</td>
+            </tr>
+            <tr>
+              <td>AsyncSubject</td>
+              <td>None</td>
+              <td>Last value on complete</td>
+              <td>Final computed result</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- BehaviorSubject -->
+      <div class="op-card open" id="card-behaviorsubject">
+        <div class="op-card-header" onclick="toggleCard(this)">
+          <span class="op-name">BehaviorSubject(initialValue)</span>
+          <span class="op-badge">State Management</span>
+          <span class="op-chevron">›</span>
+        </div>
+        <div class="op-body">
+          <p class="op-desc">Holds the current value and replays it to every new subscriber. The foundation of lightweight reactive state management in Angular without NgRx.</p>
+          <div class="op-label">Angular Example</div>
+          <div class="code-wrap">
+            <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+            <pre><span class="kw">import</span> <span class="pn">{</span> <span class="cls">BehaviorSubject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="fn">map</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'rxjs/operators'</span><span class="pn">;</span>
+
+<span class="dec">@Injectable</span><span class="pn">({</span> <span class="fn">providedIn</span><span class="pn">:</span> <span class="str">'root'</span> <span class="pn">})</span>
+<span class="kw">export class</span> <span class="cls">AuthService</span> <span class="pn">{</span>
+  <span class="kw">private</span> <span class="fn">userSubject</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">BehaviorSubject</span><span class="pn">&lt;</span><span class="cls">User</span> <span class="op">|</span> <span class="kw">null</span><span class="pn">&gt;(</span><span class="kw">null</span><span class="pn">);</span>
+
+  <span class="cm">// Public read-only stream</span>
+  <span class="fn">currentUser$</span>  <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">userSubject</span><span class="pn">.</span><span class="fn">asObservable</span><span class="pn">();</span>
+  <span class="fn">isLoggedIn$</span>   <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">currentUser$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">map</span><span class="pn">(</span><span class="fn">u</span> <span class="op">=&gt;</span> <span class="fn">u</span> <span class="op">!==</span> <span class="kw">null</span><span class="pn">));</span>
+
+  <span class="cm">// Synchronous access when needed</span>
+  <span class="kw">get</span> <span class="fn">currentUser</span><span class="pn">():</span> <span class="cls">User</span> <span class="op">|</span> <span class="kw">null</span> <span class="pn">{</span> <span class="kw">return</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">userSubject</span><span class="pn">.</span><span class="fn">getValue</span><span class="pn">();</span> <span class="pn">}</span>
+
+  <span class="fn">login</span><span class="pn">(</span><span class="fn">user</span><span class="pn">:</span> <span class="cls">User</span><span class="pn">)</span>  <span class="pn">{</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">userSubject</span><span class="pn">.</span><span class="fn">next</span><span class="pn">(</span><span class="fn">user</span><span class="pn">);</span> <span class="pn">}</span>
+  <span class="fn">logout</span><span class="pn">()</span>          <span class="pn">{</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">userSubject</span><span class="pn">.</span><span class="fn">next</span><span class="pn">(</span><span class="kw">null</span><span class="pn">);</span> <span class="pn">}</span>
+<span class="pn">}</span></pre>
+          </div>
+          <div class="output-note">Any component subscribing at any time immediately receives the current auth state</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BEST PRACTICES ─────────────────────────────────────────────── -->
+    <section class="section" id="best-practices">
+      <div class="section-header">
+        <div class="section-icon best">★</div>
+        <div class="section-meta">
+          <div class="section-title">Angular Best Practices</div>
+          <div class="section-sub">Memory management, async pipe, and patterns</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-content">
+          <div class="callout-title">Prefer the async pipe in templates</div>
+          <div class="callout-body">The async pipe auto-subscribes and auto-unsubscribes. Using it in templates means zero manual subscription management and zero memory leaks for template-bound streams.</div>
+        </div>
+      </div>
+
+      <div class="op-label">async Pipe Pattern</div>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-lang">typescript + template</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+        <pre><span class="cm">// service.ts — single source, multiple consumers</span>
+<span class="dec">@Injectable</span><span class="pn">({</span> <span class="fn">providedIn</span><span class="pn">:</span> <span class="str">'root'</span> <span class="pn">})</span>
+<span class="kw">export class</span> <span class="cls">UserService</span> <span class="pn">{</span>
+  <span class="fn">users$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">http</span><span class="pn">.</span><span class="fn">get</span><span class="pn">&lt;</span><span class="cls">User</span><span class="pn">[]&gt;(</span><span class="str">'/api/users'</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">shareReplay</span><span class="pn">(</span><span class="num">1</span><span class="pn">));</span>
+<span class="pn">}</span>
+
+<span class="cm">// component.ts — no subscribe/unsubscribe needed!</span>
+<span class="dec">@Component</span><span class="pn">({</span>
+  <span class="fn">template</span><span class="pn">:</span> <span class="str">`
+    &lt;div *ngIf="vm$ | async as vm"&gt;
+      &lt;app-user *ngFor="let u of vm.users" [user]="u" /&gt;
+      &lt;span&gt;Total: {{ vm.count }}&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;app-spinner *ngIf="loading$ | async" /&gt;
+  `</span>
+<span class="pn">})</span>
+<span class="kw">export class</span> <span class="cls">UserListComponent</span> <span class="pn">{</span>
+  <span class="fn">vm$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">userService</span><span class="pn">.</span><span class="fn">users$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span>
+    <span class="fn">map</span><span class="pn">(</span><span class="fn">users</span> <span class="op">=&gt;</span> <span class="pn">({</span> <span class="fn">users</span><span class="pn">,</span> <span class="fn">count</span><span class="pn">:</span> <span class="fn">users</span><span class="pn">.</span><span class="fn">length</span> <span class="pn">}))</span>
+  <span class="pn">);</span>
+  <span class="fn">loading$</span> <span class="op">=</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">vm$</span><span class="pn">.</span><span class="fn">pipe</span><span class="pn">(</span><span class="fn">map</span><span class="pn">(()</span> <span class="op">=&gt;</span> <span class="kw">false</span><span class="pn">),</span> <span class="fn">startWith</span><span class="pn">(</span><span class="kw">true</span><span class="pn">));</span>
+<span class="pn">}</span></pre>
+      </div>
+
+      <div class="op-label">takeUntilDestroyed — Angular 16+</div>
+      <div class="code-wrap">
+        <div class="code-bar"><span class="code-lang">typescript</span><button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button></div>
+        <pre><span class="kw">import</span> <span class="pn">{</span> <span class="fn">takeUntilDestroyed</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'@angular/core/rxjs-interop'</span><span class="pn">;</span>
+<span class="kw">import</span> <span class="pn">{</span> <span class="cls">DestroyRef</span><span class="pn">,</span> <span class="fn">inject</span> <span class="pn">}</span> <span class="kw">from</span> <span class="str">'@angular/core'</span><span class="pn">;</span>
+
+<span class="dec">@Component</span><span class="pn">({ ... })</span>
+<span class="kw">export class</span> <span class="cls">ModernComponent</span> <span class="pn">{</span>
+  <span class="cm">// inject in field initializer — no ngOnInit needed</span>
+  <span class="kw">private</span> <span class="fn">destroyRef</span> <span class="op">=</span> <span class="fn">inject</span><span class="pn">(</span><span class="cls">DestroyRef</span><span class="pn">);</span>
+
+  <span class="fn">ngOnInit</span><span class="pn">() {</span>
+    <span class="fn">interval</span><span class="pn">(</span><span class="num">1000</span><span class="pn">).</span><span class="fn">pipe</span><span class="pn">(</span>
+      <span class="fn">takeUntilDestroyed</span><span class="pn">(</span><span class="kw">this</span><span class="pn">.</span><span class="fn">destroyRef</span><span class="pn">)</span>   <span class="cm">// auto cleanup!</span>
+    <span class="pn">).</span><span class="fn">subscribe</span><span class="pn">(</span><span class="fn">t</span> <span class="op">=&gt;</span> <span class="kw">this</span><span class="pn">.</span><span class="fn">tick</span> <span class="op">=</span> <span class="fn">t</span><span class="pn">);</span>
+    <span class="cm">// No ngOnDestroy needed!</span>
+  <span class="pn">}</span>
+<span class="pn">}</span></pre>
+      </div>
+
+      <div class="op-label">Quick Operator Selection Guide</div>
+      <div class="bp-grid">
+        <div class="bp-card"><div class="bp-scenario">Type-ahead search</div><div class="bp-solution">debounceTime + distinctUntilChanged + switchMap</div></div>
+        <div class="bp-card"><div class="bp-scenario">Parallel HTTP requests</div><div class="bp-solution">forkJoin or mergeMap</div></div>
+        <div class="bp-card"><div class="bp-scenario">Sequential HTTP requests</div><div class="bp-solution">concatMap</div></div>
+        <div class="bp-card"><div class="bp-scenario">Cancel previous request</div><div class="bp-solution">switchMap</div></div>
+        <div class="bp-card"><div class="bp-scenario">Prevent form double-submit</div><div class="bp-solution">exhaustMap</div></div>
+        <div class="bp-card"><div class="bp-scenario">Cache HTTP response</div><div class="bp-solution">shareReplay(1)</div></div>
+        <div class="bp-card"><div class="bp-scenario">Component cleanup (Angular 16+)</div><div class="bp-solution">takeUntilDestroyed</div></div>
+        <div class="bp-card"><div class="bp-scenario">Component cleanup (legacy)</div><div class="bp-solution">takeUntil(destroy$)</div></div>
+        <div class="bp-card"><div class="bp-scenario">Loading / spinner state</div><div class="bp-solution">startWith(true) + finalize</div></div>
+        <div class="bp-card"><div class="bp-scenario">HTTP error recovery</div><div class="bp-solution">catchError + retry</div></div>
+        <div class="bp-card"><div class="bp-scenario">Cross-component events</div><div class="bp-solution">Subject (via injectable service)</div></div>
+        <div class="bp-card"><div class="bp-scenario">Current state access</div><div class="bp-solution">BehaviorSubject</div></div>
+        <div class="bp-card"><div class="bp-scenario">Batch DOM / API events</div><div class="bp-solution">bufferTime or buffer</div></div>
+        <div class="bp-card"><div class="bp-scenario">Template binding</div><div class="bp-solution">async pipe — no manual subscribe</div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <span class="footer-brand">&copy; 2026 <a href="https://www.linkedin.com/in/praveen-raghupatruni/" target="_blank" style="color:inherit;text-decoration:none;">Praveen Raghupatruni</a></span>
+  <div class="footer-links">
+    <a href="https://rxjs.dev" target="_blank">rxjs.dev</a>
+    <a href="https://angular.dev" target="_blank">angular.dev</a>
+    <a href="https://rxmarbles.com" target="_blank">RxMarbles</a>
+  </div>
+</footer>
+
+<!-- Mobile toggle -->
+<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle navigation">☰</button>
+
+<script>
+/* ── Collapse / expand cards ── */
+function toggleCard(header) {
+  const card = header.closest('.op-card');
+  card.classList.toggle('open');
+}
+
+/* ── Sidebar toggle (mobile) ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── Copy code ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+/* ── Scroll progress ── */
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.body.scrollHeight - window.innerHeight;
+  progress.style.width = (window.scrollY / max * 100) + '%';
+});
+
+/* ── Active nav on scroll ── */
+const sections = document.querySelectorAll('.section[id]');
+const navItems = document.querySelectorAll('.nav-item[href]');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const link = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+sections.forEach(s => observer.observe(s));
+
+/* ── Operator search ── */
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.op-card').forEach(card => {
+    const name = card.querySelector('.op-name')?.textContent?.toLowerCase() || '';
+    const desc = card.querySelector('.op-desc')?.textContent?.toLowerCase() || '';
+    const match = !q || name.includes(q) || desc.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+});
+
+/* ── Close sidebar on outside click (mobile) ── */
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('mobileToggle');
+  if (sb.classList.contains('open') && !sb.contains(e.target) && !btn.contains(e.target)) {
+    sb.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>
