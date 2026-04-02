@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Networking Deep Dive — Your Name</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <nav class="page-nav">
+    <a href="../index.html" class="page-nav__back">&larr; Back to all topics</a>
+  </nav>
+
+  <article class="article">
+    <h1>Docker Networking Deep Dive</h1>
+    <p class="article__meta">02 Apr 2026 &middot; DevOps</p>
+
+    <p>
+      Docker provides several networking drivers out of the box. Understanding
+      when to use each one is critical for building reliable containerised
+      applications.
+    </p>
+
+    <h2>Bridge Networks</h2>
+    <p>
+      The default <code>bridge</code> network is created automatically.
+      Containers on the same bridge can talk to each other via IP, but
+      user-defined bridges also give you automatic DNS resolution by container
+      name.
+    </p>
+
+    <pre><code>docker network create my-app-net
+docker run -d --name api --network my-app-net node-api
+docker run -d --name db  --network my-app-net postgres</code></pre>
+
+    <p>
+      Now <code>api</code> can reach <code>db</code> simply by using the
+      hostname <code>db</code> — no IP juggling required.
+    </p>
+
+    <h2>Key Takeaways</h2>
+    <ul>
+      <li>Always use user-defined bridge networks (not the default one).</li>
+      <li>Overlay networks are for Swarm / multi-host communication.</li>
+      <li>Use <code>docker network inspect</code> to debug connectivity.</li>
+    </ul>
+  </article>
+
+  <footer class="footer">
+    <p>&copy; 2026 Your Name &middot; <a href="../index.html" style="color:var(--accent)">Home</a></p>
+  </footer>
+
+</body>
+</html>
