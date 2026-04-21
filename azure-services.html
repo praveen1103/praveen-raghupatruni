@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Azure Services Every Developer Should Know (2026 Edition)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS (Identical to MCP Explained)
+───────────────────────────────────────────────────────────── */
+:root {
+  --bg-0:       #050507;
+  --bg-1:       #0a0a0e;
+  --bg-2:       #0d1117;
+  --bg-3:       #161b22;
+  --bg-card:    #0d1117;
+  --bg-hover:   #161b22;
+
+  --border-dim: #21262d;
+  --border-mid: #30363d;
+  --border-hi:  #444c56;
+
+  --text-0:     #f0f6fc;
+  --text-1:     #c9d1d9;
+  --text-2:     #8b949e;
+  --text-3:     #484f58;
+
+  --blue:       #58a6ff;
+  --blue-dim:   #1f6feb;
+  --blue-glow:  rgba(88,166,255,0.12);
+  --green:      #3fb950;
+  --green-dim:  #238636;
+  --purple:     #bc8cff;
+  --orange:     #d29922;
+  --red:        #f85149;
+  --teal:       #39c5cf;
+  --pink:       #f778ba;
+
+  --sidebar-w:  280px;
+  --content-max: 860px;
+  --radius:     8px;
+  --radius-lg:  12px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(88,166,255,0.25); color: var(--text-0); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ─────────────────────────────────────────────────────────────
+   PROGRESS BAR
+───────────────────────────────────────────────────────────── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--bg-3); z-index: 1000;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  transition: width 0.1s linear;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────────────────────── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 90px 48px 70px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-dim);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+}
+.hero-glow {
+  position: absolute; top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(88,166,255,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: var(--content-max); }
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800; line-height: 1.1; color: var(--text-0);
+  margin-bottom: 20px;
+}
+.hero h1 span { color: var(--blue); }
+.hero-desc {
+  font-size: 1.05rem; color: var(--text-2); max-width: 620px;
+  margin-bottom: 28px; font-style: italic;
+}
+.hero-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid;
+  letter-spacing: 0.04em;
+}
+.pill.what    { color: var(--purple); border-color: rgba(188,140,255,0.3); background: rgba(188,140,255,0.08); }
+.pill.why     { color: var(--blue);   border-color: rgba(88,166,255,0.3);  background: rgba(88,166,255,0.08);  }
+.pill.how     { color: var(--teal);   border-color: rgba(57,197,207,0.3);  background: rgba(57,197,207,0.08);  }
+.pill.ai      { color: var(--pink);   border-color: rgba(247,120,186,0.3); background: rgba(247,120,186,0.08);  }
+.pill.core    { color: var(--green);  border-color: rgba(63,185,80,0.3);   background: rgba(63,185,80,0.08);  }
+
+/* ─────────────────────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: calc(100vh - 200px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border-dim);
+  padding: 0 0 40px;
+}
+.sidebar-header {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border-dim);
+}
+.nav-section { padding: 16px 0 4px; }
+.nav-group-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 20px 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 20px; font-size: 0.82rem; color: var(--text-2);
+  text-decoration: none; transition: all 0.15s; border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text-0); background: var(--bg-3); border-left-color: var(--blue); }
+.nav-item.active { color: var(--blue); background: rgba(88,166,255,0.06); border-left-color: var(--blue); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hi); flex-shrink: 0; }
+.nav-item.active .nav-dot, .nav-item:hover .nav-dot { background: var(--blue); }
+
+.mobile-toggle {
+  display: none; position: fixed; bottom: 24px; left: 24px; z-index: 600;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--blue); color: #fff; border: none; cursor: pointer;
+  font-size: 1.1rem; box-shadow: 0 4px 20px rgba(88,166,255,0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────────────────────────── */
+.main {
+  padding: 48px 56px 80px;
+  max-width: calc(var(--content-max) + 112px);
+}
+
+.section {
+  margin-bottom: 64px; padding-bottom: 48px;
+  border-bottom: 1px solid var(--border-dim);
+  scroll-margin-top: 24px;
+}
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--blue); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+  color: var(--text-0); margin-bottom: 20px; line-height: 1.2;
+}
+p { margin-bottom: 16px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--text-0); font-weight: 500; }
+em { color: var(--purple); font-style: italic; }
+
+/* ─────────────────────────────────────────────────────────────
+   CALLOUT BOXES
+───────────────────────────────────────────────────────────── */
+.callout {
+  border-left: 3px solid; border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 16px 20px; margin: 24px 0; font-size: 0.9rem;
+}
+.callout.funny  { border-color: var(--orange); background: rgba(210,153,34,0.07); }
+.callout.info   { border-color: var(--blue);   background: rgba(88,166,255,0.07); }
+.callout.tip    { border-color: var(--green);  background: rgba(63,185,80,0.07);  }
+.callout.danger { border-color: var(--red);    background: rgba(248,81,73,0.07);  }
+.callout-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+}
+.callout.funny  .callout-label { color: var(--orange); }
+.callout.info   .callout-label { color: var(--blue);   }
+.callout.tip    .callout-label { color: var(--green);  }
+.callout.danger .callout-label { color: var(--red);    }
+
+/* ─────────────────────────────────────────────────────────────
+   CODE BLOCKS
+───────────────────────────────────────────────────────────── */
+.code-block {
+  background: var(--bg-3);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  overflow: hidden; margin: 24px 0;
+}
+.code-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-2); border-bottom: 1px solid var(--border-dim);
+}
+.code-lang {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  color: var(--text-3); letter-spacing: 0.06em;
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-2);
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+  padding: 2px 6px; border-radius: 4px;
+}
+.copy-btn:hover { color: var(--text-0); background: rgba(255,255,255,0.06); }
+.copy-btn.copied { color: var(--green); }
+pre {
+  padding: 20px 24px; overflow-x: auto;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65;
+}
+code { font-family: var(--font-mono); }
+
+/* Syntax colours */
+.kw  { color: #ff7b72; }
+.fn  { color: #d2a8ff;    }
+.str { color: #a5d6ff;  }
+.cm  { color: #8b949e; font-style: italic; }
+.cl  { color: #ffa657;   }
+.nm  { color: #79c0ff;  }
+.pu  { color: #c9d1d9;    }
+
+/* ─────────────────────────────────────────────────────────────
+   ANALOGY / DIAGRAM CARDS
+───────────────────────────────────────────────────────────── */
+.analogy-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin: 24px 0;
+}
+.analogy-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg); padding: 20px; text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.analogy-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+.analogy-card .icon { font-size: 2.4rem; margin-bottom: 12px; }
+.analogy-card h4 {
+  font-family: var(--font-display); font-size: 0.95rem; font-weight: 700;
+  color: var(--text-0); margin-bottom: 8px;
+}
+.analogy-card p { font-size: 0.85rem; color: var(--text-2); margin: 0; }
+
+/* ─────────────────────────────────────────────────────────────
+   FLOW DIAGRAM
+───────────────────────────────────────────────────────────── */
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; margin: 24px 0;
+}
+.flow-box {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius); padding: 10px 18px;
+  font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-1);
+  text-align: center;
+}
+.flow-box.highlight { border-color: var(--purple); color: var(--purple); background: rgba(188,140,255,0.07); }
+.flow-box.azure    { border-color: var(--blue);   color: var(--blue);   background: rgba(88,166,255,0.07);  }
+.flow-arrow { color: var(--text-3); font-size: 1rem; }
+
+/* ─────────────────────────────────────────────────────────────
+   COMPARISON TABLE
+───────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 24px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-2); text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 10px 16px; text-align: left;
+  border-bottom: 1px solid var(--border-mid);
+  background: var(--bg-3);
+}
+tbody tr { border-bottom: 1px solid var(--border-dim); transition: background 0.1s; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody td { padding: 14px 16px; color: var(--text-1); vertical-align: top; }
+tbody td:first-child { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-0); }
+.badge {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.65rem;
+  font-weight: 500; padding: 2px 8px; border-radius: 10px; border: 1px solid;
+}
+.badge.must-know  { color: var(--green);  border-color: rgba(63,185,80,0.3);  background: rgba(63,185,80,0.08);  }
+.badge.ai         { color: var(--pink);   border-color: rgba(247,120,186,0.3); background: rgba(247,120,186,0.08);  }
+.badge.high-roi   { color: var(--teal);   border-color: rgba(57,197,207,0.3);  background: rgba(57,197,207,0.08);  }
+
+/* ─────────────────────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border-dim); padding: 28px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-1); font-size: 0.78rem; color: var(--text-3);
+}
+.footer-brand { font-family: var(--font-mono); font-weight: 500; color: var(--text-2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--blue); }
+
+/* ─────────────────────────────────────────────────────────────
+   ANIMATIONS + RESPONSIVE
+───────────────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.section { animation: fade-up 0.4s ease both; }
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.10s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.20s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; left: -100%; top: 0; height: 100%;
+    width: 280px; z-index: 500; transition: left 0.3s ease;
+  }
+  .sidebar.open { left: 0; }
+  .main { padding: 28px 24px 60px; }
+  .analogy-grid { grid-template-columns: 1fr 1fr; }
+  .mobile-toggle { display: flex; }
+  .hero { padding: 60px 24px 50px; }
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+  .flow { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- ── HERO ────────────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Microsoft Cloud — Deep Dive 2026</div>
+    <h1>Azure Services<br><span>Every Developer Should Know</span></h1>
+    <p class="hero-desc">The ultimate no-BS guide to the Azure services that actually matter. From “I just need a website” to “I’m building the next AI unicorn” — these are the building blocks that separate weekend hacks from production-grade systems.</p>
+    <div class="hero-pills">
+      <span class="pill what">What matters?</span>
+      <span class="pill why">Why learn them</span>
+      <span class="pill how">Core Categories</span>
+      <span class="pill ai">AI Services</span>
+      <span class="pill core">Non-AI Foundation</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── LAYOUT ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">Navigation</div>
+    <nav id="navList">
+      <div class="nav-section">
+        <div class="nav-group-label">Introduction</div>
+        <a class="nav-item" href="#problem"><span class="nav-dot"></span>The Problem</a>
+        <a class="nav-item" href="#what"><span class="nav-dot"></span>What Are Azure Services?</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Deep Dive</div>
+        <a class="nav-item" href="#why"><span class="nav-dot"></span>Why They Matter</a>
+        <a class="nav-item" href="#core"><span class="nav-dot"></span>Core Non-AI Services</a>
+        <a class="nav-item" href="#ai"><span class="nav-dot"></span>Azure AI Services</a>
+        <a class="nav-item" href="#arch"><span class="nav-dot"></span>Architecture &amp; How It All Fits</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Practical</div>
+        <a class="nav-item" href="#how"><span class="nav-dot"></span>How to Get Started</a>
+        <a class="nav-item" href="#tools"><span class="nav-dot"></span>Ecosystem &amp; Resources</a>
+        <a class="nav-item" href="#tldr"><span class="nav-dot"></span>TL;DR Cheat Sheet</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── THE PROBLEM ──────────────────────────────────────────────── -->
+    <section class="section" id="problem">
+      <div class="section-label">01 — The Problem</div>
+      <h2 class="section-title">Building in 2026 Without Azure Is Like Driving a Ferrari… on a Horse</h2>
+
+      <p>Imagine you’re the smartest developer in the room. You can code circles around anyone. But every time you need to store a file, send an email, scale to 10,000 users, or add AI chat to your app… you end up wiring together 17 different services, managing servers, worrying about uptime, and praying the bill doesn’t bankrupt you.</p>
+
+      <p>That’s exactly what life looked like before you knew Azure. Your app becomes a lonely island — brilliant but isolated, manual, expensive, and impossible to scale.</p>
+
+      <div class="callout funny">
+        <div class="callout-label">Real Talk</div>
+        Before Azure, most devs were basically modern-day alchemists: turning coffee into custom Terraform scripts, crying over 3 a.m. outages, and manually copy-pasting data between 8 different SaaS tools. Fun times.
+      </div>
+
+      <p>The old way created an insane N×M nightmare: N features you want × M cloud providers = absolute chaos. Azure fixes that by giving you **one unified platform** where everything just… works together.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Before Azure Knowledge</th>
+              <th>With Azure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Need a web app + database</td>
+              <td>Spin up EC2 + RDS + manual networking</td>
+              <td><span class="badge must-know">App Service + Cosmos DB in 5 mins</span></td>
+            </tr>
+            <tr>
+              <td>Add AI chat</td>
+              <td>Pray OpenAI doesn’t rate-limit you</td>
+              <td><span class="badge ai">Azure OpenAI + AI Search = instant RAG</span></td>
+            </tr>
+            <tr>
+              <td>Scale to millions of users</td>
+              <td>Manual Kubernetes hell</td>
+              <td><span class="badge must-know">Container Apps or Functions — auto-scale for free</span></td>
+            </tr>
+            <tr>
+              <td>Secure secrets</td>
+              <td>Hard-code them like a rookie</td>
+              <td><span class="badge must-know">Key Vault + Managed Identity = zero secrets in code</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── WHAT IS IT ──────────────────────────────────────────────── -->
+    <section class="section" id="what">
+      <div class="section-label">02 — What Are Azure Services?</div>
+      <h2 class="section-title">Azure: The LEGO Set for Serious Developers</h2>
+
+      <p><strong>Azure</strong> is Microsoft’s global cloud platform — 200+ highly managed services that let you rent compute, storage, databases, AI models, networking, security, and everything in between. Instead of buying and babysitting servers, you rent pre-built, battle-tested, auto-scaling blocks.</p>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🧱</div>
+          <h4>LEGO Bricks</h4>
+          <p>Each Azure service is a perfectly engineered brick. Snap them together and you get production-grade systems in hours instead of months.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🔌</div>
+          <h4>USB-C for the Cloud</h4>
+          <p>Just like MCP is USB-C for AI tools, Azure is the universal port for everything else: compute, data, identity, AI, observability… it all plugs in seamlessly.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🚀</div>
+          <h4>Serverless Superpower</h4>
+          <p>You focus on code and business logic. Azure handles the boring stuff: patching, scaling, backups, compliance.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-label">Official Vibe</div>
+        Azure isn’t just “another cloud.” It’s the only cloud that gives you enterprise-grade security, global reach, and bleeding-edge AI all in one place — while still being ridiculously easy for indie hackers and startups.
+      </div>
+    </section>
+
+    <!-- ── WHY WE NEED IT ───────────────────────────────────────────── -->
+    <section class="section" id="why">
+      <div class="section-label">03 — Why You Should Care (A Lot)</div>
+      <h2 class="section-title">Because “Just Use a VPS” Is No Longer a Strategy</h2>
+
+      <p>Modern apps are expected to be intelligent, global, always-on, and cheap. Azure gives you that without a 10-person ops team.</p>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">⚡</div>
+          <h4>Speed</h4>
+          <p>Go from idea to production in days instead of weeks. Functions + App Service = deploy in one git push.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🌍</div>
+          <h4>Global Scale</h4>
+          <p>60+ regions. Your users in Tokyo, São Paulo, and Berlin get low latency automatically.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🛡️</div>
+          <h4>Enterprise Security</h4>
+          <p>Built-in compliance (GDPR, HIPAA, ISO). Zero-trust by default with Managed Identities.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🧠</div>
+          <h4>AI-Native</h4>
+          <p>Azure OpenAI, AI Search, Document Intelligence — the best models, securely integrated.</p>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">Real World Impact</div>
+        Companies using these services ship AI features 5–10× faster than teams stuck on raw VMs or multi-cloud spaghetti.
+      </div>
+    </section>
+
+    <!-- ── CORE NON-AI SERVICES ─────────────────────────────────────── -->
+    <section class="section" id="core">
+      <div class="section-label">04 — Core Non-AI Services</div>
+      <h2 class="section-title">The Foundation Every Serious Developer Must Know Cold</h2>
+
+      <p>These are the services you will use in literally every project. Master them and you can build almost anything.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Service</th><th>Category</th><th>Why It’s Magic</th><th>Real-World Use Case</th><th>Must-Know Level</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Azure App Service</strong></td>
+              <td>Web &amp; API Hosting</td>
+              <td>Deploy .NET, Node, Python, Java, PHP apps with zero servers. Auto-scale, custom domains, slots for zero-downtime deploys.</td>
+              <td>Production SaaS web apps, REST APIs, background jobs</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Functions</strong></td>
+              <td>Serverless Compute</td>
+              <td>Event-driven code (HTTP, Timer, Blob, Cosmos trigger). Pay only for milliseconds you run. Perfect for microservices and glue logic.</td>
+              <td>Webhooks, file processing, scheduled jobs, chatbots</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Cosmos DB</strong></td>
+              <td>Global NoSQL Database</td>
+              <td>Multi-model (SQL, Mongo, Cassandra, Gremlin). Sub-millisecond latency, automatic global replication, serverless or provisioned.</td>
+              <td>Real-time apps, gaming, IoT, user profiles</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure SQL Database</strong></td>
+              <td>Relational Database</td>
+              <td>Fully managed SQL Server. Hyperscale, serverless compute, built-in HA and geo-replication.</td>
+              <td>Traditional apps that need ACID transactions</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Storage Account (Blob, Queue, Table, File)</strong></td>
+              <td>Storage</td>
+              <td>Infinitely scalable, cheap, durable storage. Hot/Cool/Archive tiers. Perfect for images, videos, logs, queues.</td>
+              <td>Media storage, backups, message queues</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Key Vault + Managed Identity</strong></td>
+              <td>Security</td>
+              <td>Secrets, keys, certificates stored securely. Apps authenticate without ever seeing secrets.</td>
+              <td>Every single production app</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Container Apps / AKS</strong></td>
+              <td>Containers &amp; Orchestration</td>
+              <td>Run Docker containers serverlessly (Container Apps) or with full Kubernetes (AKS). Dapr built-in.</td>
+              <td>Microservices, event-driven workloads</td>
+              <td><span class="badge must-know">Must Know</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-label">Pro Tip</div>
+        90% of real-world apps only need these 7 services. Master them first.
+      </div>
+    </section>
+
+    <!-- ── AZURE AI SERVICES ────────────────────────────────────────── -->
+    <section class="section" id="ai">
+      <div class="section-label">05 — Azure AI Services</div>
+      <h2 class="section-title">The Brain Layer That Makes Your Apps Actually Intelligent</h2>
+
+      <p>Azure doesn’t just host your code — it gives your code superpowers. These services are production-ready, secure, and ridiculously easy to call from any language.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Service</th><th>What It Does</th><th>Typical Use Case</th><th>Why Developers Love It</th><th>Badge</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Azure OpenAI Service</strong></td>
+              <td>GPT-4o, o1-preview, embeddings, Assistants API, fine-tuning</td>
+              <td>Chatbots, code generation, RAG, agents, summarization</td>
+              <td>Enterprise security + Microsoft’s best models. No OpenAI account needed.</td>
+              <td><span class="badge ai">AI Powerhouse</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure AI Search</strong></td>
+              <td>Vector + keyword + semantic search with built-in chunking &amp; reranking</td>
+              <td>RAG applications, enterprise knowledge bases, product search</td>
+              <td>Turns your documents into a smart search engine in minutes.</td>
+              <td><span class="badge ai">Must Know</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure AI Document Intelligence</strong></td>
+              <td>Extract text, tables, key-value pairs, signatures from PDFs, invoices, IDs</td>
+              <td>Invoice automation, form processing, contract analysis</td>
+              <td>Saves hundreds of hours of manual data entry.</td>
+              <td><span class="badge high-roi">High ROI</span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure AI Vision</strong></td>
+              <td>Image analysis, OCR, object detection, face recognition, spatial analysis</td>
+              <td>Visual inspection, content moderation, accessibility tools</td>
+              <td>Works on photos, PDFs, live camera feeds.</td>
+              <td><span class="badge ai"></span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure AI Speech</strong></td>
+              <td>Speech-to-text, text-to-speech, real-time translation, speaker diarization</td>
+              <td>Voice assistants, call-center bots, multilingual apps</td>
+              <td>Neural voices sound scarily human.</td>
+              <td><span class="badge ai"></span></td>
+            </tr>
+            <tr>
+              <td><strong>Azure Machine Learning</strong></td>
+              <td>Full MLOps platform: AutoML, pipelines, model registry, endpoints</td>
+              <td>Custom models when pre-built ones aren’t enough</td>
+              <td>Enterprise-grade training &amp; deployment.</td>
+              <td><span class="badge ai"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">2026 Golden Stack</div>
+        Azure OpenAI + AI Search + Cosmos DB + Functions = the modern intelligent backend. You can build production RAG agents in a single afternoon.
+      </div>
+    </section>
+
+    <!-- ── ARCHITECTURE ─────────────────────────────────────────────── -->
+    <section class="section" id="arch">
+      <div class="section-label">06 — Architecture</div>
+      <h2 class="section-title">How the Pieces Actually Fit Together</h2>
+
+      <p>A typical modern Azure application looks like this:</p>
+
+      <div class="flow">
+        <div class="flow-box highlight">User / Mobile / Web</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box azure">Azure Front Door / CDN</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box azure">App Service / Functions / Container Apps</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box azure">Cosmos DB / SQL</div>
+        <div class="flow-arrow">↔</div>
+        <div class="flow-box azure">Azure OpenAI + AI Search</div>
+      </div>
+
+      <p>Everything is secured with Microsoft Entra ID + Managed Identities. You never manage VMs or worry about patching.</p>
+
+      <div class="code-block">
+        <div class="code-bar">
+          <span class="code-lang">bash — Deploy in 30 seconds</span>
+          <button class="copy-btn" onclick="copyCode(this)">⎘ Copy</button>
+        </div>
+        <pre><span class="cm"># Create resource group</span>
+az group create --name myapp-rg --location eastus
+
+<span class="cm"># Deploy a serverless web app + database in one command</span>
+az deployment group create --resource-group myapp-rg --template-file main.bicep</pre>
+      </div>
+    </section>
+
+    <!-- ── HOW TO GET STARTED ────────────────────────────────────────── -->
+    <section class="section" id="how">
+      <div class="section-label">07 — How to Get Started</div>
+      <h2 class="section-title">Your 30-Day Azure Mastery Plan</h2>
+      <p>1. Create a free Azure account (₹ free credits for students/startups)<br>
+         2. Learn Resource Groups + Managed Identities first<br>
+         3. Build a simple app with App Service + Cosmos DB<br>
+         4. Add Azure OpenAI + AI Search for RAG<br>
+         5. Use Bicep/Terraform for infrastructure-as-code<br>
+         6. Monitor with Application Insights + Log Analytics</p>
+    </section>
+
+    <!-- ── TOOLS & RESOURCES ────────────────────────────────────────── -->
+    <section class="section" id="tools">
+      <div class="section-label">08 — Ecosystem &amp; Resources</div>
+      <h2 class="section-title">The Azure Ecosystem Is Already Massive</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">Official &amp; Community Tools</div>
+        • Azure Portal • Azure CLI • Bicep • Terraform • GitHub Actions • VS Code Azure Extension • Azure Developer CLI (azd)
+      </div>
+    </section>
+
+    <!-- ── TL;DR ────────────────────────────────────────────────────── -->
+    <section class="section" id="tldr">
+      <div class="section-label">09 — TL;DR</div>
+      <h2 class="section-title">The Five-Second Cheat Sheet</h2>
+
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">📦</div>
+          <h4>Non-AI Must-Know</h4>
+          <p>App Service, Functions, Cosmos DB, Azure SQL, Storage, Key Vault, Container Apps</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🧠</div>
+          <h4>AI Must-Know</h4>
+          <p>Azure OpenAI, AI Search, Document Intelligence</p>
+        </div>
+      </div>
+
+      <div class="callout funny">
+        <div class="callout-label">One-Liner to Impress at Interviews</div>
+        “I build intelligent, global, serverless apps using Azure OpenAI + AI Search + Cosmos DB + Functions. Everything is secured with Managed Identities and deployed with Bicep.”
+      </div>
+
+      <p>Azure won’t make you a better coder. But it will make your code dramatically more powerful, scalable, and intelligent. That’s the difference between a weekend prototype and a product people pay for.</p>
+    </section>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <span class="footer-brand">&copy; 2026 <a href="https://www.linkedin.com/in/praveen-raghupatruni/" target="_blank" style="color:inherit;text-decoration:none;">Praveen Raghupatruni</a></span>
+  <div class="footer-links">
+    <a href="https://azure.microsoft.com" target="_blank">Azure Portal</a>
+    <a href="https://learn.microsoft.com/azure" target="_blank">Azure Docs</a>
+    <a href="https://github.com/microsoft/azure-dev" target="_blank">Azure Developer CLI</a>
+    <a href="mcp-explained.html">← Back to MCP</a>
+  </div>
+</footer>
+
+<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">☰</button>
+
+<script>
+/* ── Progress bar ── */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+/* ── Sidebar active link ── */
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => observer.observe(s));
+
+/* ── Mobile sidebar ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── Copy code ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

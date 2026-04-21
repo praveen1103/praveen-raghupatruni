@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claude Certified Architect — Foundations (CCA-F) Exam Guide &amp; Cheatsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=Syne:wght@400;600;700;800&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS (Identical to MCP Explained + Azure Services)
+───────────────────────────────────────────────────────────── */
+:root {
+  --bg-0:       #050507;
+  --bg-1:       #0a0a0e;
+  --bg-2:       #0d1117;
+  --bg-3:       #161b22;
+  --bg-card:    #0d1117;
+  --bg-hover:   #161b22;
+
+  --border-dim: #21262d;
+  --border-mid: #30363d;
+  --border-hi:  #444c56;
+
+  --text-0:     #f0f6fc;
+  --text-1:     #c9d1d9;
+  --text-2:     #8b949e;
+  --text-3:     #484f58;
+
+  --blue:       #58a6ff;
+  --blue-dim:   #1f6feb;
+  --blue-glow:  rgba(88,166,255,0.12);
+  --green:      #3fb950;
+  --green-dim:  #238636;
+  --purple:     #bc8cff;
+  --orange:     #d29922;
+  --red:        #f85149;
+  --teal:       #39c5cf;
+  --pink:       #f778ba;
+
+  --sidebar-w:  280px;
+  --content-max: 860px;
+  --radius:     8px;
+  --radius-lg:  12px;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(188,140,255,0.25); color: var(--text-0); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* Progress Bar */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--bg-3); z-index: 1000;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  transition: width 0.1s linear;
+}
+
+/* Hero */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 90px 48px 70px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-dim);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+}
+.hero-glow {
+  position: absolute; top: -120px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(188,140,255,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: var(--content-max); }
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800; line-height: 1.1; color: var(--text-0);
+  margin-bottom: 20px;
+}
+.hero h1 span { color: var(--purple); }
+.hero-desc {
+  font-size: 1.05rem; color: var(--text-2); max-width: 620px;
+  margin-bottom: 28px; font-style: italic;
+}
+.hero-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  padding: 4px 12px; border-radius: 20px; border: 1px solid;
+  letter-spacing: 0.04em;
+}
+.pill.what    { color: var(--purple); border-color: rgba(188,140,255,0.3); background: rgba(188,140,255,0.08); }
+.pill.why     { color: var(--blue);   border-color: rgba(88,166,255,0.3);  background: rgba(88,166,255,0.08);  }
+.pill.how     { color: var(--teal);   border-color: rgba(57,197,207,0.3);  background: rgba(57,197,207,0.08);  }
+.pill.exam    { color: var(--pink);   border-color: rgba(247,120,186,0.3); background: rgba(247,120,186,0.08);  }
+
+/* Layout */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: calc(100vh - 200px);
+}
+.sidebar {
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border-dim);
+  padding: 0 0 40px;
+}
+.sidebar-header {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border-dim);
+}
+.nav-section { padding: 16px 0 4px; }
+.nav-group-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+  color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0 20px 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 20px; font-size: 0.82rem; color: var(--text-2);
+  text-decoration: none; transition: all 0.15s; border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text-0); background: var(--bg-3); border-left-color: var(--purple); }
+.nav-item.active { color: var(--purple); background: rgba(188,140,255,0.06); border-left-color: var(--purple); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border-hi); flex-shrink: 0; }
+.nav-item.active .nav-dot, .nav-item:hover .nav-dot { background: var(--purple); }
+
+/* Main Content */
+.main {
+  padding: 48px 56px 80px;
+  max-width: calc(var(--content-max) + 112px);
+}
+.section {
+  margin-bottom: 64px; padding-bottom: 48px;
+  border-bottom: 1px solid var(--border-dim);
+  scroll-margin-top: 24px;
+}
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--purple); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 700;
+  color: var(--text-0); margin-bottom: 20px; line-height: 1.2;
+}
+p { margin-bottom: 16px; }
+strong { color: var(--text-0); font-weight: 500; }
+em { color: var(--purple); font-style: italic; }
+
+/* Callouts, Code, Tables, Analogies - Same as MCP/Azure */
+.callout {
+  border-left: 3px solid; border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 16px 20px; margin: 24px 0; font-size: 0.9rem;
+}
+.callout.funny  { border-color: var(--orange); background: rgba(210,153,34,0.07); }
+.callout.info   { border-color: var(--blue);   background: rgba(88,166,255,0.07); }
+.callout.tip    { border-color: var(--green);  background: rgba(63,185,80,0.07);  }
+.callout.danger { border-color: var(--red);    background: rgba(248,81,73,0.07);  }
+.callout-label {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+}
+.callout.funny  .callout-label { color: var(--orange); }
+.callout.info   .callout-label { color: var(--blue);   }
+.callout.tip    .callout-label { color: var(--green);  }
+.callout.danger .callout-label { color: var(--red);    }
+
+.analogy-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px; margin: 24px 0;
+}
+.analogy-card {
+  background: var(--bg-card); border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg); padding: 20px; text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.analogy-card:hover { border-color: var(--purple); transform: translateY(-2px); }
+.analogy-card .icon { font-size: 2.4rem; margin-bottom: 12px; }
+
+.table-wrap { overflow-x: auto; margin: 24px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  color: var(--text-2); text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 10px 16px; text-align: left;
+  border-bottom: 1px solid var(--border-mid);
+  background: var(--bg-3);
+}
+tbody tr { border-bottom: 1px solid var(--border-dim); transition: background 0.1s; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody td { padding: 14px 16px; color: var(--text-1); vertical-align: top; }
+tbody td:first-child { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-0); }
+.badge {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.65rem;
+  font-weight: 500; padding: 2px 8px; border-radius: 10px; border: 1px solid;
+}
+.badge.must-know  { color: var(--green);  border-color: rgba(63,185,80,0.3); background: rgba(63,185,80,0.08); }
+.badge.exam       { color: var(--purple); border-color: rgba(188,140,255,0.3); background: rgba(188,140,255,0.08); }
+.badge.high-yield { color: var(--teal);   border-color: rgba(57,197,207,0.3); background: rgba(57,197,207,0.08); }
+
+/* Code blocks */
+.code-block {
+  background: var(--bg-3);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  overflow: hidden; margin: 24px 0;
+}
+.code-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-2); border-bottom: 1px solid var(--border-dim);
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-2);
+  background: none; border: none; cursor: pointer; transition: color 0.15s;
+  padding: 2px 6px; border-radius: 4px;
+}
+.copy-btn:hover { color: var(--text-0); background: rgba(255,255,255,0.06); }
+.copy-btn.copied { color: var(--green); }
+pre {
+  padding: 20px 24px; overflow-x: auto;
+  font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.65;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--border-dim); padding: 28px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-1); font-size: 0.78rem; color: var(--text-3);
+}
+.footer-brand { font-family: var(--font-mono); font-weight: 500; color: var(--text-2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--purple); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; left: -100%; top: 0; height: 100%; width: 280px; z-index: 500; transition: left 0.3s ease; }
+  .sidebar.open { left: 0; }
+  .main { padding: 28px 24px 60px; }
+  .hero { padding: 60px 24px 50px; }
+  .mobile-toggle { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Anthropic Academy — 2026</div>
+    <h1>Claude Certified Architect<br><span>Foundations (CCA-F)</span></h1>
+    <p class="hero-desc">The only exam guide, cheatsheet &amp; battle-tested tips you need to pass the Claude Certified Architect — Foundations exam on your first try. 60 scenario-based questions. 120 minutes. Zero fluff.</p>
+    <div class="hero-pills">
+      <span class="pill what">What is CCA-F?</span>
+      <span class="pill why">Why get certified</span>
+      <span class="pill how">Exam Structure</span>
+      <span class="pill exam">5 Domains + Cheatsheet</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">Navigation</div>
+    <nav id="navList">
+      <div class="nav-section">
+        <div class="nav-group-label">Introduction</div>
+        <a class="nav-item" href="#problem"><span class="nav-dot"></span>The Problem</a>
+        <a class="nav-item" href="#what"><span class="nav-dot"></span>What is CCA-F?</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Deep Dive</div>
+        <a class="nav-item" href="#why"><span class="nav-dot"></span>Why Get Certified</a>
+        <a class="nav-item" href="#exam"><span class="nav-dot"></span>Exam Structure</a>
+        <a class="nav-item" href="#domains"><span class="nav-dot"></span>The 5 Domains</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-group-label">Practical</div>
+        <a class="nav-item" href="#cheatsheet"><span class="nav-dot"></span>Full Cheatsheet</a>
+        <a class="nav-item" href="#tips"><span class="nav-dot"></span>Tips &amp; Tricks to Pass</a>
+        <a class="nav-item" href="#tldr"><span class="nav-dot"></span>TL;DR</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Problem -->
+    <section class="section" id="problem">
+      <div class="section-label">01 — The Reality Check</div>
+      <h2 class="section-title">Building with Claude Without Certification Is Like Flying Blind</h2>
+      <p>Anyone can call the Claude API. Very few people can build production-grade, reliable, secure, and cost-efficient agentic systems that actually ship value. The CCA-F certification proves you’re one of those few.</p>
+      
+      <div class="callout funny">
+        <div class="callout-label">Real Talk</div>
+        Before CCA-F, your resume said “I used Claude.” After CCA-F, it says “I architect production AI systems that don’t hallucinate, don’t bankrupt the company, and actually work at 3 a.m.”
+      </div>
+    </section>
+
+    <!-- What is it -->
+    <section class="section" id="what">
+      <div class="section-label">02 — What is Claude Certified Architect?</div>
+      <h2 class="section-title">CCA-F: The 301-Level Architect Certification from Anthropic</h2>
+      <p>Launched March 12, 2026, the Claude Certified Architect — Foundations (CCA-F) is Anthropic’s first official technical certification. It’s a proctored, scenario-based exam designed for engineers and architects with 6+ months of real hands-on experience building with Claude.</p>
+      
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🏗️</div>
+          <h4>The Architect Badge</h4>
+          <p>Not just “I can prompt.” It proves you can design complete, reliable, production-ready systems using Claude, MCP, agents, and Claude Code.</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🔬</div>
+          <h4>301-Level</h4>
+          <p>This is not a beginner cert. It’s the equivalent of AWS Solutions Architect — but for Claude-native AI systems.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why -->
+    <section class="section" id="why">
+      <div class="section-label">03 — Why Get Certified</div>
+      <h2 class="section-title">Because “I Used Claude” No Longer Impresses Hiring Managers</h2>
+      <p>CCA-F instantly signals you understand agentic loops, MCP tool design, context management, reliability patterns, and production trade-offs.</p>
+    </section>
+
+    <!-- Exam Structure -->
+    <section class="section" id="exam">
+      <div class="section-label">04 — Exam Structure</div>
+      <h2 class="section-title">60 Scenario-Based Questions • 120 Minutes • Proctored</h2>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Detail</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Format</td><td>60 multiple-choice, heavily scenario-based</td></tr>
+            <tr><td>Duration</td><td>120 minutes</td></tr>
+            <tr><td>Passing Score</td><td>720 / 1000</td></tr>
+            <tr><td>Cost</td><td>$99 per attempt (free for first 5,000 Claude Partner Network members)</td></tr>
+            <tr><td>Delivery</td><td>Proctored online via Skilljar</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-label">Key Fact</div>
+        Every question is based on real-world scenarios: Customer Support Agent, Code Generation Pipeline, Multi-Agent Research System, Structured Data Extraction, etc.
+      </div>
+    </section>
+
+    <!-- The 5 Domains -->
+    <section class="section" id="domains">
+      <div class="section-label">05 — The 5 Core Domains</div>
+      <h2 class="section-title">What You’re Actually Tested On</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Domain</th><th>Weight</th><th>What You Must Master</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Agentic Architecture &amp; Orchestration</strong></td>
+              <td>27%</td>
+              <td>Agent loops, tool calling patterns, stop_reason handling, multi-agent orchestration, error recovery</td>
+            </tr>
+            <tr>
+              <td><strong>2. Tool Design &amp; MCP Integration</strong></td>
+              <td>18%</td>
+              <td>Building MCP servers, tool schemas, resource vs tool vs prompt primitives, security boundaries</td>
+            </tr>
+            <tr>
+              <td><strong>3. Claude Code Configuration &amp; Workflows</strong></td>
+              <td>20%</td>
+              <td>Claude Code projects, .claude rules, custom commands, CI/CD integration, artifact handling</td>
+            </tr>
+            <tr>
+              <td><strong>4. Prompt Engineering &amp; Structured Output</strong></td>
+              <td>20%</td>
+              <td>Chain-of-thought, XML/JSON output, few-shot, system prompts, safety &amp; refusal handling</td>
+            </tr>
+            <tr>
+              <td><strong>5. Context Management &amp; Production Reliability</strong></td>
+              <td>15%</td>
+              <td>Token budgeting, context caching, evaluation, cost control, observability, security best practices</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cheatsheet -->
+    <section class="section" id="cheatsheet">
+      <div class="section-label">06 — Full Cheatsheet</div>
+      <h2 class="section-title">Everything You Need to Memorize (Copy-Paste Ready)</h2>
+
+      <div class="callout tip">
+        <div class="callout-label">High-Yield Patterns</div>
+        <strong>Agent Loop Golden Rule:</strong> While stop_reason === "tool_use" → call tool → continue conversation.<br>
+        <strong>MCP Tip:</strong> Always expose tools + resources + prompts. Use Zod for input schemas.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Topic</th><th>Cheat Code / Pattern</th><th>Exam Trap to Avoid</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Agentic Loop</td><td>Continue until stop_reason !== "tool_use"</td><td>Stopping too early</td></tr>
+            <tr><td>MCP Tool Call</td><td>JSON-RPC "tools/call" with proper schema</td><td>Hard-coding instead of using MCP</td></tr>
+            <tr><td>Claude Code</td><td>.claude/rules + custom commands</td><td>Ignoring project config</td></tr>
+            <tr><td>Structured Output</td><td>XML tags or JSON mode + "Respond only with..."</td><td>Free-form text when schema required</td></tr>
+            <tr><td>Context Management</td><td>Token budget = input + output + cache</td><td>Forgetting caching costs</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tips & Tricks -->
+    <section class="section" id="tips">
+      <div class="section-label">07 — Tips &amp; Tricks to Pass First Try</div>
+      <h2 class="section-title">How to Score 800+ on Your First Attempt</h2>
+      
+      <ol>
+        <li><strong>Read the scenario twice</strong> — the question is always hidden in the last sentence.</li>
+        <li><strong>Think like Anthropic</strong> — they love safety, reliability, and cost-awareness.</li>
+        <li><strong>Master MCP</strong> — at least 4–5 questions will be pure MCP tool design.</li>
+        <li><strong>Practice with Claude Code</strong> — create a real project and use it daily.</li>
+        <li><strong>Memorize the 5 domains weights</strong> — allocate your study time accordingly.</li>
+      </ol>
+
+      <div class="callout funny">
+        <div class="callout-label">Pro Move</div>
+        When in doubt, choose the answer that mentions “MCP server”, “token budget”, or “structured output”. Anthropic loves their own stack.
+      </div>
+    </section>
+
+    <!-- TL;DR -->
+    <section class="section" id="tldr">
+      <div class="section-label">08 — TL;DR</div>
+      <h2 class="section-title">The One-Page Summary to Pass CCA-F</h2>
+      
+      <div class="analogy-grid">
+        <div class="analogy-card">
+          <div class="icon">🧠</div>
+          <h4>Pass Formula</h4>
+          <p>Agent Loops + MCP Mastery + Claude Code + Structured Output + Cost Awareness = CCA-F badge</p>
+        </div>
+        <div class="analogy-card">
+          <div class="icon">🏆</div>
+          <h4>Interview Line</h4>
+          <p>“I’m a Claude Certified Architect — I design production agentic systems using MCP, Claude Code, and proper context orchestration.”</p>
+        </div>
+      </div>
+
+      <div class="callout funny">
+        <div class="callout-label">Final One-Liner</div>
+        “CCA-F doesn’t test if you can talk to Claude. It tests if you can architect systems that Claude trusts to run your company.”
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <span class="footer-brand">&copy; 2026 Praveen Raghupatruni</span>
+  <div class="footer-links">
+    <a href="https://anthropic.skilljar.com" target="_blank">Anthropic Skilljar</a>
+    <a href="https://modelcontextprotocol.io" target="_blank">MCP Docs</a>
+    <a href="azure-services.html">Azure Services →</a>
+    <a href="mcp-explained.html">← MCP Explained</a>
+  </div>
+</footer>
+
+<button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()">☰</button>
+
+<script>
+/* Progress bar */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+/* Sidebar active link */
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => observer.observe(s));
+
+/* Mobile sidebar */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* Copy code */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
