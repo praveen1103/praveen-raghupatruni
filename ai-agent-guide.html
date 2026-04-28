@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>So You Wanna Build an AI Agent 🤖</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --card: #141414;
+    --accent1: #ff4d4d;
+    --accent2: #ffd700;
+    --accent3: #00ffcc;
+    --accent4: #a78bfa;
+    --text: #f0f0f0;
+    --muted: #888;
+    --code-bg: #1a1a2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 20px; height: 20px;
+    border: 2px solid var(--accent2);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s, background 0.2s;
+    mix-blend-mode: difference;
+  }
+  .cursor.clicking { transform: scale(0.5); background: var(--accent2); }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.3;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 60%, rgba(255,77,77,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse at 20% 20%, rgba(167,139,250,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,255,204,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .hero-emoji {
+    font-size: 6rem;
+    animation: bounce 1.2s ease-in-out infinite alternate;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0) rotate(-5deg); }
+    to { transform: translateY(-20px) rotate(5deg); }
+  }
+
+  .hero h1 {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    line-height: 1.1;
+    color: var(--accent2);
+    text-shadow: 4px 4px 0 var(--accent1), 8px 8px 0 rgba(255,77,77,0.2);
+    animation: slideIn 0.8s ease both;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero p.subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    max-width: 540px;
+    animation: slideIn 1s ease 0.2s both;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* Steps container */
+  .steps {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  /* Step card */
+  .step {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1.5px solid #222;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    animation: fadeUp 0.6s ease both;
+  }
+  .step:hover {
+    transform: translateY(-4px) rotate(-0.3deg);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step:nth-child(1) { border-color: rgba(255,77,77,0.4); animation-delay: 0.1s; }
+  .step:nth-child(2) { border-color: rgba(255,215,0,0.4); animation-delay: 0.2s; }
+  .step:nth-child(3) { border-color: rgba(0,255,204,0.4); animation-delay: 0.3s; }
+  .step:nth-child(4) { border-color: rgba(167,139,250,0.4); animation-delay: 0.4s; }
+  .step:nth-child(5) { border-color: rgba(255,150,50,0.4); animation-delay: 0.5s; }
+  .step:nth-child(6) { border-color: rgba(100,200,255,0.4); animation-delay: 0.6s; }
+  .step:nth-child(7) { border-color: rgba(255,100,200,0.4); animation-delay: 0.7s; }
+
+  /* Color splat in corner */
+  .step::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .step:nth-child(1)::before { background: var(--accent1); }
+  .step:nth-child(2)::before { background: var(--accent2); }
+  .step:nth-child(3)::before { background: var(--accent3); }
+  .step:nth-child(4)::before { background: var(--accent4); }
+  .step:nth-child(5)::before { background: #ff9632; }
+  .step:nth-child(6)::before { background: #64c8ff; }
+  .step:nth-child(7)::before { background: #ff64c8; }
+
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .step-number {
+    font-family: 'Boogaloo', cursive;
+    font-size: 3.5rem;
+    line-height: 1;
+    min-width: 60px;
+    opacity: 0.15;
+  }
+
+  .step-emoji {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .step-title {
+    font-family: 'Boogaloo', cursive;
+    font-size: 1.8rem;
+    line-height: 1.2;
+    flex: 1;
+  }
+
+  .step:nth-child(1) .step-title { color: var(--accent1); }
+  .step:nth-child(2) .step-title { color: var(--accent2); }
+  .step:nth-child(3) .step-title { color: var(--accent3); }
+  .step:nth-child(4) .step-title { color: var(--accent4); }
+  .step:nth-child(5) .step-title { color: #ff9632; }
+  .step:nth-child(6) .step-title { color: #64c8ff; }
+  .step:nth-child(7) .step-title { color: #ff64c8; }
+
+  .step-body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #ccc;
+    margin-bottom: 1.2rem;
+  }
+
+  .funny {
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--accent2);
+    padding: 0.7rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--accent2);
+    margin: 1rem 0;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    overflow-x: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    border: 1px solid #222;
+    margin-top: 1rem;
+    position: relative;
+  }
+
+  pre::before {
+    content: 'python';
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 0.65rem;
+    color: #444;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .st { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .nb { color: #ffcb6b; }
+  .op { color: #89ddff; }
+
+  /* Badges */
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,0.07);
+    color: #aaa;
+  }
+
+  /* Final CTA */
+  .cta {
+    text-align: center;
+    padding: 4rem 2rem 6rem;
+    position: relative;
+  }
+  .cta h2 {
+    font-family: 'Boogaloo', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--accent3);
+    text-shadow: 2px 2px 0 rgba(0,255,204,0.3);
+    margin-bottom: 0.5rem;
+  }
+  .cta p { color: var(--muted); font-size: 1rem; }
+
+  /* Floating particles */
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    opacity: 0;
+    animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0.6; }
+    100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- Particles -->
+<script>
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 8 + 3;
+    const colors = ['#ff4d4d','#ffd700','#00ffcc','#a78bfa','#ff9632'];
+    p.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}vw;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${Math.random()*15+8}s;
+      animation-delay:${Math.random()*10}s;
+    `;
+    document.body.appendChild(p);
+  }
+</script>
+
+<!-- Hero -->
+<section class="hero">
+  <span class="hero-emoji">🤖</span>
+  <h1>So You Wanna Build<br>an AI Agent?</h1>
+  <p class="subtitle">A headfirst, no-helmet-required guide to Python AI agents — with all the chaos that implies.</p>
+  <div class="scroll-hint">↓ scroll to doom ↓</div>
+</section>
+
+<!-- Steps -->
+<main class="steps">
+
+  <!-- Step 1 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">01</span>
+      <span class="step-emoji">😤</span>
+      <h2 class="step-title">Deny You Need a Plan (Vibes-Based Architecture)</h2>
+    </div>
+    <p class="step-body">
+      Every great AI agent starts with someone confidently saying <em>"I'll just figure it out as I go."</em> 
+      Set up your Python environment. Install <code>langchain</code>, <code>openai</code>, and <code>everything else</code> because why not — disk space is a suggestion.
+    </p>
+    <div class="funny">💬 "I definitely don't need a virtualenv. I am not like other developers." — Famous last words.</div>
+    <pre><span class="cm"># Step 1: Create a virtual env (do this, I'm begging you)</span>
+python -m venv agent_env
+source agent_env/bin/activate  <span class="cm"># or agent_env\Scripts\activate on Windows</span>
+
+pip install openai langchain langchain-openai python-dotenv
+<span class="cm"># pip installing at 3am feels like power</span></pre>
+    <div class="badges">
+      <span class="badge">Setup</span>
+      <span class="badge">Virtual Env</span>
+      <span class="badge">pip install chaos</span>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">02</span>
+      <span class="step-emoji">🔑</span>
+      <h2 class="step-title">Get an API Key (and Immediately Expose It)</h2>
+    </div>
+    <p class="step-body">
+      Grab an API key from OpenAI (or Anthropic, or Groq, or wherever the cool kids are today). 
+      The headfirst move is to hardcode it directly into your script, push it to GitHub, 
+      and find out 6 minutes later that bots scraped it. Use <code>.env</code> files instead. Learn from our collective trauma.
+    </p>
+    <div class="funny">🚨 If your key starts with "sk-" and ends up on GitHub, you will get an email. It will not be fun.</div>
+    <pre><span class="cm"># .env file (add this to .gitignore immediately)</span>
+OPENAI_API_KEY=sk-your-key-goes-here-not-on-github
+
+<span class="cm"># In your Python file:</span>
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">import</span> os
+
+load_dotenv()
+api_key = os.getenv(<span class="st">"OPENAI_API_KEY"</span>)
+<span class="cm"># Congrats, you are now a "security engineer"</span></pre>
+    <div class="badges"><span class="badge">API Keys</span><span class="badge">.env</span><span class="badge">Don't Push to GitHub</span></div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">03</span>
+      <span class="step-emoji">🧠</span>
+      <h2 class="step-title">Choose Your LLM Brain (The Actual Thinking Part)</h2>
+    </div>
+    <p class="step-body">
+      Pick a Large Language Model to power your agent's "intelligence." Think of it as choosing the brain 
+      for your Frankenstein. GPT-4, Claude, Gemini — they're all smart, slightly unhinged, and will confidently 
+      answer questions they have no business answering. Wire one up.
+    </p>
+    <div class="funny">🤔 The LLM is like a very enthusiastic intern. Brilliant? Yes. Will it make stuff up? Absolutely.</div>
+    <pre><span class="kw">from</span> langchain_openai <span class="kw">import</span> ChatOpenAI
+
+<span class="cm"># Initialize the brain</span>
+llm = ChatOpenAI(
+    model=<span class="st">"gpt-4o"</span>,
+    temperature=<span class="nb">0.7</span>,  <span class="cm"># 0 = robot, 1 = chaos gremlin</span>
+    api_key=api_key
+)
+
+<span class="cm"># Quick sanity check</span>
+response = llm.invoke(<span class="st">"Are you sentient? Be honest."</span>)
+<span class="nb">print</span>(response.content)  <span class="cm"># Spoiler: it'll say no. Suspiciously quickly.</span></pre>
+    <div class="badges"><span class="badge">LLM</span><span class="badge">GPT-4</span><span class="badge">Temperature</span></div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">04</span>
+      <span class="step-emoji">🛠️</span>
+      <h2 class="step-title">Give It Tools (So It Can Actually DO Things)</h2>
+    </div>
+    <p class="step-body">
+      A brain without hands is just a brain. Tools let your agent search the web, run code, 
+      read files, call APIs — basically everything you told your parents you could do in a job interview.
+      Define Python functions and decorate them so LangChain knows they exist.
+    </p>
+    <div class="funny">🔧 This is where your agent graduates from "chat bot" to "thing that can accidentally email your boss."</div>
+    <pre><span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
+
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">calculate</span>(expression: <span class="nb">str</span>) -> <span class="nb">str</span>:
+    <span class="st">"""Evaluates a math expression. E.g. '2 + 2'"""</span>
+    <span class="kw">try</span>:
+        <span class="kw">return</span> <span class="nb">str</span>(eval(expression))  <span class="cm"># yes eval, we're going fast</span>
+    <span class="kw">except</span> <span class="kw">Exception</span> <span class="kw">as</span> e:
+        <span class="kw">return</span> <span class="nb">f</span><span class="st">"Math broke: {e}"</span>
+
+<span class="kw">@tool</span>
+<span class="kw">def</span> <span class="fn">get_weather</span>(city: <span class="nb">str</span>) -> <span class="nb">str</span>:
+    <span class="st">"""Gets current weather for a city"""</span>
+    <span class="kw">return</span> <span class="nb">f</span><span class="st">"It is definitely raining in {city}. It's always raining."</span>
+
+tools = [calculate, get_weather]</pre>
+    <div class="badges"><span class="badge">Tools</span><span class="badge">@tool decorator</span><span class="badge">Function Calling</span></div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">05</span>
+      <span class="step-emoji">🎭</span>
+      <h2 class="step-title">Write a System Prompt (Give It a Personality)</h2>
+    </div>
+    <p class="step-body">
+      The system prompt is your agent's soul. It defines who it is, what it does, and why 
+      it exists on this planet. Spend 40% of your total project time here writing, rewriting, 
+      and arguing with yourself about how to phrase "be helpful but don't be weird."
+    </p>
+    <div class="funny">🎭 Your system prompt is like writing a dating profile for a robot. Every word matters. None of them are enough.</div>
+    <pre><span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> ChatPromptTemplate, MessagesPlaceholder
+
+system_prompt = <span class="st">"""You are AgentX, a helpful AI assistant with tools.
+You are efficient, friendly, and slightly sarcastic (but in a charming way).
+When you don't know something, admit it — unlike certain humans.
+Always use tools when they are relevant. Don't guess when you can calculate.
+Under no circumstances should you start a sentence with 'Certainly!'"""</span>
+
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="st">"system"</span>, system_prompt),
+    MessagesPlaceholder(variable_name=<span class="st">"chat_history"</span>),
+    (<span class="st">"human"</span>, <span class="st">"{input}"</span>),
+    MessagesPlaceholder(variable_name=<span class="st">"agent_scratchpad"</span>),
+])</pre>
+    <div class="badges"><span class="badge">System Prompt</span><span class="badge">Prompt Engineering</span><span class="badge">Personality</span></div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">06</span>
+      <span class="step-emoji">⚙️</span>
+      <h2 class="step-title">Assemble the Agent (Frankenstein Moment)</h2>
+    </div>
+    <p class="step-body">
+      Glue the brain, the tools, and the prompt together into an <em>agent executor</em>. 
+      This is the ReAct loop — the agent Reasons, takes an Action, observes the result, 
+      and repeats until it has an answer or hits your token limit, whichever comes first.
+    </p>
+    <div class="funny">⚡ "It's alive!" — You, approximately 2 seconds before it enters an infinite loop and burns through your API credits.</div>
+    <pre><span class="kw">from</span> langchain.agents <span class="kw">import</span> create_openai_tools_agent, AgentExecutor
+<span class="kw">from</span> langchain_community.chat_message_histories <span class="kw">import</span> ChatMessageHistory
+
+<span class="cm"># Bind tools to LLM</span>
+agent = create_openai_tools_agent(llm, tools, prompt)
+
+<span class="cm"># Wrap in executor (this is the "run the loop" part)</span>
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    verbose=<span class="kw">True</span>,     <span class="cm"># prints its "thinking" — great for debugging, haunting</span>
+    max_iterations=<span class="nb">10</span>  <span class="cm"># prevent infinite loops (set this, trust me)</span>
+)
+
+<span class="cm"># Add memory so it doesn't forget you mid-conversation</span>
+memory = ChatMessageHistory()
+
+<span class="nb">print</span>(<span class="st">"🤖 Agent is alive. It is your problem now."</span>)</pre>
+    <div class="badges"><span class="badge">ReAct Loop</span><span class="badge">AgentExecutor</span><span class="badge">Memory</span></div>
+  </div>
+
+  <!-- Step 7 -->
+  <div class="step">
+    <div class="step-header">
+      <span class="step-number">07</span>
+      <span class="step-emoji">🚀</span>
+      <h2 class="step-title">Run It & Watch the Magic / Chaos Unfold</h2>
+    </div>
+    <p class="step-body">
+      Fire it up. Talk to it. Watch in amazement as it uses your tools, reasons through problems, 
+      and occasionally decides to do something completely unexpected. Add a simple loop for a CLI 
+      chat interface, or slap a Gradio/Streamlit UI on it and call it a "product."
+    </p>
+    <div class="funny">🎉 You've officially built an AI agent. Go update your LinkedIn. "Built production AI systems" — close enough.</div>
+    <pre><span class="kw">from</span> langchain_core.messages <span class="kw">import</span> HumanMessage, AIMessage
+
+<span class="nb">print</span>(<span class="st">"🤖 AgentX: Hello. I am ready. Please don't ask me to do your taxes."</span>)
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    user_input = <span class="nb">input</span>(<span class="st">"You: "</span>).strip()
+    <span class="kw">if</span> user_input.lower() <span class="kw">in</span> [<span class="st">"quit"</span>, <span class="st">"exit"</span>, <span class="st">"bye"</span>]:
+        <span class="nb">print</span>(<span class="st">"🤖 AgentX: Goodbye. It was statistically probable knowing you."</span>)
+        <span class="kw">break</span>
+
+    response = agent_executor.invoke({
+        <span class="st">"input"</span>: user_input,
+        <span class="st">"chat_history"</span>: memory.messages
+    })
+
+    answer = response[<span class="st">"output"</span>]
+    memory.add_user_message(user_input)
+    memory.add_ai_message(answer)
+
+    <span class="nb">print</span>(<span class="nb">f</span><span class="st">"🤖 AgentX: {answer}\n"</span>)</pre>
+    <div class="badges"><span class="badge">Chat Loop</span><span class="badge">Memory</span><span class="badge">Deployed-ish</span></div>
+  </div>
+
+</main>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>🏁 You Did It, Bestie</h2>
+  <p>Your agent is live. It's probably fine. <br>Now go add error handling and pretend you planned this all along.</p>
+</div>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 10 + 'px';
+    cursor.style.top = e.clientY - 10 + 'px';
+  });
+  document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
+</script>
+
+</body>
+</html>
