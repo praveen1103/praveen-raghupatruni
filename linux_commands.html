@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐧 The Linux Ubuntu Command Bible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@400;700;800&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d14;
+  --surface: #13131f;
+  --surface2: #1a1a2e;
+  --overlay: #252540;
+  --border: #2a2a45;
+  --text: #c8c8e8;
+  --muted: #6666a0;
+  --purple: #cba6f7;
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --red: #f38ba8;
+  --blue: #89b4fa;
+  --teal: #94e2d5;
+  --orange: #fab387;
+  --pink: #f5c2e7;
+  --white: #eff1f5;
+  --prompt: #a6e3a1;
+  --cursor: #cba6f7;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--overlay); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  padding: 70px 40px 50px;
+  text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(203,166,247,0.07) 0%, transparent 70%);
+}
+
+.header-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(203,166,247,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(203,166,247,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 100% at 50% 0%, black 30%, transparent 100%);
+}
+
+.penguin-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 16px;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(203,166,247,0.5));
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 52px);
+  color: var(--white);
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+h1 span { color: var(--purple); }
+
+.subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--yellow);
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+
+.subtitle2 {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--purple);
+  display: block;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── SEARCH ── */
+.search-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13,13,20,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 40px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  position: relative;
+  max-width: 560px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px 10px 40px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#search:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(203,166,247,0.1);
+}
+
+#search::placeholder { color: var(--muted); }
+
+.search-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.clear-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s;
+  display: none;
+}
+.clear-btn:hover { border-color: var(--red); color: var(--red); }
+.clear-btn.visible { display: block; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 200px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  padding: 24px 0;
+  position: sticky;
+  top: 65px;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.sidebar-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 20px 12px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.03);
+  border-left-color: var(--border);
+}
+
+.nav-item.active {
+  color: var(--white);
+  background: rgba(203,166,247,0.06);
+  border-left-color: var(--purple);
+}
+
+.nav-icon { font-size: 16px; flex-shrink: 0; }
+
+.nav-count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--overlay);
+  color: var(--muted);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* ── MAIN ── */
+main {
+  flex: 1;
+  padding: 32px 40px;
+  min-width: 0;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 56px;
+  scroll-margin-top: 80px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon { font-size: 26px; }
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--white);
+}
+
+.section-count-badge {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* ── COMMAND CARD ── */
+.cmd-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.cmd-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cmd-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-color, var(--purple));
+  border-radius: 3px 0 0 3px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.cmd-card:hover {
+  border-color: var(--accent-color, var(--purple));
+  background: var(--surface2);
+  transform: translateX(3px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.cmd-card:hover::before { opacity: 1; }
+
+.cmd-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.cmd-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue);
+  background: rgba(137,180,250,0.08);
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(137,180,250,0.15);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cmd-name::before {
+  content: '$';
+  color: var(--prompt);
+  font-weight: 400;
+}
+
+.cmd-desc {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.cmd-funny {
+  font-size: 13px;
+  color: var(--yellow);
+  font-style: italic;
+  margin: 6px 0;
+  padding: 6px 10px;
+  background: rgba(249,226,175,0.05);
+  border-radius: 6px;
+  border-left: 2px solid rgba(249,226,175,0.3);
+}
+
+.cmd-funny::before { content: '💬 '; }
+
+.cmd-example {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--teal);
+  background: rgba(0,0,0,0.3);
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  border: 1px solid rgba(148,226,213,0.1);
+}
+
+.cmd-example::before {
+  content: '▶';
+  color: var(--green);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.cmd-warning {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(243,139,168,0.07);
+  border-radius: 6px;
+  border: 1px solid rgba(243,139,168,0.2);
+}
+
+.copy-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--muted);
+  padding: 3px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.copy-btn.copied {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Search highlighting */
+mark {
+  background: rgba(249,226,175,0.25);
+  color: var(--yellow);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.hidden { display: none !important; }
+
+/* ── NO RESULTS ── */
+.no-results {
+  display: none;
+  text-align: center;
+  padding: 80px 40px;
+  color: var(--muted);
+}
+
+.no-results.visible { display: block; }
+
+.no-results-icon { font-size: 56px; margin-bottom: 16px; }
+
+.no-results h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 40px;
+  background: var(--surface);
+}
+
+.footer-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.wisdom-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.wisdom-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--purple);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.wisdom-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.footer-bottom {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.footer-bottom span { color: var(--purple); }
+
+/* ── BACK TO TOP ── */
+#back-top {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--purple);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0;
+  transform: translateY(10px);
+  z-index: 200;
+}
+
+#back-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#back-top:hover {
+  background: var(--overlay);
+  border-color: var(--purple);
+  box-shadow: 0 0 20px rgba(203,166,247,0.2);
+}
+
+/* ── CURSOR BLINK ── */
+.blink {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── INTRO BOX ── */
+.intro-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 0 40px 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--teal));
+}
+
+.intro-dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.dot-r { background: var(--red); }
+.dot-y { background: var(--yellow); }
+.dot-g { background: var(--green); }
+
+.intro-prompt { color: var(--prompt); }
+.intro-cmd { color: var(--blue); }
+.intro-comment { color: var(--muted); font-style: italic; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  main { padding: 20px; }
+  .search-wrap { padding: 12px 20px; }
+  header { padding: 48px 20px 36px; }
+  .intro-box { margin: 0 20px 24px; }
+  .stats-bar { gap: 20px; }
+  footer { padding: 32px 20px; }
+}
+
+/* Entry animations */
+.section {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeUp 0.5s forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section:nth-child(1) { animation-delay: 0.05s; }
+.section:nth-child(2) { animation-delay: 0.1s; }
+.section:nth-child(3) { animation-delay: 0.15s; }
+.section:nth-child(4) { animation-delay: 0.2s; }
+.section:nth-child(5) { animation-delay: 0.25s; }
+.section:nth-child(6) { animation-delay: 0.3s; }
+.section:nth-child(7) { animation-delay: 0.35s; }
+.section:nth-child(8) { animation-delay: 0.4s; }
+
+/* Pulse glow on section accent */
+.section-header::after {
+  content: '';
+  display: block;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--section-color, var(--purple)), transparent);
+  opacity: 0.4;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-grid"></div>
+  <span class="penguin-icon">🐧</span>
+  <h1>The Linux Ubuntu<br><span>Command Bible</span></h1>
+  <p class="subtitle">// A COMPLETELY SERIOUS AND NOT AT ALL FUNNY REFERENCE GUIDE</p>
+  <p class="subtitle2">(It is, in fact, very funny.) Read at your own risk. Do NOT run commands blindly.</p>
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-num" id="total-cmds">150+</span><span class="stat-label">Commands</span></div>
+    <div class="stat"><span class="stat-num">14</span><span class="stat-label">Sections</span></div>
+    <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Regrets Possible</span></div>
+    <div class="stat"><span class="stat-num">0</span><span class="stat-label">Warranty</span></div>
+  </div>
+</header>
+
+<!-- INTRO TERMINAL BOX -->
+<div class="intro-box">
+  <div class="intro-dots">
+    <div class="dot dot-r"></div>
+    <div class="dot dot-y"></div>
+    <div class="dot dot-g"></div>
+  </div>
+  <div><span class="intro-prompt">user@ubuntu:~$ </span><span class="intro-cmd">cat /etc/linux_wisdom.txt</span></div>
+  <br>
+  <div><span class="intro-comment"># Congratulations! You've decided to learn Linux.</span></div>
+  <div><span class="intro-comment"># Either you're a brave beginner, a curious developer,</span></div>
+  <div><span class="intro-comment"># or you accidentally deleted something important. Welcome.</span></div>
+  <br>
+  <div><span class="intro-comment"># Each command below comes with:</span></div>
+  <div><span class="intro-comment">#  ✓ What it does (officially)</span></div>
+  <div><span class="intro-comment">#  ✓ What it ACTUALLY does (honestly)</span></div>
+  <div><span class="intro-comment">#  ✓ An example so you don't embarrass yourself</span></div>
+  <div><span class="intro-comment">#  ⚠ A warning if it can destroy your system</span></div>
+  <br>
+  <div><span class="intro-prompt">user@ubuntu:~$ </span><span class="blink">█</span></div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">$</span>
+    <input type="text" id="search" placeholder="grep 'command' | search..." autocomplete="off" spellcheck="false">
+  </div>
+  <span class="search-count" id="search-count"></span>
+  <button class="clear-btn" id="clear-btn" onclick="clearSearch()">✕ clear</button>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-title">Sections</div>
+    <!-- filled by JS -->
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main-content">
+    <div id="no-results" class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h3>No commands found</h3>
+      <p>Try searching for something like <code style="color:var(--blue)">grep</code>, <code style="color:var(--blue)">kill</code>, or <code style="color:var(--blue)">sudo</code></p>
+    </div>
+    <!-- Sections filled by JS -->
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="text-align:center;margin-bottom:28px;">
+    <span style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white)">🎓 Final Wisdom</span>
+  </div>
+  <div class="footer-grid" id="wisdom-grid"></div>
+  <div class="footer-bottom">
+    <div>May your uptimes be long, your segfaults few,</div>
+    <div>and your <span>sudo</span> password always remembered.</div>
+    <div style="margin-top:12px;color:var(--overlay)">────────────────</div>
+    <div style="margin-top:12px">Built with <span>❤</span> and too many hours in the terminal &nbsp;·&nbsp; 🐧 Linux Ubuntu Command Bible</div>
+  </div>
+</footer>
+
+<button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<script>
+const DATA = [
+  {
+    id: "files",
+    icon: "🗂️",
+    title: "File & Directory Operations",
+    color: "#a6e3a1",
+    cmds: [
+      { cmd: "ls", desc: "List directory contents.", funny: "Like opening your fridge and staring blankly at everything inside.", ex: "ls -la /home/you" },
+      { cmd: "ls -la", desc: "List ALL files with details, including hidden ones.", funny: "Even the files ashamed of themselves (dotfiles) can't hide from this.", ex: "ls -la ~/.config" },
+      { cmd: "cd", desc: "Change directory.", funny: "Teleportation, but only for your terminal. Still waiting on the body version.", ex: "cd /var/log" },
+      { cmd: "pwd", desc: "Print Working Directory — shows exactly where you are.", funny: "When you're lost in the filesystem at 3am. 'Where am I?!' This helps.", ex: "pwd" },
+      { cmd: "mkdir", desc: "Make a new directory.", funny: "Having a baby folder. No crying involved (usually).", ex: "mkdir -p ~/projects/my_brilliant_idea" },
+      { cmd: "rmdir", desc: "Remove an EMPTY directory.", funny: "Evicting an empty folder. It had no files. It had no future.", ex: "rmdir ~/projects/abandoned_idea" },
+      { cmd: "rm", desc: "Remove files or directories.", funny: "The digital shredder. No recycling bin. No mercy. No regrets... maybe.", ex: "rm -rf node_modules/", warn: "⚠️  rm -rf / deletes EVERYTHING. Don't test this. Anywhere. Ever." },
+      { cmd: "cp", desc: "Copy files or directories.", funny: "Ctrl+C Ctrl+V but you feel like a hacker because you used the terminal.", ex: "cp -r ~/Documents ~/backup/Documents" },
+      { cmd: "mv", desc: "Move or rename files.", funny: "It's also how you rename things. Unix devs were lazy and we love them for it.", ex: "mv old_name.txt new_name.txt" },
+      { cmd: "touch", desc: "Create an empty file or update timestamps.", funny: "The most wholesome command. Just gently touches a file into existence.", ex: "touch my_todo_list_i_will_never_open.txt" },
+      { cmd: "find", desc: "Search for files in a directory hierarchy.", funny: "Like a bloodhound, but for files. Never gets tired. Never judges.", ex: "find / -name '*.mp3' 2>/dev/null" },
+      { cmd: "locate", desc: "Find files by name using a prebuilt database.", funny: "find's faster cousin who studied in advance. Run updatedb to keep it current.", ex: "locate firefox" },
+      { cmd: "tree", desc: "Display directory structure as a tree.", funny: "Makes your filesystem look like a Christmas tree. Festive and functional!", ex: "tree -L 2 ~/projects" },
+      { cmd: "ln", desc: "Create hard or symbolic links.", funny: "File aliases. Like a celebrity's stage name, but for filesystem paths.", ex: "ln -s /usr/bin/python3 ~/mypy" },
+      { cmd: "stat", desc: "Display detailed file/filesystem status.", funny: "The nosy neighbor of commands. Knows literally everything about a file.", ex: "stat /etc/passwd" },
+      { cmd: "file", desc: "Determine file type.", funny: "Because naming a file 'image.jpg' doesn't mean it IS an image.", ex: "file suspicious_file.jpg" },
+    ]
+  },
+  {
+    id: "viewing",
+    icon: "📖",
+    title: "Viewing & Editing Files",
+    color: "#89b4fa",
+    cmds: [
+      { cmd: "cat", desc: "Concatenate and display file contents.", funny: "Named after concatenate, not the animal. Disappointing but true.", ex: "cat /etc/os-release" },
+      { cmd: "less", desc: "View file contents one page at a time.", funny: "'less is more' — this is literally true in Unix. Unlike in life.", ex: "less /var/log/syslog" },
+      { cmd: "more", desc: "View file contents (older pager).", funny: "Like less but more annoying. Yes, less is more, and more is less. Linux philosophy.", ex: "more /etc/fstab" },
+      { cmd: "head", desc: "Show the first N lines of a file.", funny: "Just the top 10 lines. Like a file's LinkedIn summary.", ex: "head -20 /var/log/auth.log" },
+      { cmd: "tail", desc: "Show the last lines of a file.", funny: "tail -f is perfect for watching logs scroll and pretending you understand them.", ex: "tail -f /var/log/syslog" },
+      { cmd: "nano", desc: "Simple beginner-friendly terminal text editor.", funny: "Has a cheat sheet at the bottom. Very kind and thoughtful of it.", ex: "nano ~/.bashrc" },
+      { cmd: "vim", desc: "Powerful modal text editor.", funny: "How to exit vim: :wq — you're welcome. This took Stack Overflow 2 million views to answer.", ex: "vim /etc/nginx/nginx.conf", warn: "⚠️  Exit with :wq (save) or :q! (abandon). You WILL need this." },
+      { cmd: "wc", desc: "Count words, lines, and characters in a file.", funny: "The file's fitness tracker. How many lines did you write today?", ex: "wc -l /etc/hosts" },
+      { cmd: "diff", desc: "Compare two files line by line.", funny: "The relationship counselor for files. 'Here's what's different between you two...'", ex: "diff file1.txt file2.txt" },
+      { cmd: "sort", desc: "Sort lines of text.", funny: "The neat freak of commands. Alphabetizes everything it touches.", ex: "sort -r names.txt" },
+      { cmd: "uniq", desc: "Filter duplicate lines.", funny: "sort's best friend who removes awkward repetition from the conversation.", ex: "sort data.txt | uniq -c" },
+      { cmd: "cut", desc: "Extract specific columns from text.", funny: "Performs surgery on text lines. Very precise, no anesthesia.", ex: "cut -d: -f1 /etc/passwd" },
+      { cmd: "tee", desc: "Read stdin and write to file AND stdout simultaneously.", funny: "The multitasker. Saves to file AND shows on screen. Does both. No drama.", ex: "ls -la | tee listing.txt" },
+    ]
+  },
+  {
+    id: "search",
+    icon: "🔍",
+    title: "Searching & Text Processing",
+    color: "#94e2d5",
+    cmds: [
+      { cmd: "grep", desc: "Search text using patterns (regular expressions).", funny: "The text detective. Finds needles in haystacks — describe the needle first.", ex: "grep -r 'TODO' ~/projects/" },
+      { cmd: "grep -i", desc: "Case-insensitive grep search.", funny: "grep with its reading glasses off. Doesn't care about CAPITALIZATION. Very chill.", ex: "grep -i 'error' /var/log/syslog" },
+      { cmd: "grep -v", desc: "Invert match — show lines that DON'T match.", funny: "grep's rebellious mode. Shows everything EXCEPT what you searched for.", ex: "grep -v '#' /etc/hosts" },
+      { cmd: "sed", desc: "Stream editor for filtering and transforming text.", funny: "Find and replace on steroids. With regex. The power corrupts. Use responsibly.", ex: "sed 's/old/new/g' file.txt" },
+      { cmd: "awk", desc: "Pattern scanning and text processing language.", funny: "Not a command. It's a whole programming language pretending to be a command. Sneaky.", ex: "awk '{print $1}' /etc/passwd" },
+      { cmd: "tr", desc: "Translate or delete characters.", funny: "The character conversion bureau. Uppercase, lowercase, deleted — it handles all.", ex: "echo 'hello' | tr 'a-z' 'A-Z'" },
+      { cmd: "xargs", desc: "Build and execute command lines from stdin.", funny: "The forklift of commands. Takes a pile of input and carries it to another command.", ex: "find . -name '*.tmp' | xargs rm" },
+    ]
+  },
+  {
+    id: "sysinfo",
+    icon: "⚙️",
+    title: "System Information",
+    color: "#fab387",
+    cmds: [
+      { cmd: "uname -a", desc: "Print all system information.", funny: "Your Linux's birth certificate. Kernel, hostname, architecture — all the gossip.", ex: "uname -a" },
+      { cmd: "lsb_release -a", desc: "Show Ubuntu/distro version info.", funny: "How to tell which Ubuntu you're on. Spoiler: it's named after an animal.", ex: "lsb_release -a" },
+      { cmd: "hostname", desc: "Show or set the system hostname.", funny: "Your computer's name. Often 'ubuntu'. Very original. Very creative.", ex: "hostname -I" },
+      { cmd: "uptime", desc: "Show how long the system has been running.", funny: "The system's brag counter. '42 days uptime!' It's basically a flex.", ex: "uptime" },
+      { cmd: "date", desc: "Display or set the system date and time.", funny: "Proves your system knows what day it is. Unlike you at 3am.", ex: "date '+%Y-%m-%d %H:%M:%S'" },
+      { cmd: "lscpu", desc: "Show CPU architecture information.", funny: "Your processor's resume. Cores, speed, cache — it's all there to impress you.", ex: "lscpu | grep 'CPU(s)'" },
+      { cmd: "lspci", desc: "List PCI devices attached to the system.", funny: "What's plugged into your motherboard. Graphics card will be there, hopefully.", ex: "lspci | grep VGA" },
+      { cmd: "lsusb", desc: "List USB devices.", funny: "Discover all USB things attached. 'Why is my keyboard listed twice?' — classic.", ex: "lsusb" },
+      { cmd: "lsblk", desc: "List block devices (disks and partitions).", funny: "Your hard drives' family tree. Shows partitions and mounts in a nice tree.", ex: "lsblk -f" },
+      { cmd: "df -h", desc: "Report disk space usage in human-readable form.", funny: "Nobody wants to read raw bytes. We're human, not machines. Wait—", ex: "df -h" },
+      { cmd: "du -sh", desc: "Estimate directory space usage.", funny: "For finding which folder ate all your disk space. It's always Downloads.", ex: "du -sh ~/Downloads/*" },
+      { cmd: "free -h", desc: "Show memory usage in human-readable form.", funny: "Seeing 'available: 200MB' at 9am after opening Chrome is deeply humbling.", ex: "free -h" },
+      { cmd: "vmstat", desc: "Report virtual memory statistics.", funny: "A full system health checkup. More numbers than a doctor's report.", ex: "vmstat 1 5" },
+    ]
+  },
+  {
+    id: "process",
+    icon: "🎛️",
+    title: "Process Management",
+    color: "#f5c2e7",
+    cmds: [
+      { cmd: "ps aux", desc: "Show all running processes with details.", funny: "A snapshot of everything your system is doing RIGHT NOW. It's a LOT.", ex: "ps aux | grep firefox" },
+      { cmd: "top", desc: "Interactive real-time process viewer.", funny: "Like a task manager but you feel way more powerful. Press 'q' to escape reality.", ex: "top" },
+      { cmd: "htop", desc: "Improved interactive process viewer (colorful).", funny: "top went to therapy, got colors, became htop. Much more pleasant to look at.", ex: "htop" },
+      { cmd: "kill", desc: "Send a signal to a process by PID.", funny: "Terminates a process. Named 'kill' to be very clear about its intentions.", ex: "kill -9 1234", warn: "⚠️  kill -9 is the nuclear option. The process cannot say goodbye." },
+      { cmd: "pkill", desc: "Kill processes by name.", funny: "Like kill but you use the name instead of the PID. Much more satisfying.", ex: "pkill firefox" },
+      { cmd: "killall", desc: "Kill all processes matching a name.", funny: "Mass termination. For when one kill just isn't enough.", ex: "killall chrome" },
+      { cmd: "nohup", desc: "Run a command immune to hangups.", funny: "Your process survives even if you log out. It's basically immortal.", ex: "nohup python script.py &" },
+      { cmd: "nice", desc: "Run a command with modified scheduling priority.", funny: "'Nice' because lower values are ruder (higher priority). Counterintuitive? Welcome to Unix.", ex: "nice -n 10 python heavy_script.py" },
+      { cmd: "watch", desc: "Execute a program periodically, showing output.", funny: "Watches a command run every 2 seconds. Great for pretending you're monitoring things.", ex: "watch -n 1 free -h" },
+      { cmd: "time", desc: "Measure how long a command takes to execute.", funny: "For finding your script takes 47 seconds, then optimizing it to 46.9 seconds.", ex: "time ls -la /" },
+      { cmd: "jobs", desc: "List current shell background/stopped jobs.", funny: "Check what tasks you've abandoned to the background. They're still going.", ex: "jobs -l" },
+      { cmd: "bg / fg", desc: "Send jobs to background / bring back to foreground.", funny: "bg sends your job to work silently like a good intern. fg summons it back.", ex: "bg %1 | fg %1" },
+    ]
+  },
+  {
+    id: "users",
+    icon: "👤",
+    title: "Users & Permissions",
+    color: "#cba6f7",
+    cmds: [
+      { cmd: "sudo", desc: "Execute a command as superuser.", funny: "'sudo make me a sandwich.' The magic word. With great power comes great sudo.", ex: "sudo apt update" },
+      { cmd: "whoami", desc: "Print the current username.", funny: "For when you've been in so many terminals you've had an identity crisis.", ex: "whoami" },
+      { cmd: "id", desc: "Print user and group IDs.", funny: "Your system identity card. UID, GID, groups — the whole package.", ex: "id username" },
+      { cmd: "useradd", desc: "Create a new user account.", funny: "Births a new user. adduser is the friendlier version that asks questions nicely.", ex: "sudo useradd -m -s /bin/bash newuser" },
+      { cmd: "passwd", desc: "Change a user's password.", funny: "The security update you keep putting off. 'password123' is NOT a password.", ex: "passwd" },
+      { cmd: "usermod", desc: "Modify a user account.", funny: "Like editing a user's profile from the command line. No selfie update though.", ex: "sudo usermod -aG sudo username" },
+      { cmd: "chmod", desc: "Change file permissions.", funny: "chmod 777 = anyone can do anything. chmod 000 = even you can't. Pure chaos or pure paranoia.", ex: "chmod 755 myscript.sh" },
+      { cmd: "chown", desc: "Change file owner and group.", funny: "Transfer file ownership. Like giving your friend your Netflix account, but for files.", ex: "sudo chown user:group file.txt" },
+      { cmd: "sudo visudo", desc: "Safely edit the sudoers file.", funny: "The ONLY safe way to edit sudoers. Using vim directly is how sysadmins get fired.", ex: "sudo visudo" },
+      { cmd: "last", desc: "Show last logged-in users.", funny: "A history of who logged in and when. Perfect for playing detective.", ex: "last -n 10" },
+      { cmd: "su", desc: "Switch user (become another user).", funny: "Become another user. Great for blaming errors on 'root' in stand-up meetings.", ex: "su - username" },
+      { cmd: "umask", desc: "Set default permission mask for new files.", funny: "The permissions police that quietly controls every new file you create.", ex: "umask 022" },
+    ]
+  },
+  {
+    id: "network",
+    icon: "🌐",
+    title: "Networking",
+    color: "#89b4fa",
+    cmds: [
+      { cmd: "ping", desc: "Test network connectivity to a host.", funny: "Sends little 'hello?' packets and waits for an answer. Very polite. Usually.", ex: "ping -c 4 google.com" },
+      { cmd: "ip addr", desc: "Show network interfaces and IP addresses.", funny: "The modern way to see your IPs. ifconfig is the old way nobody told you to stop using.", ex: "ip addr show" },
+      { cmd: "ss -tuln", desc: "Show open ports and socket statistics.", funny: "netstat went on vacation and ss took over. Faster, just as confusing.", ex: "ss -tuln" },
+      { cmd: "curl", desc: "Transfer data from/to URLs (HTTP, FTP, etc).", funny: "The Swiss army knife of HTTP. Downloads, posts, tests APIs — does everything but coffee.", ex: "curl -I https://google.com" },
+      { cmd: "wget", desc: "Download files from the internet.", funny: "Your download manager in CLI form. Great for downloading ISOs at 2MB/s.", ex: "wget https://example.com/file.zip" },
+      { cmd: "ssh", desc: "Secure Shell — remote login to another machine.", funny: "Teleport into another computer. Star Trek-level cool. With more typing.", ex: "ssh user@192.168.1.100" },
+      { cmd: "scp", desc: "Secure copy files over SSH.", funny: "cp's globe-trotting cousin. Copies files between computers. Jet-setter.", ex: "scp file.txt user@server:/home/user/" },
+      { cmd: "rsync", desc: "Fast, versatile remote file copying.", funny: "scp's smarter sibling who only copies what changed. Saves bandwidth and sanity.", ex: "rsync -avz ~/Documents/ user@backup:/backup/" },
+      { cmd: "nmap", desc: "Network exploration and security scanning.", funny: "Scans networks and reports open ports. Legitimate uses: many. Sketchy uses: please don't.", ex: "nmap -sV 192.168.1.1" },
+      { cmd: "traceroute", desc: "Trace the route packets take to a host.", funny: "Shows every router your packet visits. Like tracking a package, but for data.", ex: "traceroute google.com" },
+      { cmd: "dig", desc: "DNS lookup utility.", funny: "Interrogates DNS servers professionally. No waterboarding involved.", ex: "dig google.com A" },
+      { cmd: "ufw", desc: "Uncomplicated Firewall — iptables frontend.", funny: "iptables went to charm school and became ufw. 'Uncomplicated' is doing heavy lifting.", ex: "sudo ufw status" },
+      { cmd: "nc", desc: "Netcat — the networking Swiss army knife.", funny: "Can do almost anything network-related. Used by sysadmins and villains alike.", ex: "nc -zv google.com 443" },
+      { cmd: "netstat -tulnp", desc: "Show network connections, routing tables.", funny: "The classic network inspector. Still works. Old doesn't mean bad.", ex: "netstat -tulnp" },
+    ]
+  },
+  {
+    id: "packages",
+    icon: "📦",
+    title: "Package Management",
+    color: "#f9e2af",
+    cmds: [
+      { cmd: "apt update", desc: "Update package list from repositories.", funny: "Tell your system about new software gossip. Mandatory ritual before installing anything.", ex: "sudo apt update" },
+      { cmd: "apt upgrade", desc: "Upgrade all installed packages.", funny: "Give every package a software glow-up. May take a while. Make tea.", ex: "sudo apt upgrade -y" },
+      { cmd: "apt install", desc: "Install a new package.", funny: "Shopping for software. Free. No shipping. No DRM. Open source is beautiful.", ex: "sudo apt install htop vim git" },
+      { cmd: "apt remove", desc: "Remove a package.", funny: "Leaves config files behind, like an ex who won't take their stuff.", ex: "sudo apt remove firefox" },
+      { cmd: "apt purge", desc: "Remove package AND its configuration files.", funny: "Like apt remove but also burns the config files. Clean break. No looking back.", ex: "sudo apt purge firefox" },
+      { cmd: "apt autoremove", desc: "Remove unused dependency packages.", funny: "Cleans up packages nobody needs anymore. The Marie Kondo of your system.", ex: "sudo apt autoremove" },
+      { cmd: "apt search", desc: "Search for packages in repositories.", funny: "Window shopping for software. Safe and free. Unlike actual window shopping.", ex: "apt search image-editor" },
+      { cmd: "dpkg -l", desc: "List all installed packages.", funny: "Your system's shopping history. Longer than you expect. Way, WAY longer.", ex: "dpkg -l | grep python" },
+      { cmd: "snap install", desc: "Install a snap package.", funny: "Universal packages. Takes longer to start but comes with everything built-in.", ex: "sudo snap install vscode --classic" },
+      { cmd: "add-apt-repository", desc: "Add a software repository (PPA).", funny: "Tells your system about a new software source. Adding a store to the shopping mall.", ex: "sudo add-apt-repository ppa:git-core/ppa" },
+    ]
+  },
+  {
+    id: "disk",
+    icon: "💾",
+    title: "Disk & Filesystem",
+    color: "#f38ba8",
+    cmds: [
+      { cmd: "fdisk -l", desc: "List disk partition tables.", funny: "Surgery on your disk's partition table. Don't sneeze while using this.", ex: "sudo fdisk -l" },
+      { cmd: "lsblk", desc: "List block devices and their mounts.", funny: "Your disk's family tree. Clean and readable. Unlike fdisk.", ex: "lsblk -f" },
+      { cmd: "mkfs.ext4", desc: "Format a partition with ext4 filesystem.", funny: "Wipes and creates a fresh filesystem. Destructive. Satisfying. Irreversible.", ex: "sudo mkfs.ext4 /dev/sdb1", warn: "⚠️  Make ABSOLUTELY sure it's the right partition. There is no undo." },
+      { cmd: "mount", desc: "Mount a filesystem.", funny: "Attach a disk/partition to the directory tree. Like plugging in a USB, but in the terminal.", ex: "sudo mount /dev/sdb1 /mnt/usb" },
+      { cmd: "umount", desc: "Unmount a filesystem.", funny: "NOT 'unmount'. uMount. The U is for Unix, where vowels are optional.", ex: "sudo umount /mnt/usb" },
+      { cmd: "fsck", desc: "Check and repair a filesystem.", funny: "Run on UNMOUNTED filesystems only. Like defragging but actually useful and terrifying.", ex: "sudo fsck /dev/sdb1" },
+      { cmd: "dd", desc: "Convert and copy files at the block level.", funny: "Dubbed 'Disk Destroyer' lovingly. Can clone disks, create ISOs, or nuke drives. Handle with nuclear-level care.", ex: "dd if=/dev/sda of=backup.img bs=4M status=progress", warn: "⚠️  dd if=/dev/zero of=/dev/sda will wipe your entire drive. Please, no." },
+      { cmd: "blkid", desc: "Print block device attributes including UUID.", funny: "Every disk has a UUID. Shows type, label. Very philosophical existential stuff.", ex: "sudo blkid" },
+      { cmd: "swapon --show", desc: "Show active swap space.", funny: "When RAM is full, Linux uses swap. Overflow parking. Slower, but it exists.", ex: "swapon --show" },
+    ]
+  },
+  {
+    id: "services",
+    icon: "🔧",
+    title: "System Control & Services",
+    color: "#cba6f7",
+    cmds: [
+      { cmd: "systemctl status", desc: "Show status of a systemd service.", funny: "The overlord of modern Ubuntu services. It rules all other services. Bow.", ex: "sudo systemctl status nginx" },
+      { cmd: "systemctl start", desc: "Start a systemd service.", funny: "Bring a service to life. It was sleeping. Now it works. Magic.", ex: "sudo systemctl start apache2" },
+      { cmd: "systemctl stop", desc: "Stop a running service.", funny: "Gracefully shut down a service. Much kinder than kill -9.", ex: "sudo systemctl stop mysql" },
+      { cmd: "systemctl enable", desc: "Enable service to start at boot.", funny: "Make a service start automatically at boot. Set it and forget it.", ex: "sudo systemctl enable docker" },
+      { cmd: "systemctl disable", desc: "Disable service from starting at boot.", funny: "Stop a service from starting at boot. Breaking up with it, gently.", ex: "sudo systemctl disable bluetooth" },
+      { cmd: "journalctl", desc: "View systemd journal (logs for all services).", funny: "Every service tells its story here. Mostly boring. Sometimes horrifying.", ex: "journalctl -xe --since '1 hour ago'" },
+      { cmd: "dmesg", desc: "Print kernel ring buffer messages.", funny: "The kernel's birth diary. Shows hardware detection messages from boot. Very chatty.", ex: "dmesg | grep -i error" },
+      { cmd: "reboot", desc: "Restart the system.", funny: "The universal fix. 'Have you tried turning it off and on again?' — this is that.", ex: "sudo reboot" },
+      { cmd: "shutdown -h now", desc: "Immediately halt and power off.", funny: "shutdown -h now = power off. shutdown -r now = reboot. The nuclear options.", ex: "sudo shutdown -h now" },
+      { cmd: "timedatectl", desc: "Control system time, date, and timezone.", funny: "Set timezone, sync NTP. Important for logs so they make chronological sense.", ex: "timedatectl set-timezone Asia/Kolkata" },
+      { cmd: "hostnamectl", desc: "Control system hostname.", funny: "Change your machine's name. 'ubuntu' is boring. 'death-star' is way better.", ex: "sudo hostnamectl set-hostname myserver" },
+      { cmd: "sysctl", desc: "Configure kernel parameters at runtime.", funny: "Tweaks the kernel while it's running. Like adjusting the engine while driving.", ex: "sysctl -a | grep net.ipv4" },
+    ]
+  },
+  {
+    id: "security",
+    icon: "🔐",
+    title: "Security & Encryption",
+    color: "#f38ba8",
+    cmds: [
+      { cmd: "ssh-keygen", desc: "Generate SSH key pairs (public/private).", funny: "Creates your cryptographic ID card for passwordless SSH. Very spy-movie energy.", ex: "ssh-keygen -t ed25519 -C 'your@email.com'" },
+      { cmd: "ssh-copy-id", desc: "Copy SSH public key to a remote server.", funny: "Registers your key on a remote server so you can login without a password. Luxury.", ex: "ssh-copy-id user@server" },
+      { cmd: "gpg", desc: "GNU Privacy Guard — encrypt and sign files.", funny: "Military-grade encryption in your terminal. Your grocery list is CONFIDENTIAL.", ex: "gpg -c secretfile.txt" },
+      { cmd: "openssl", desc: "Cryptographic tool — keys, certs, encryption.", funny: "Can encrypt, decrypt, generate keys, create certificates, and probably make coffee.", ex: "openssl rand -base64 32" },
+      { cmd: "ufw enable", desc: "Enable the Uncomplicated Firewall.", funny: "Turn on the firewall. 'Are you sure? y/n' — always say y. ALWAYS.", ex: "sudo ufw enable" },
+      { cmd: "sha256sum", desc: "Compute SHA-256 hash of a file.", funny: "Verify that ISO you downloaded is legit before booting it. Do it. Always.", ex: "sha256sum ubuntu-22.04.iso" },
+      { cmd: "sudo journalctl -u ssh", desc: "View SSH service logs.", funny: "See who's been trying to hack into your server. Spoiler: many robots.", ex: "sudo journalctl -u ssh -f" },
+      { cmd: "chmod 600", desc: "Set file to owner-read-write only.", funny: "SSH private keys must be 600 or SSH dramatically refuses to work.", ex: "chmod 600 ~/.ssh/id_rsa" },
+    ]
+  },
+  {
+    id: "shell",
+    icon: "🖥️",
+    title: "Shell & Scripting",
+    color: "#a6e3a1",
+    cmds: [
+      { cmd: "echo", desc: "Display a line of text to stdout.", funny: "Makes your terminal say things. The first command everyone learns. Still used daily.", ex: 'echo "Hello, World!"' },
+      { cmd: "export", desc: "Set an environment variable.", funny: "Makes a variable visible to child processes. Sharing is caring, even for variables.", ex: "export PATH=$PATH:/usr/local/bin" },
+      { cmd: "env", desc: "Show all environment variables.", funny: "Dumps every environment variable. There are a LOT. More than you ever wanted to know.", ex: "env | grep HOME" },
+      { cmd: "alias", desc: "Create a command shortcut.", funny: "Make your own commands! alias please=sudo is a popular one. Very polite computing.", ex: "alias ll='ls -la'" },
+      { cmd: "history", desc: "Show command history.", funny: "Your terminal's diary. Contains all your typos, failed commands, and regrettable sudos.", ex: "history | tail -20" },
+      { cmd: "source", desc: "Execute a script in the current shell context.", funny: "Runs a script in the current shell so its variables stick around.", ex: "source ~/.bashrc" },
+      { cmd: "crontab -e", desc: "Edit scheduled cron jobs.", funny: "Make commands run automatically on a schedule. Set-it-and-forget-it Linux.", ex: "crontab -e" },
+      { cmd: "set -euo pipefail", desc: "Make bash scripts fail safely and loudly.", funny: "Adds seat belts to your bash script. Your future self will thank you.", ex: "set -euo pipefail" },
+      { cmd: "bc", desc: "Command-line calculator.", funny: "A calculator in your terminal. Uses C-like syntax. Very nerdy. Very useful.", ex: "echo '2^10' | bc" },
+      { cmd: "seq", desc: "Print a sequence of numbers.", funny: "Counts for you. Because manually typing 1 to 100 is beneath you.", ex: "seq 1 10" },
+    ]
+  },
+  {
+    id: "compress",
+    icon: "📂",
+    title: "Compression & Archiving",
+    color: "#fab387",
+    cmds: [
+      { cmd: "tar -czvf", desc: "Create a compressed .tar.gz archive.", funny: "Named for ancient tape drives. Now used like zip files. The flags are legendary.", ex: "tar -czvf archive.tar.gz folder/" },
+      { cmd: "tar -xzvf", desc: "Extract a .tar.gz archive.", funny: "Open a tarball. Like unwrapping a gift, but the gift is someone else's code.", ex: "tar -xzvf archive.tar.gz" },
+      { cmd: "gzip", desc: "Compress a file using gzip.", funny: "Squishes files smaller. Digital vacuum-packing for your sweaters.", ex: "gzip bigfile.txt" },
+      { cmd: "gunzip", desc: "Decompress a gzip file.", funny: "Un-squishes files. Your sweaters come back wrinkled but functional.", ex: "gunzip bigfile.txt.gz" },
+      { cmd: "zip -r", desc: "Create a zip archive.", funny: "The universal archive. Even Windows people know what a .zip is!", ex: "zip -r archive.zip folder/" },
+      { cmd: "unzip", desc: "Extract a zip archive.", funny: "The most Googled file operation, probably. Now you don't need to Google it.", ex: "unzip archive.zip -d /destination/" },
+      { cmd: "7z", desc: "7-Zip compression tool.", funny: "The overachiever of compression. Can open almost any archive format. Very show-off.", ex: "7z a archive.7z folder/" },
+    ]
+  },
+  {
+    id: "fun",
+    icon: "🎨",
+    title: "Terminal Tricks & Fun",
+    color: "#f5c2e7",
+    cmds: [
+      { cmd: "clear", desc: "Clear the terminal screen.", funny: "Ctrl+L does the same thing. Both are therapeutic. Use liberally.", ex: "clear" },
+      { cmd: "man", desc: "Display the manual for a command.", funny: "RTFM (Read The Fine Manual). All the info is here. Nobody reads it though.", ex: "man grep" },
+      { cmd: "whatis", desc: "One-line description of a command.", funny: "For when you want to know what something does but can't commit to a whole man page.", ex: "whatis grep" },
+      { cmd: "which", desc: "Find the location of an executable.", funny: "Where is this command hiding? Linux is big. Commands get lost sometimes.", ex: "which python3" },
+      { cmd: "xdg-open", desc: "Open a file with its default application.", funny: "The 'just open it somehow' command. Linux's double-click equivalent.", ex: "xdg-open document.pdf" },
+      { cmd: "notify-send", desc: "Send a desktop notification from terminal.", funny: "Pop up a notification from a script. Alert yourself when long jobs finish.", ex: "notify-send 'Done!' 'Backup completed'" },
+      { cmd: "cowsay", desc: "A cow in ASCII art says your message.", funny: "This ships on some systems. Linux has interesting priorities. Install with apt.", ex: "cowsay 'I love Linux'" },
+      { cmd: "fortune | cowsay", desc: "Random wise quote delivered by a cow.", funny: "Randomly wise or absurd quotes, delivered by an ASCII cow. Peak Linux culture.", ex: "fortune | cowsay" },
+      { cmd: "sl", desc: "A steam locomotive runs across your terminal.", funny: "What happens when you type sl instead of ls? Install it and find out. Worth it.", ex: "sl" },
+      { cmd: "figlet", desc: "Generate large ASCII art text.", funny: "Turn boring text into giant ASCII art. Absolutely necessary for every script.", ex: "figlet 'HELLO WORLD'" },
+      { cmd: "yes", desc: "Output 'y' forever until killed.", funny: "Answers 'y' to everything, forever. Pipe into commands that ask too many questions.", ex: "yes | apt install something" },
+      { cmd: "factor", desc: "Print prime factors of a number.", funny: "Tells you the prime factors. Useful for math, cryptography, or showing off.", ex: "factor 360" },
+      { cmd: "cal", desc: "Display a calendar in the terminal.", funny: "A calendar in your terminal. Because apparently one screen isn't enough.", ex: "cal 2025" },
+    ]
+  },
+];
+
+const WISDOM = [
+  { title: "The Golden Rule", text: "Never run a command you copied from the internet without reading it first. Especially if it starts with curl | bash." },
+  { title: "The Silver Rule", text: "Always have a backup. Always. Right now. Stop reading and go make one." },
+  { title: "The rm -rf Rule", text: "If someone tells you to run rm -rf /, they are not your friend." },
+  { title: "The sudo Rule", text: "With sudo comes great responsibility — and the ability to break absolutely everything." },
+  { title: "The Vim Rule", text: "It is okay to use nano. It is okay to use gedit. We don't judge here. :q! and move on." },
+  { title: "The Tab Rule", text: "Press Tab. Always press Tab. Autocomplete is your best friend. It saves typos and lives." },
+  { title: "The Ctrl+C Rule", text: "When something goes wrong, try Ctrl+C first. Then panic. Then Google the error message." },
+  { title: "The History Rule", text: "Press the up arrow. Your previous commands are there. Linux invented time travel." },
+  { title: "The Man Page Rule", text: "man <command> has the answer. It always does. You just have to read it." },
+  { title: "The Stack Overflow Rule", text: "If you don't know what a command does, Google it. That's what everyone does. Including experts." },
+];
+
+// Build sidebar
+const sidebar = document.getElementById('sidebar');
+DATA.forEach(section => {
+  const a = document.createElement('a');
+  a.className = 'nav-item';
+  a.href = `#${section.id}`;
+  a.dataset.section = section.id;
+  a.innerHTML = `<span class="nav-icon">${section.icon}</span>${section.title}<span class="nav-count">${section.cmds.length}</span>`;
+  sidebar.appendChild(a);
+});
+
+// Build main content
+const main = document.getElementById('main-content');
+DATA.forEach(section => {
+  const sec = document.createElement('div');
+  sec.className = 'section';
+  sec.id = section.id;
+
+  const header = document.createElement('div');
+  header.className = 'section-header';
+  header.style.setProperty('--section-color', section.color);
+  header.innerHTML = `
+    <span class="section-icon">${section.icon}</span>
+    <h2 class="section-title">${section.title}</h2>
+    <span class="section-count-badge">${section.cmds.length} cmds</span>
+  `;
+  sec.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.className = 'cmd-grid';
+
+  section.cmds.forEach(cmd => {
+    const card = document.createElement('div');
+    card.className = 'cmd-card';
+    card.style.setProperty('--accent-color', section.color);
+    card.dataset.search = `${cmd.cmd} ${cmd.desc} ${cmd.funny}`.toLowerCase();
+
+    card.innerHTML = `
+      <div class="cmd-top">
+        <span class="cmd-name">${escHtml(cmd.cmd)}</span>
+        <span class="cmd-desc">${escHtml(cmd.desc)}</span>
+        <button class="copy-btn" onclick="copyCmd(this, '${escAttr(cmd.ex)}')">copy</button>
+      </div>
+      <div class="cmd-funny">${escHtml(cmd.funny)}</div>
+      <div class="cmd-example">${escHtml(cmd.ex)}</div>
+      ${cmd.warn ? `<div class="cmd-warning">${escHtml(cmd.warn)}</div>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+
+  sec.appendChild(grid);
+  main.appendChild(sec);
+});
+
+// Build wisdom
+const wisdomGrid = document.getElementById('wisdom-grid');
+WISDOM.forEach(w => {
+  const card = document.createElement('div');
+  card.className = 'wisdom-card';
+  card.innerHTML = `<div class="wisdom-title"># ${w.title}</div><div class="wisdom-text">${w.text}</div>`;
+  wisdomGrid.appendChild(card);
+});
+
+// Total command count
+document.getElementById('total-cmds').textContent = DATA.reduce((a, s) => a + s.cmds.length, 0) + '+';
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return s.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
+// Copy
+function copyCmd(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ done';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// Search
+const searchEl = document.getElementById('search');
+const countEl = document.getElementById('search-count');
+const clearBtn = document.getElementById('clear-btn');
+const noResults = document.getElementById('no-results');
+
+searchEl.addEventListener('input', doSearch);
+
+function doSearch() {
+  const q = searchEl.value.trim().toLowerCase();
+  clearBtn.classList.toggle('visible', q.length > 0);
+
+  const sections = document.querySelectorAll('.section');
+  let total = 0;
+
+  sections.forEach(sec => {
+    const cards = sec.querySelectorAll('.cmd-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      const match = !q || card.dataset.search.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) {
+        visible++;
+        // highlight
+        if (q) highlightCard(card, q);
+        else clearHighlight(card);
+      }
+    });
+
+    sec.classList.toggle('hidden', visible === 0);
+    total += visible;
+  });
+
+  countEl.textContent = q ? `${total} result${total !== 1 ? 's' : ''}` : '';
+  noResults.classList.toggle('visible', total === 0 && q.length > 0);
+}
+
+function highlightCard(card, q) {
+  clearHighlight(card);
+  const walk = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walk.nextNode()) nodes.push(walk.currentNode);
+  nodes.forEach(node => {
+    const idx = node.textContent.toLowerCase().indexOf(q);
+    if (idx === -1) return;
+    const span = document.createElement('span');
+    const before = document.createTextNode(node.textContent.slice(0, idx));
+    const mark = document.createElement('mark');
+    mark.textContent = node.textContent.slice(idx, idx + q.length);
+    const after = document.createTextNode(node.textContent.slice(idx + q.length));
+    span.appendChild(before); span.appendChild(mark); span.appendChild(after);
+    node.parentNode.replaceChild(span, node);
+  });
+}
+
+function clearHighlight(card) {
+  card.querySelectorAll('mark').forEach(m => {
+    m.replaceWith(document.createTextNode(m.textContent));
+  });
+}
+
+function clearSearch() {
+  searchEl.value = '';
+  doSearch();
+  searchEl.focus();
+}
+
+// Active nav on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const active = document.querySelector(`.nav-item[data-section="${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+// Back to top
+const backTop = document.getElementById('back-top');
+window.addEventListener('scroll', () => {
+  backTop.classList.toggle('visible', window.scrollY > 400);
+});
+
+// Keyboard shortcut: / to focus search
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== searchEl) {
+    e.preventDefault();
+    searchEl.focus();
+  }
+  if (e.key === 'Escape') clearSearch();
+});
+</script>
+</body>
+</html>
