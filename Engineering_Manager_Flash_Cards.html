@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Manager (.NET) - Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #00d2ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 600px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff, #7b2ff7);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .card-counter {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .cat-leadership { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .cat-technical { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .cat-team { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .cat-process { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .cat-dotnet { background: rgba(99, 45, 214, 0.2); color: #c4b5fd; border: 1px solid rgba(99, 45, 214, 0.3); }
+        .cat-tips { background: rgba(236, 72, 153, 0.2); color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        .flashcard-container {
+            width: 100%;
+            max-width: 600px;
+            height: 420px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-bottom: 25px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(0,210,255,0.05);
+        }
+
+        .flashcard-back {
+            background: linear-gradient(145deg, #1e3a5f, #1e293b);
+            border: 1px solid rgba(0,210,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(123,47,247,0.1);
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front h2 {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            color: #f1f5f9;
+            margin-bottom: 15px;
+        }
+
+        .flashcard-front .icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-back p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+
+        .flashcard-back ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .flashcard-back ul li {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .flashcard-back ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #00d2ff;
+        }
+
+        .tap-hint {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 15px;
+            opacity: 0.7;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-prev, .btn-next {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .btn-prev:hover, .btn-next:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-shuffle {
+            background: linear-gradient(135deg, #7b2ff7, #00d2ff);
+            color: #fff;
+        }
+
+        .btn-shuffle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(123, 47, 247, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .filter-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: rgba(0, 210, 255, 0.4);
+            color: #fff;
+        }
+
+        .keyboard-hints {
+            margin-top: 25px;
+            color: #475569;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .keyboard-hints kbd {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: inherit;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .flashcard-container {
+                height: 380px;
+            }
+
+            .flashcard-face {
+                padding: 22px;
+            }
+
+            .flashcard-front h2 {
+                font-size: 1.15rem;
+            }
+
+            .flashcard-back p,
+            .flashcard-back ul li {
+                font-size: 0.85rem;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .flashcard-container {
+                height: 360px;
+            }
+
+            .flashcard-front h2 {
+                font-size: 1.05rem;
+            }
+        }
+
+        .swipe-indicator {
+            display: none;
+            text-align: center;
+            color: #475569;
+            font-size: 0.75rem;
+            margin-top: 10px;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .swipe-indicator {
+                display: block;
+            }
+            .keyboard-hints {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🧠 Think Like an EM (.NET)</h1>
+        <p>Engineering Manager Mindset &amp; .NET Best Practices</p>
+    </header>
+
+    <div class="filter-container" id="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="leadership">Leadership</button>
+        <button class="filter-btn" data-filter="technical">Technical</button>
+        <button class="filter-btn" data-filter="team">Team</button>
+        <button class="filter-btn" data-filter="process">Process</button>
+        <button class="filter-btn" data-filter="dotnet">.NET</button>
+        <button class="filter-btn" data-filter="tips">Tips & Tricks</button>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="card-counter" id="cardCounter">1 / 40</div>
+
+    <div class="flashcard-container" id="flashcardContainer">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-face flashcard-front">
+                <span class="category-badge" id="frontCategory"></span>
+                <div class="icon" id="frontIcon"></div>
+                <h2 id="frontText"></h2>
+                <span class="tap-hint">Tap to reveal answer</span>
+            </div>
+            <div class="flashcard-face flashcard-back">
+                <div id="backContent"></div>
+                <span class="tap-hint">Tap to see question</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-prev" id="prevBtn" onclick="prevCard()">← Prev</button>
+        <button class="btn btn-shuffle" onclick="shuffleCards()">🔀 Shuffle</button>
+        <button class="btn btn-next" id="nextBtn" onclick="nextCard()">Next →</button>
+    </div>
+
+    <div class="swipe-indicator">👆 Swipe left/right to navigate • Tap card to flip</div>
+    <div class="keyboard-hints">
+        <kbd>←</kbd> Previous &nbsp; <kbd>→</kbd> Next &nbsp; <kbd>Space</kbd> Flip &nbsp; <kbd>S</kbd> Shuffle
+    </div>
+
+    <script>
+        const flashcardsData = [
+            {
+                category: "leadership",
+                icon: "🎯",
+                question: "What is your #1 job as an Engineering Manager?",
+                answer: "<ul><li>Multiply the output of your team, not yourself</li><li>Remove blockers before they become visible</li><li>Create an environment where engineers do their best work</li><li>Balance business needs with technical excellence</li><li>You succeed when your team succeeds without you in the room</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "⚖️",
+                question: "How do you balance being technical vs. managerial?",
+                answer: "<ul><li>Stay technical enough to ask the right questions, not to write all the code</li><li>Review PRs for architecture, not semicolons</li><li>Keep 20-30% time for technical context</li><li>Trust your senior devs for implementation details</li><li>Your job is to make decisions, not to prove you're the smartest in the room</li></ul>"
+            },
+            {
+                category: "technical",
+                icon: "🏗️",
+                question: "How should an EM approach Architecture Decisions?",
+                answer: "<ul><li>Document decisions with ADRs (Architecture Decision Records)</li><li>Optimize for reversibility — prefer two-way doors</li><li>Ask: 'What's the cost of being wrong?'</li><li>Involve the team in decisions, own the accountability</li><li>Think in systems, not features</li><li>Consider: maintainability > cleverness</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "🟣",
+                question: "Key .NET Architecture Patterns an EM Should Champion",
+                answer: "<ul><li>Clean Architecture / Onion Architecture for large projects</li><li>CQRS + MediatR for complex domains</li><li>Vertical Slice Architecture for faster delivery</li><li>Minimal APIs for microservices</li><li>Background services with IHostedService</li><li>Know when NOT to use patterns — simplicity wins</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "⚡",
+                question: "Performance Decisions in .NET — What Should an EM Know?",
+                answer: "<ul><li>Know the difference between Span&lt;T&gt;, Memory&lt;T&gt; usage and when they matter</li><li>Connection pooling in EF Core is not optional</li><li>Async/await is not always faster — understand the thread pool</li><li>Caching strategy: Memory → Distributed → CDN</li><li>Profile before optimizing (BenchmarkDotNet, dotTrace)</li><li>Set performance budgets in CI/CD pipelines</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "👥",
+                question: "How to Build a High-Performing .NET Team?",
+                answer: "<ul><li>Hire for problem-solving ability, not framework knowledge</li><li>Mix seniors and juniors intentionally (70/30 ratio)</li><li>Establish coding standards early (use .editorconfig)</li><li>Psychological safety > technical brilliance</li><li>Pair programming for knowledge transfer, not gatekeeping</li><li>Celebrate technical debt paydown, not just features</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "🗣️",
+                question: "How to Run Effective 1:1s as an EM?",
+                answer: "<ul><li>Their meeting, not yours — let them set the agenda</li><li>Ask: 'What's blocking you that you haven't told me?'</li><li>Discuss career growth every 3rd meeting minimum</li><li>Take notes and follow through on commitments</li><li>Watch for burnout signals: cynicism, withdrawal, overtime</li><li>Share context from leadership — be transparent</li></ul>"
+            },
+            {
+                category: "process",
+                icon: "🔄",
+                question: "How to Manage Technical Debt as an EM?",
+                answer: "<ul><li>Make it visible: maintain a tech debt register</li><li>Allocate 15-20% of sprint capacity for debt reduction</li><li>Classify: Security debt > Performance debt > Code quality</li><li>Frame it in business terms: 'This slows us by X days per feature'</li><li>Never ask permission to fix critical debt — just do it</li><li>Track debt-to-feature ratio over time</li></ul>"
+            },
+            {
+                category: "process",
+                icon: "📊",
+                question: "What Metrics Should an EM Track?",
+                answer: "<ul><li>DORA Metrics: Deployment frequency, Lead time, MTTR, Change failure rate</li><li>Sprint velocity (trend, not absolute)</li><li>Code review turnaround time</li><li>Bug escape rate to production</li><li>Team satisfaction (regular pulse surveys)</li><li>Never use metrics to punish — use them to improve systems</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "🐳",
+                question: ".NET DevOps Practices an EM Must Enforce",
+                answer: "<ul><li>CI/CD with GitHub Actions or Azure DevOps — no manual deploys</li><li>Docker multi-stage builds for consistent environments</li><li>Health checks endpoint (/health) in every service</li><li>Structured logging with Serilog + correlation IDs</li><li>Feature flags (LaunchDarkly/custom) for safe releases</li><li>Blue-green or canary deployments for critical services</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "🧭",
+                question: "How to Communicate Up (to VPs/C-suite)?",
+                answer: "<ul><li>Lead with impact, not implementation</li><li>Speak in business outcomes: revenue, risk, time-to-market</li><li>Use the BLUF format: Bottom Line Up Front</li><li>Bring solutions, not just problems</li><li>Quantify everything: 'This will reduce incidents by 40%'</li><li>Be honest about trade-offs — trust is your currency</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "💡",
+                question: "The 'Calendar Test' for EMs",
+                answer: "<p>Look at your calendar for last week. Categorize time into:</p><ul><li><strong>People:</strong> 1:1s, coaching, hiring (aim: 40%)</li><li><strong>Strategy:</strong> Planning, architecture, roadmap (aim: 30%)</li><li><strong>Execution:</strong> Reviews, standups, unblocking (aim: 20%)</li><li><strong>Admin:</strong> Reports, emails, meetings (aim: &lt;10%)</li></ul><p>If admin > 25%, you have a process problem.</p>"
+            },
+            {
+                category: "tips",
+                icon: "🔑",
+                question: "The 'Bus Factor' Rule",
+                answer: "<ul><li>No single person should be a SPOF (Single Point of Failure)</li><li>If someone leaves tomorrow, what breaks? Fix that now.</li><li>Enforce documentation of tribal knowledge</li><li>Rotate on-call and project leads</li><li>Cross-train team members on critical systems</li><li>In .NET: ensure multiple people understand the DI container setup, middleware pipeline, and deployment process</li></ul>"
+            },
+            {
+                category: "technical",
+                icon: "🔍",
+                question: "Code Review Philosophy for EMs",
+                answer: "<ul><li>Reviews should take &lt;24 hours — set this as team norm</li><li>Small PRs (&lt;400 lines) — enforce this culturally</li><li>Review for: correctness → maintainability → performance</li><li>Automate style issues (analyzers, formatters)</li><li>Ask questions instead of giving commands</li><li>PR descriptions should explain WHY, not WHAT</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "🛡️",
+                question: ".NET Security Checklist for EMs",
+                answer: "<ul><li>OWASP Top 10 awareness across the team</li><li>Use parameterized queries — never string concatenation</li><li>Secrets in Azure Key Vault / AWS Secrets Manager, not appsettings</li><li>Enable HTTPS everywhere + HSTS headers</li><li>Regular NuGet dependency audits (dotnet list package --vulnerable)</li><li>Authentication: Use Identity / Duende IdentityServer properly</li><li>Rate limiting middleware in production APIs</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "🌱",
+                question: "How to Grow Senior Engineers into Tech Leads?",
+                answer: "<ul><li>Give them ownership of a subsystem, not just tasks</li><li>Let them make (recoverable) mistakes</li><li>Include them in architecture discussions</li><li>Ask them to mentor juniors — teaching solidifies knowledge</li><li>Delegate decision-making, not just work</li><li>Give feedback on their influence, not just their code</li></ul>"
+            },
+            {
+                category: "process",
+                icon: "🚀",
+                question: "How to Ship Faster Without Cutting Corners?",
+                answer: "<ul><li>Reduce WIP (Work In Progress) — limit to 1-2 items per dev</li><li>Feature flags to decouple deploy from release</li><li>Automate everything you do more than twice</li><li>Trunk-based development with short-lived branches</li><li>Definition of Done includes tests + monitoring</li><li>Invest in developer experience (build times, local env)</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "🎪",
+                question: "Managing Stakeholder Expectations",
+                answer: "<ul><li>Under-promise, over-deliver (add 30% buffer)</li><li>Share progress weekly, not just at deadlines</li><li>Make trade-offs explicit: 'We can do X by Friday OR Y by next Thursday'</li><li>Say No with data, not emotions</li><li>Build trust deposits before making withdrawals</li><li>Document agreements in writing — memories differ</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "🧰",
+                question: "EM's Toolkit: Essential Frameworks",
+                answer: "<ul><li><strong>RACI:</strong> Who's Responsible, Accountable, Consulted, Informed</li><li><strong>RAPID:</strong> For faster decision-making</li><li><strong>Eisenhower Matrix:</strong> Urgent vs. Important prioritization</li><li><strong>Situation-Behavior-Impact:</strong> For giving feedback</li><li><strong>5 Whys:</strong> Root cause analysis for incidents</li><li><strong>T-shirt sizing:</strong> Quick estimation with stakeholders</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "📦",
+                question: ".NET Solution Structure an EM Should Advocate",
+                answer: "<ul><li>src/ — Source projects</li><li>tests/ — Unit + Integration tests (mirror src structure)</li><li>docs/ — ADRs, runbooks, architecture diagrams</li><li>Directory.Build.props for shared settings</li><li>Global usings to reduce noise</li><li>Consistent naming: Company.Product.Layer pattern</li><li>Shared contracts in a dedicated package for microservices</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "🎯",
+                question: "Hiring .NET Engineers — What to Actually Look For",
+                answer: "<ul><li>Problem decomposition skills > API trivia</li><li>Ask system design questions relevant to your domain</li><li>Live coding: watch HOW they think, not just the answer</li><li>Look for curiosity: 'How does this work under the hood?'</li><li>Culture add, not culture fit</li><li>Red flag: can't explain trade-offs in their past decisions</li><li>Green flag: asks YOU good questions about the team</li></ul>"
+            },
+            {
+                category: "technical",
+                icon: "🔥",
+                question: "Incident Management — EM's Role",
+                answer: "<ul><li>During incident: Shield the team, manage communication</li><li>Your job: coordinate, not debug (unless critical)</li><li>Blameless postmortems within 48 hours</li><li>Focus on: What systems failed? Not: Who failed?</li><li>Action items with owners and deadlines</li><li>Track MTTR trend — it should decrease over time</li><li>Build runbooks before you need them</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "⏰",
+                question: "Time Management Hacks for EMs",
+                answer: "<ul><li>Batch context-switching: group meetings together</li><li>Protect 2-hour blocks for strategic thinking</li><li>Delegate anything someone else can do 70% as well</li><li>'If it's not a HELL YES, it's a no' for new commitments</li><li>Async communication by default, sync by exception</li><li>Write things down — your memory is unreliable at scale</li><li>Review calendar every Friday — ruthlessly prune</li></ul>"
+            },
+            {
+                category: "process",
+                icon: "📋",
+                question: "Sprint Planning Tips for .NET Teams",
+                answer: "<ul><li>Stories should be vertically sliced (UI → API → DB)</li><li>Include infrastructure/DevOps work in sprint capacity</li><li>Spike stories for unknown tech (time-boxed to 1-2 days)</li><li>Acceptance criteria must be testable</li><li>Break anything > 5 story points into smaller pieces</li><li>Account for PR review time in estimates</li><li>Leave 10% buffer for unplanned work</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "🌊",
+                question: "Navigating Organizational Politics",
+                answer: "<ul><li>Build allies before you need them</li><li>Understand other teams' OKRs — find alignment</li><li>Give credit publicly, give feedback privately</li><li>Document your team's wins — visibility matters</li><li>Learn the language of finance and product</li><li>Pick your battles: not every hill is worth dying on</li><li>Be the person who makes meetings shorter, not longer</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "🧪",
+                question: "Testing Strategy an EM Should Enforce",
+                answer: "<ul><li>Testing pyramid: Many unit → Some integration → Few E2E</li><li>Unit tests: fast, isolated, test behavior not implementation</li><li>Integration tests: Use WebApplicationFactory for API testing</li><li>Don't mock everything — test real behavior where possible</li><li>Code coverage target: 80% meaningful (not vanity coverage)</li><li>Mutation testing to verify test quality</li><li>Tests run in CI — broken tests block merge</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "🧠",
+                question: "Mental Models Every EM Needs",
+                answer: "<ul><li><strong>Conway's Law:</strong> Your architecture mirrors your org chart</li><li><strong>Goodhart's Law:</strong> When a measure becomes a target, it ceases to be a good measure</li><li><strong>Brooks's Law:</strong> Adding people to a late project makes it later</li><li><strong>Two Pizza Rule:</strong> Teams > 8 people lose efficiency</li><li><strong>Pareto Principle:</strong> 80% of bugs come from 20% of code</li><li><strong>Hyrum's Law:</strong> Every observable behavior will be depended on</li></ul>"
+            },
+            {
+                category: "technical",
+                icon: "📐",
+                question: "When to Choose Microservices vs. Monolith in .NET?",
+                answer: "<ul><li>Start monolith → extract services when pain is real</li><li>Microservices need: CI/CD maturity, observability, team autonomy</li><li>Team size matters: < 4 devs? Monolith is fine</li><li>.NET Aspire simplifies distributed .NET apps</li><li>Modular monolith (separate assemblies) is often the sweet spot</li><li>Ask: 'Can we deploy independently?' If no → don't split</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "💬",
+                question: "Giving Difficult Feedback",
+                answer: "<ul><li>Use SBI: Situation → Behavior → Impact</li><li>Timely: within 48 hours, not at annual review</li><li>Be specific: 'In Tuesday's PR review, you...' not 'You always...'</li><li>Ask for their perspective first</li><li>Focus on behavior change, not character judgment</li><li>Follow up: check in after 1-2 weeks</li><li>Document patterns for performance management</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "🏆",
+                question: "Things to Remember Every Day as an EM",
+                answer: "<ul><li>Your team's growth IS your growth</li><li>Clarity is kindness — be explicit about expectations</li><li>Done is better than perfect (but 'done' includes quality)</li><li>Technology serves the business, not the other way around</li><li>The best code is the code you don't have to write</li><li>Invest in relationships — they compound over time</li><li>Take care of yourself — burned out EMs burn out teams</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "🎯",
+                question: "How to Set and Use OKRs Effectively?",
+                answer: "<ul><li>O = Objective (inspiring, qualitative direction); KR = Key Result (measurable, specific)</li><li>Team OKRs should ladder up to company OKRs</li><li>60-70% achievement is healthy — 100% means too easy</li><li>Review weekly, don't wait for quarter-end surprises</li><li>Limit to 3-5 OKRs per quarter — focus beats breadth</li><li>Never tie OKRs to compensation — they'll sandbag targets</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "🌐",
+                question: "Managing Remote & Hybrid .NET Teams",
+                answer: "<ul><li>Async-first culture: documents > meetings, decisions in writing</li><li>Over-communicate context — hallway conversations don't happen remotely</li><li>Equal access rule: if one person is remote, all are on camera</li><li>Time-zone fairness: rotate meeting times, don't always penalize one region</li><li>Invest in developer toolbox: fast CI/CD, good local dev env</li><li>Build trust intentionally: virtual coffee chats, team retros, shared docs</li></ul>"
+            },
+            {
+                category: "process",
+                icon: "🗺️",
+                question: "How to Build and Own a Technical Roadmap?",
+                answer: "<ul><li>Now / Next / Later framework — keep it horizon-based, not date-specific</li><li>Include tech debt, infrastructure, and platform work — not just features</li><li>Align with product roadmap but own the 'how' completely</li><li>Communicate trade-offs: 'We can ship X fast OR Y right'</li><li>Review and update quarterly — a stale roadmap is worse than none</li><li>Share widely: transparency builds trust with stakeholders</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "🤖",
+                question: "AI & LLM Tooling in .NET Teams — EM Perspective",
+                answer: "<ul><li>GitHub Copilot adoption: measure PR throughput, not just acceptance rate</li><li>Semantic Kernel (.NET SDK) for building LLM-powered features</li><li>Establish AI code review norms — LLM output still needs human review</li><li>Set guardrails: no secrets in prompts, no sensitive data to external APIs</li><li>AI speeds up boilerplate; senior engineers are still the bottleneck for architecture</li><li>Track AI-related incidents separately in your post-mortem process</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "🤝",
+                question: "The Art of Delegation for EMs",
+                answer: "<ul><li>Delegate authority, not just tasks — give ownership of outcomes</li><li>Match the right person to the right challenge (stretch + capability)</li><li>Delegation levels: 1=Do it, 2=Report back, 3=Decide & inform, 4=Full autonomy</li><li>Resist the urge to rescue — let people struggle productively</li><li>Create a 'delegation log' — track what you've handed off and to whom</li><li>The goal: everything you do today should be someone else's job in 6 months</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "🏛️",
+                question: "Building Engineering Culture Deliberately",
+                answer: "<ul><li>Culture is what happens when you're not in the room</li><li>Document your norms: team working agreement, definition of done</li><li>Rituals matter: team demos, blameless retros, learning lunches</li><li>Reward the behaviors you want: curiosity, helping others, raising flags early</li><li>Hire and fire by your values — nothing undermines culture faster than tolerating misalignment</li><li>Psychological safety is the foundation — without it, nothing else works</li></ul>"
+            },
+            {
+                category: "team",
+                icon: "🔗",
+                question: "Cross-team Collaboration & Dependencies",
+                answer: "<ul><li>Map your team's dependencies at sprint start — identify blockers early</li><li>Build relationships with peer EMs before you need their help</li><li>APIs between teams: treat them like external contracts — versioned, documented</li><li>Escalate dependency blocks within 48 hours, not at deadline</li><li>Join their retrospectives occasionally — understand their pain, not just yours</li><li>When two teams conflict: align on shared outcome, not team priorities</li></ul>"
+            },
+            {
+                category: "leadership",
+                icon: "💰",
+                question: "Budget & Headcount Planning for EMs",
+                answer: "<ul><li>Know your team's fully-loaded cost — you need this for ROI conversations</li><li>Headcount asks need business cases: expected output delta, risk of not hiring</li><li>Contingent vs. permanent: contractors for short bursts, FTE for core capabilities</li><li>Track tooling and infra spend — small SaaS bills compound fast</li><li>Build your ask 2 quarters early — budget cycles have long lead times</li><li>Frame spend in revenue protected or enabled, not engineering comfort</li></ul>"
+            },
+            {
+                category: "dotnet",
+                icon: "📡",
+                question: "Observability in .NET — What Every EM Must Ensure",
+                answer: "<ul><li>The three pillars: Logs (what happened), Metrics (how often), Traces (where time went)</li><li>OpenTelemetry is the .NET standard — enforce it from day one</li><li>Structured logging with Serilog or Microsoft.Extensions.Logging + correlation IDs</li><li>Application Insights or Grafana/Prometheus for dashboards</li><li>SLOs (Service Level Objectives) defined before you're paged, not after</li><li>Alerting: page on symptoms (customer impact), not causes (CPU spike)</li></ul>"
+            },
+            {
+                category: "tips",
+                icon: "📉",
+                question: "Managing Underperformance Without Losing Humanity",
+                answer: "<ul><li>Address it early — waiting makes it harder, not easier</li><li>Distinguish: skill gap vs. will gap — solutions differ completely</li><li>PIP is a last resort, not a first move — exhaust coaching first</li><li>Document everything: dates, conversations, agreements, outcomes</li><li>Be direct and kind simultaneously — vagueness isn't compassion, it's avoidance</li><li>Involve HR early as a partner, not just when it's gone badly</li><li>Success: either performance improves OR a dignified exit — both are okay outcomes</li></ul>"
+            }
+        ];
+
+        let currentCards = [...flashcardsData];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function getCategoryClass(category) {
+            const map = {
+                leadership: 'cat-leadership',
+                technical: 'cat-technical',
+                team: 'cat-team',
+                process: 'cat-process',
+                dotnet: 'cat-dotnet',
+                tips: 'cat-tips'
+            };
+            return map[category] || 'cat-tips';
+        }
+
+        function getCategoryLabel(category) {
+            const map = {
+                leadership: 'Leadership',
+                technical: 'Technical',
+                team: 'Team',
+                process: 'Process',
+                dotnet: '.NET',
+                tips: 'Tips & Tricks'
+            };
+            return map[category] || category;
+        }
+
+        function renderCard() {
+            const card = currentCards[currentIndex];
+            document.getElementById('frontIcon').textContent = card.icon;
+            document.getElementById('frontText').textContent = card.question;
+            document.getElementById('backContent').innerHTML = card.answer;
+
+            const badge = document.getElementById('frontCategory');
+            badge.textContent = getCategoryLabel(card.category);
+            badge.className = 'category-badge ' + getCategoryClass(card.category);
+
+            document.getElementById('cardCounter').textContent = `${currentIndex + 1} / ${currentCards.length}`;
+            document.getElementById('progressFill').style.width = `${((currentIndex + 1) / currentCards.length) * 100}%`;
+
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === currentCards.length - 1;
+
+            if (isFlipped) {
+                document.getElementById('flashcard').classList.remove('flipped');
+                isFlipped = false;
+            }
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            if (currentIndex < currentCards.length - 1) {
+                currentIndex++;
+                renderCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = currentCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentCards[i], currentCards[j]] = [currentCards[j], currentCards[i]];
+            }
+            currentIndex = 0;
+            renderCard();
+        }
+
+        function filterCards(category) {
+            if (category === 'all') {
+                currentCards = [...flashcardsData];
+            } else {
+                currentCards = flashcardsData.filter(card => card.category === category);
+            }
+            currentIndex = 0;
+            renderCard();
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === category);
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('flashcardContainer').addEventListener('click', flipCard);
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => filterCards(btn.dataset.filter));
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextCard();
+            else if (e.key === 'ArrowLeft') prevCard();
+            else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+            else if (e.key === 's' || e.key === 'S') shuffleCards();
+        });
+
+        // Touch/Swipe support
+        document.getElementById('flashcardContainer').addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.getElementById('flashcardContainer').addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextCard();
+                else prevCard();
+            }
+        }, { passive: true });
+
+        // Initialize
+        renderCard();
+    </script>
+</body>
+</html>

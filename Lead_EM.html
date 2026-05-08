@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Lead SE → Engineering Manager: The .NET Survival Guide</title>
+    <style>
+        :root {
+            --primary: #512bd4;
+            --secondary: #1e1e2e;
+            --accent: #e91e8c;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f0f1a;
+            --card: #1a1a2e;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: #2d2d44;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--bg) 50%, #1a0a2e 100%);
+            border-bottom: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(81, 43, 212, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #512bd4, #e91e8c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: var(--muted);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .hero .joke {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            font-style: italic;
+            color: var(--warning);
+            position: relative;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border);
+            z-index: 9999;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Navigation */
+        .nav {
+            position: sticky;
+            top: 4px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text);
+            background: var(--card);
+            border-color: var(--primary);
+        }
+
+        /* Sections */
+        .section {
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(81, 43, 212, 0.15);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        /* Accordion */
+        .accordion {
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .accordion-header:hover {
+            border-color: var(--primary);
+            background: rgba(81, 43, 212, 0.1);
+        }
+
+        .accordion-header.active {
+            border-color: var(--primary);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            background: rgba(81, 43, 212, 0.15);
+        }
+
+        .accordion-header .arrow {
+            transition: transform 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .accordion-header.active .arrow {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--primary);
+            border-top: none;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            padding: 25px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .accordion-content.show {
+            display: block;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 3px;
+        }
+
+        .tag-purple { background: rgba(81, 43, 212, 0.2); color: #a78bfa; }
+        .tag-pink { background: rgba(233, 30, 140, 0.2); color: #f472b6; }
+        .tag-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .tag-yellow { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .tag-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        /* Code Blocks */
+        .code-block {
+            background: #0d0d1a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .code-block .keyword { color: #c792ea; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .comment { color: #546e7a; }
+        .code-block .type { color: #82aaff; }
+        .code-block .method { color: #ffcb6b; }
+
+        /* Quiz */
+        .quiz-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px 20px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: rgba(81, 43, 212, 0.1);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .quiz-option .letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--border);
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .quiz-feedback.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: #34d399;
+        }
+
+        .quiz-feedback.wrong {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: #f87171;
+        }
+
+        /* Tips */
+        .tip-box {
+            background: rgba(81, 43, 212, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .tip-box.warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: var(--warning);
+        }
+
+        .tip-box.danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .tip-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+        }
+
+        .tip-box-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Example Answer */
+        .example-answer {
+            background: linear-gradient(135deg, rgba(81, 43, 212, 0.05), rgba(233, 30, 140, 0.05));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .example-answer::before {
+            content: '💬 Example Answer';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--bg);
+            padding: 2px 12px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
+            border-radius: 4px;
+        }
+
+        .example-answer .good {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .example-answer .bad {
+            color: var(--danger);
+            font-weight: 600;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        /* Cheat Sheet */
+        .cheat-sheet {
+            background: var(--card);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .cheat-sheet h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .cheat-sheet table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .cheat-sheet th, .cheat-sheet td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cheat-sheet th {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cheat-sheet tr:hover td {
+            background: rgba(81, 43, 212, 0.05);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .tab:hover {
+            background: rgba(81, 43, 212, 0.1);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0 10px 10px 10px;
+            padding: 25px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Score Tracker */
+        .score-tracker {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(81, 43, 212, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .score-tracker:hover {
+            transform: scale(1.1);
+        }
+
+        .score-tracker .score-num {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .score-tracker .score-label {
+            font-size: 0.6rem;
+            color: var(--muted);
+        }
+
+        /* Funny Quotes */
+        .funny-quote {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--card);
+        }
+
+        .funny-quote::before {
+            content: '😂';
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-style: normal;
+        }
+
+        /* Comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison .before, .comparison .after {
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .comparison .before {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .comparison .after {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .comparison h4 {
+            margin-bottom: 10px;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .checklist li:hover {
+            background: rgba(81, 43, 212, 0.1);
+        }
+
+        .checklist li.checked {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+
+        .checklist li.checked .checkbox {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .checklist li.checked .checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        /* Print Styles for Cheat Sheet */
+        .print-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(81, 43, 212, 0.4);
+        }
+
+        /* Scenario Game */
+        .scenario-game {
+            background: linear-gradient(135deg, var(--card), rgba(81, 43, 212, 0.1));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .scenario-game h4 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .scenario-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .scenario-choice {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scenario-choice:hover {
+            border-color: var(--primary);
+            background: rgba(81, 43, 212, 0.1);
+        }
+
+        .scenario-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .scenario-result.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .comparison { grid-template-columns: 1fr; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 0.75rem; padding: 6px 10px; }
+            .section { padding: 40px 0; }
+        }
+
+        @media print {
+            .nav, .progress-container, .score-tracker, .print-btn,
+            .quiz-container, .scenario-game { display: none; }
+            body { background: white; color: black; }
+            .card, .cheat-sheet { border-color: #ddd; background: white; }
+            .section { page-break-inside: avoid; }
+        }
+
+        /* Easter Egg */
+        .easter-egg {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .easter-egg:hover {
+            transform: rotate(360deg) scale(1.2);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dashed var(--primary);
+            cursor: help;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.8rem;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .level-easy { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .level-medium { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .level-hard { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .highlight { color: var(--accent); font-weight: 600; }
+        .highlight-purple { color: var(--primary); font-weight: 600; }
+
+        ul, ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        h4 {
+            margin: 15px 0 10px;
+            color: var(--text);
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="score-tracker" id="scoreTracker" title="Your Quiz Score">
+        <span class="score-num" id="scoreNum">0</span>
+        <span class="score-label">points</span>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1>🎯 Lead SE → Engineering Manager</h1>
+        <p class="subtitle">The Ultimate .NET Transition Survival Guide</p>
+        <div class="joke">
+            "I used to mass-produce C# code. Now I mass-produce 1:1 meeting calendar invites." <br>
+            <small>— Every new Engineering Manager, probably</small>
+        </div>
+        <p style="margin-top: 20px; position: relative;">
+            <span class="tag tag-purple">People Management</span>
+            <span class="tag tag-pink">System Design</span>
+            <span class="tag tag-green">Delivery</span>
+            <span class="tag tag-yellow">Strategy</span>
+            <span class="tag tag-red">Hiring</span>
+            <span class="tag tag-purple">Stakeholders</span>
+            <span class="tag tag-green">AI & Culture</span>
+        </p>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-links">
+            <li><a href="#mindset">🧠 Mindset Shift</a></li>
+            <li><a href="#people">👥 People</a></li>
+            <li><a href="#technical">⚙️ Technical</a></li>
+            <li><a href="#delivery">📦 Delivery</a></li>
+            <li><a href="#stakeholders">🤝 Stakeholders</a></li>
+            <li><a href="#culture">🏛️ Culture & AI</a></li>
+            <li><a href="#interviews">🎤 Interviews</a></li>
+            <li><a href="#scenarios">🎮 Scenarios</a></li>
+            <li><a href="#cheatsheet">📋 Cheat Sheet</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+
+        <!-- Section 1: Mindset Shift -->
+        <section class="section" id="mindset">
+            <h2 class="section-title">🧠 The Mindset Shift</h2>
+            <p class="section-subtitle">From "I ship code" to "I ship people who ship code" — yes, you're a meta-shipper now</p>
+
+            <div class="funny-quote">
+                "As a Lead SE, your PR was code. As an EM, your PR is people's careers. <br>And unlike code, people don't have a --force flag."
+            </div>
+
+            <div class="comparison">
+                <div class="before">
+                    <h4>❌ Lead Software Engineer</h4>
+                    <ul>
+                        <li>My code runs in production</li>
+                        <li>I architect systems</li>
+                        <li>I review PRs at 11 PM</li>
+                        <li>I mentor through code</li>
+                        <li>My IDE is open 8+ hours</li>
+                        <li>Bugs keep me up at night</li>
+                    </ul>
+                </div>
+                <div class="after">
+                    <h4>✅ Engineering Manager</h4>
+                    <ul>
+                        <li>My team's code runs in production</li>
+                        <li>I architect teams & processes</li>
+                        <li>I review growth plans at 11 PM</li>
+                        <li>I mentor through conversations</li>
+                        <li>My calendar is full 8+ hours</li>
+                        <li>Attrition keeps me up at night</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tip-box success">
+                <div class="tip-box-title">💡 Pro Tip</div>
+                Your success is no longer measured by YOUR output — it's measured by your TEAM's output multiplied by their happiness coefficient. Yes, that's a real thing. No, you can't unit test it.
+            </div>
+
+            <div class="card">
+                <h4>🔑 The Five Key Transitions</h4>
+                <ul class="checklist" id="checklist1">
+                    <li onclick="toggleCheck(this)"><span class="checkbox"></span> From solving problems → Enabling others to solve problems</li>
+                    <li onclick="toggleCheck(this)"><span class="checkbox"></span> From technical excellence → People excellence</li>
+                    <li onclick="toggleCheck(this)"><span class="checkbox"></span> From individual contribution → Force multiplication</li>
+                    <li onclick="toggleCheck(this)"><span class="checkbox"></span> From code ownership → Outcome ownership</li>
+                    <li onclick="toggleCheck(this)"><span class="checkbox"></span> From "how to build it" → "what to build & why"</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 2: People Management -->
+        <section class="section" id="people">
+            <h2 class="section-title">👥 People Management</h2>
+            <p class="section-subtitle">Congratulations! You now manage humans. They're like microservices but with feelings.</p>
+
+            <div class="funny-quote">
+                "Managing a .NET application is easy — it either compiles or it doesn't. Managing people? They compile fine but throw runtime exceptions you NEVER expected."
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🗣️ 1:1 Meetings — Your Most Important Tool</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <p><strong>Frequency:</strong> Weekly, 30 mins minimum. Never cancel. NEVER.</p>
+                    <h4>The GROW Framework for 1:1s:</h4>
+                    <ul>
+                        <li><strong>G</strong>oal — What do they want to achieve?</li>
+                        <li><strong>R</strong>eality — Where are they now?</li>
+                        <li><strong>O</strong>ptions — What paths exist?</li>
+                        <li><strong>W</strong>ill — What will they commit to?</li>
+                    </ul>
+                    <div class="tip-box">
+                        <div class="tip-box-title">🎯 Power Questions to Ask</div>
+                        <ul>
+                            <li>"What's the one thing I could do to make your job easier?"</li>
+                            <li>"If you could change one thing about our team, what would it be?"</li>
+                            <li>"What's something you're proud of this week that nobody noticed?"</li>
+                            <li>"Where do you see yourself in 12 months? How can I help?"</li>
+                        </ul>
+                    </div>
+                    <div class="tip-box danger">
+                        <div class="tip-box-title">⚠️ Anti-Pattern Alert</div>
+                        Don't turn 1:1s into status updates. You have Jira for that (unfortunately).
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>📊 Performance Management & Feedback</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The SBI Feedback Model (Situation-Behavior-Impact):</h4>
+                    <div class="example-answer">
+                        <p><strong>Instead of:</strong> <span class="bad">"Your code reviews are bad"</span></p>
+                        <p><strong>Say:</strong> <span class="good">"In yesterday's PR review (Situation), I noticed you approved without comments on the missing null checks (Behavior). This caused a NullReferenceException in production that took the team 2 hours to fix (Impact)."</span></p>
+                    </div>
+                    <h4>Performance Rating Framework:</h4>
+                    <ul>
+                        <li>🚀 <strong>Exceeding:</strong> Consistently delivers beyond expectations, uplevels others</li>
+                        <li>✅ <strong>Meeting:</strong> Reliably delivers at level, growing steadily</li>
+                        <li>⚠️ <strong>Developing:</strong> Has gaps, needs coaching, on a growth plan</li>
+                        <li>🔴 <strong>Below:</strong> On PIP. This is where your HR partnership skills matter</li>
+                    </ul>
+                    <div class="tip-box warning">
+                        <div class="tip-box-title">🎯 Remember</div>
+                        Feedback should never be a surprise during review time. If it is, YOU failed as a manager, not them.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🔥 Conflict Resolution</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The DESC Method:</h4>
+                    <ul>
+                        <li><strong>D</strong>escribe the situation objectively</li>
+                        <li><strong>E</strong>xpress your concerns</li>
+                        <li><strong>S</strong>uggest alternatives</li>
+                        <li><strong>C</strong>onsequences — state what happens if unresolved</li>
+                    </ul>
+                    <div class="example-answer">
+                        <p><strong>Scenario:</strong> Two senior devs fighting over whether to use MediatR or not.</p>
+                        <p><strong>Bad approach:</strong> <span class="bad">"Just use what I say, I'm the manager."</span></p>
+                        <p><strong>Good approach:</strong> <span class="good">"Let's timebox this decision. Each of you prepare a 10-minute ADR (Architecture Decision Record) with pros/cons. We'll evaluate against our team's specific constraints: throughput needs, team familiarity, and maintenance overhead. We decide by Thursday."</span></p>
+                    </div>
+                    <div class="tip-box success">
+                        <div class="tip-box-title">💡 Conflict is Healthy</div>
+                        Teams without conflict are teams where people don't feel safe enough to disagree. Your job is to make conflict productive, not eliminate it.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🎯 Hiring & Team Building</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>Building Your .NET Dream Team:</h4>
+                    <div class="code-block" data-lang="hiring-rubric">
+<span class="comment">// Your hiring evaluation shouldn't just be about LeetCode</span>
+<span class="keyword">class</span> <span class="type">IdealCandidate</span> {
+    <span class="keyword">public</span> <span class="type">int</span> TechnicalSkill { get; set; }      <span class="comment">// 30% weight</span>
+    <span class="keyword">public</span> <span class="type">int</span> ProblemSolving { get; set; }      <span class="comment">// 25% weight</span>
+    <span class="keyword">public</span> <span class="type">int</span> Communication { get; set; }       <span class="comment">// 20% weight</span>
+    <span class="keyword">public</span> <span class="type">int</span> CulturalAdd { get; set; }         <span class="comment">// 15% weight (not "fit"!)</span>
+    <span class="keyword">public</span> <span class="type">int</span> GrowthMindset { get; set; }      <span class="comment">// 10% weight</span>
+}
+                    </div>
+                    <h4>Interview Questions You Should Ask Candidates:</h4>
+                    <ul>
+                        <li>"Tell me about a time you disagreed with an architectural decision. What happened?"</li>
+                        <li>"Describe a production incident. What was your role in resolution AND prevention?"</li>
+                        <li>"How do you approach learning a new .NET feature you've never used?"</li>
+                        <li>"Tell me about code you wrote that you later realized was terrible. What did you learn?"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>📈 Career Development & Growth Plans</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The Career Conversation Framework:</h4>
+                    <p>Every direct report should have clarity on:</p>
+                    <ul>
+                        <li>🎯 Where they want to go (Individual Contributor vs Management track)</li>
+                        <li>📍 Where they are now (honest skills assessment)</li>
+                        <li>🗺️ What the path looks like (specific, measurable milestones)</li>
+                        <li>🔧 What support they need from you</li>
+                    </ul>
+                    <div class="tip-box">
+                        <div class="tip-box-title">💡 The 70-20-10 Rule</div>
+                        <ul>
+                            <li><strong>70%</strong> learning from challenging assignments (stretch projects)</li>
+                            <li><strong>20%</strong> learning from others (mentoring, pairing)</li>
+                            <li><strong>10%</strong> formal learning (courses, conferences)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Technical Leadership -->
+        <section class="section" id="technical">
+            <h2 class="section-title">⚙️ Technical Leadership in .NET</h2>
+            <p class="section-subtitle">You don't write code daily anymore, but you better still understand it. Or your team will smell the decay.</p>
+
+            <div class="funny-quote">
+                "An EM who can't read a PR diff is like a restaurant manager who's never tasted food. Technically possible, practically terrifying."
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(event, 'tab-arch')">Architecture</div>
+                <div class="tab" onclick="switchTab(event, 'tab-dotnet')"> .NET Specifics</div>
+                <div class="tab" onclick="switchTab(event, 'tab-devops')">DevOps/Platform</div>
+                <div class="tab" onclick="switchTab(event, 'tab-quality')">Quality</div>
+            </div>
+
+            <div class="tab-content active" id="tab-arch">
+                <h4>Architecture Decisions You'll Influence:</h4>
+                <ul>
+                    <li><strong>Monolith vs Microservices</strong> — Know when each is appropriate. Hint: most teams should start monolithic.</li>
+                    <li><strong>Event-Driven Architecture</strong> — Azure Service Bus, RabbitMQ, Kafka. Understand trade-offs.</li>
+                    <li><strong>CQRS & Event Sourcing</strong> — When to use, when it's overkill (often).</li>
+                    <li><strong>Domain-Driven Design</strong> — Bounded contexts are your organizational tool.</li>
+                </ul>
+                <div class="code-block" data-lang="architectural-decision-record">
+<span class="comment">// ADR Template - Make your team use these!</span>
+<span class="comment">// Title: Use Minimal APIs for new microservices</span>
+<span class="comment">// Status: Accepted</span>
+<span class="comment">// Context: Team is building 3 new services, needs fast iteration</span>
+<span class="comment">// Decision: Use .NET 8 Minimal APIs over Controller-based</span>
+<span class="comment">// Consequences:</span>
+<span class="comment">//   + Faster development, less boilerplate</span>
+<span class="comment">//   + Better performance (no MVC pipeline overhead)</span>
+<span class="comment">//   - Team needs training (2 devs unfamiliar)</span>
+<span class="comment">//   - Some tooling gaps in OpenAPI generation</span>
+                </div>
+                <div class="tip-box success">
+                    <div class="tip-box-title">💡 EM Architecture Rule</div>
+                    Your role is not to MAKE architecture decisions (that's your Tech Lead). Your role is to ensure decisions ARE made, documented, and communicated. Create the space; don't fill it.
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-dotnet">
+                <h4>Key .NET Topics You Must Stay Current On:</h4>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🔥 .NET 8/9 Features</h4>
+                        <ul>
+                            <li>Native AOT Compilation</li>
+                            <li>Minimal APIs maturity</li>
+                            <li>Blazor United (SSR + WASM)</li>
+                            <li>Performance improvements</li>
+                            <li>Source generators</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>☁️ Azure/.NET Integration</h4>
+                        <ul>
+                            <li>Azure Functions (Isolated Worker)</li>
+                            <li>Azure Container Apps</li>
+                            <li>YARP reverse proxy</li>
+                            <li>Aspire (cloud-native stack)</li>
+                            <li>Azure OpenAI SDK</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>🏗️ Patterns & Practices</h4>
+                        <ul>
+                            <li>Vertical Slice Architecture</li>
+                            <li>Result Pattern (no exceptions for flow)</li>
+                            <li>MediatR / Wolverine</li>
+                            <li>Specification Pattern (EF Core)</li>
+                            <li>Outbox Pattern</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>📊 Observability</h4>
+                        <ul>
+                            <li>OpenTelemetry in .NET</li>
+                            <li>Structured logging (Serilog)</li>
+                            <li>Distributed tracing</li>
+                            <li>Health checks & readiness probes</li>
+                            <li>Application Insights / Datadog</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tip-box warning">
+                    <div class="tip-box-title">⚠️ Stay Technical, But Differently</div>
+                    Allocate 20% of your time to technical activities: PR reviews (selectively), design reviews, tech radar curation, POC sponsorship. Don't code on the critical path — you'll become a bottleneck.
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-devops">
+                <h4>Platform & DevOps Knowledge:</h4>
+                <ul>
+                    <li><strong>CI/CD Pipelines:</strong> Azure DevOps, GitHub Actions. Understand build times, deployment frequency.</li>
+                    <li><strong>Infrastructure:</strong> Kubernetes, Docker, Terraform. You don't need to write YAML, but you need to know what's possible.</li>
+                    <li><strong>DORA Metrics:</strong> Deployment Frequency, Lead Time, MTTR, Change Failure Rate — YOUR new KPIs.</li>
+                    <li><strong>Feature Flags:</strong> LaunchDarkly, Azure App Configuration. Deploy ≠ Release.</li>
+                    <li><strong>Cost Optimization:</strong> Cloud spend is now YOUR problem. Understand reserved instances, right-sizing.</li>
+                </ul>
+                <div class="code-block" data-lang="dora-metrics">
+<span class="comment">// DORA Metrics - What "Elite" looks like:</span>
+<span class="type">DeploymentFrequency</span>: Multiple times per day  <span class="comment">// not once per sprint!</span>
+<span class="type">LeadTimeForChanges</span>: Less than one hour       <span class="comment">// commit to production</span>
+<span class="type">MTTR</span>: Less than one hour                      <span class="comment">// incident to resolution</span>
+<span class="type">ChangeFailureRate</span>: 0-15%                     <span class="comment">// % deployments causing issues</span>
+
+<span class="comment">// Your job: Remove the obstacles preventing these numbers</span>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-quality">
+                <h4>Quality Culture — Your Responsibility:</h4>
+                <ul>
+                    <li><strong>Testing Strategy:</strong> Trophy/Pyramid — Integration tests > Unit tests for .NET APIs</li>
+                    <li><strong>Code Review Culture:</strong> Set expectations. Turnaround time &lt; 4 hours.</li>
+                    <li><strong>Technical Debt:</strong> Budget 20% sprint capacity. Make it visible. Track it.</li>
+                    <li><strong>Security:</strong> OWASP Top 10, SAST/DAST in pipeline, dependency scanning.</li>
+                    <li><strong>Architecture Fitness Functions:</strong> Automated checks for architectural rules.</li>
+                </ul>
+                <div class="tip-box">
+                    <div class="tip-box-title">💡 The Tech Debt Quadrant</div>
+                    <p>Classify tech debt as: <strong>Deliberate vs Inadvertent</strong> × <strong>Reckless vs Prudent</strong></p>
+                    <p>Only Deliberate + Prudent debt is acceptable: "We know this won't scale past 10k users, and we only have 100. We'll refactor when we hit 5k."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Delivery Management -->
+        <section class="section" id="delivery">
+            <h2 class="section-title">📦 Delivery & Execution</h2>
+            <p class="section-subtitle">Because at the end of the day, shipping matters. But HOW you ship matters more.</p>
+
+            <div class="funny-quote">
+                "A Lead SE worries about whether the code compiles. An EM worries about whether the quarter compiles."
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>📅 Sprint/Iteration Management</h4>
+                    <ul>
+                        <li>Velocity is a PLANNING tool, not a PERFORMANCE tool</li>
+                        <li>Protect the sprint. Say "no" with data.</li>
+                        <li>Retrospectives are sacred — fix ONE thing per retro</li>
+                        <li>If your standup exceeds 15 min, you have too many people or too little structure</li>
+                    </ul>
+                    <div class="tip-box warning">
+                        <div class="tip-box-title">⚠️ Never Do This</div>
+                        Never use velocity to compare teams or pressure individuals. That's how you get story point inflation — the developer equivalent of money printing.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>📊 Stakeholder Communication</h4>
+                    <ul>
+                        <li><strong>Executive Level:</strong> Outcomes, not outputs. "Revenue impact" not "story points"</li>
+                        <li><strong>Product Level:</strong> Trade-offs, timelines, risks</li>
+                        <li><strong>Team Level:</strong> Context, priorities, protection from noise</li>
+                    </ul>
+                    <div class="tip-box">
+                        <div class="tip-box-title">💡 The Umbrella Principle</div>
+                        You are an umbrella. Shit flows down from leadership. Your job is to convert it into actionable, calm context before it reaches your team.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>🚨 Incident Management</h4>
+                    <ul>
+                        <li>Build an on-call rotation that doesn't burn people out</li>
+                        <li>Blameless post-mortems (ALWAYS)</li>
+                        <li>Incident Commander role — train your team</li>
+                        <li>SLOs > SLAs. Error budgets are your friend.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4>🗺️ Roadmap & Planning</h4>
+                    <ul>
+                        <li>Now/Next/Later > Exact Gantt dates</li>
+                        <li>Dual-track agile: Discovery + Delivery</li>
+                        <li>Capacity planning: Account for 20% unplanned work</li>
+                        <li>Dependencies are risks. Map them. Mitigate them.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Stakeholder Management -->
+        <section class="section" id="stakeholders">
+            <h2 class="section-title">🤝 Stakeholder Management & Communication</h2>
+            <p class="section-subtitle">Because code compiles in milliseconds but alignment takes calendar slots and slide decks</p>
+
+            <div class="funny-quote">
+                "A stakeholder is anyone who can ask for 'just one more thing' right before a release. Treat them like a dependency — manage them early or they'll block your deploy."
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>📣 Communicating Up — Speaking Executive</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The BLUF Framework (Bottom Line Up Front):</h4>
+                    <div class="example-answer">
+                        <p><strong>Bad:</strong> <span class="bad">"So we started investigating the authentication service and found some issues with token refresh that could potentially impact users under certain conditions if we don't address it..."</span></p>
+                        <p><strong>Good:</strong> <span class="good">"Our auth service has a token refresh bug that affects ~2% of mobile users. We've scoped the fix to 3 days. We need a decision: patch now with a minor UX change, or wait 2 weeks for the clean fix. I recommend patching now."</span></p>
+                    </div>
+                    <h4>The Executive Communication Checklist:</h4>
+                    <ul>
+                        <li>Lead with the <strong>decision needed</strong> or <strong>impact</strong>, never with context</li>
+                        <li>Quantify everything: time, cost, users affected, revenue risk</li>
+                        <li>Bring options (2-3 max), your recommendation, and the trade-offs</li>
+                        <li>Anticipate questions: "What's the risk if we do nothing?" "How confident are you?"</li>
+                        <li>Follow up in writing after verbal conversations — memory degrades</li>
+                    </ul>
+                    <div class="tip-box warning">
+                        <div class="tip-box-title">⚠️ Common EM Communication Mistakes</div>
+                        <ul>
+                            <li>Burying the ask at the end of a long email</li>
+                            <li>Over-explaining implementation details to non-technical stakeholders</li>
+                            <li>Saying "it's complicated" — that's not an answer, it's a surrender</li>
+                            <li>Waiting until the deadline to escalate a problem</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🗺️ Roadmap Alignment with Product & Business</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The Now / Next / Later Roadmap:</h4>
+                    <div class="cheat-sheet">
+                        <table>
+                            <thead>
+                                <tr><th>Horizon</th><th>Timeframe</th><th>Precision</th><th>Who Cares</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><strong>Now</strong></td><td>Current quarter</td><td>Committed (±10%)</td><td>Engineering + PM</td></tr>
+                                <tr><td><strong>Next</strong></td><td>Next quarter</td><td>Probable (±30%)</td><td>PM + Leadership</td></tr>
+                                <tr><td><strong>Later</strong></td><td>6–12 months</td><td>Directional</td><td>Leadership + Execs</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>How to Say No to Stakeholders (with Data):</h4>
+                    <ul>
+                        <li>Never say "we can't do that" — say "here's what it would cost to do that vs. what we'd deprioritize"</li>
+                        <li>Make trade-offs explicit: "We can do X by Friday OR Y by next Thursday — not both"</li>
+                        <li>Use the capacity equation: show your team's velocity and current commitments</li>
+                        <li>Offer alternatives: "We can't do the full feature, but here's an 80% solution in half the time"</li>
+                    </ul>
+                    <div class="tip-box success">
+                        <div class="tip-box-title">💡 The Stakeholder Trust Bank</div>
+                        Every time you deliver on a commitment, you make a deposit. Every time you miss without early warning, you make a withdrawal. Run your stakeholder relationships like a bank account — stay in surplus.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>📊 Using Metrics to Tell Your Team's Story</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>DORA Metrics — Your Engineering Health Dashboard:</h4>
+                    <div class="cheat-sheet">
+                        <table>
+                            <thead>
+                                <tr><th>Metric</th><th>What It Measures</th><th>Elite Target</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Deployment Frequency</td><td>How often you ship</td><td>Multiple times/day</td></tr>
+                                <tr><td>Lead Time for Changes</td><td>Idea → Production speed</td><td>&lt; 1 hour</td></tr>
+                                <tr><td>Change Failure Rate</td><td>% deploys causing incidents</td><td>&lt; 5%</td></tr>
+                                <tr><td>MTTR</td><td>How fast you recover</td><td>&lt; 1 hour</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tip-box danger">
+                        <div class="tip-box-title">⚠️ Goodhart's Law Warning</div>
+                        "When a measure becomes a target, it ceases to be a good measure." If you track story points too hard, your team will inflate estimates. Use metrics to spot trends, not to score individuals.
+                    </div>
+                    <h4>Metrics That Actually Signal Team Health:</h4>
+                    <ul>
+                        <li>PR review turnaround time (proxy for collaboration speed)</li>
+                        <li>Bug escape rate to production (proxy for quality culture)</li>
+                        <li>Unplanned work % per sprint (proxy for technical debt pressure)</li>
+                        <li>Team satisfaction score (run quarterly pulse surveys — eNPS)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>💰 Budget, Headcount & Business Cases</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>Writing a Headcount Justification:</h4>
+                    <div class="code-block" data-lang="business-case">
+<span class="comment">// Frame headcount asks in business terms, not engineering comfort</span>
+<span class="keyword">var</span> businessCase = <span class="keyword">new</span> {
+    CurrentBottleneck = <span class="string">"Deploy cycle is 3 weeks; industry standard is 3 days"</span>,
+    RootCause = <span class="string">"1 QA engineer for 8 developers (ratio: 1:8, recommended: 1:4)"</span>,
+    ProposedHire = <span class="string">"1 Senior QA + 1 DevOps Engineer"</span>,
+    ExpectedOutcome = <span class="string">"Deploy cycle → 1 week; Feature throughput +40%"</span>,
+    CostOfInaction = <span class="string">"3 senior devs considering leaving due to frustration"</span>
+};
+                    </div>
+                    <h4>Budget Planning Calendar:</h4>
+                    <ul>
+                        <li><strong>Q1:</strong> Track actual vs. budget; flag overruns early</li>
+                        <li><strong>Q2:</strong> Begin drafting next-year headcount needs</li>
+                        <li><strong>Q3:</strong> Submit formal headcount and tooling budget requests</li>
+                        <li><strong>Q4:</strong> Negotiate, finalize; communicate outcomes to team</li>
+                    </ul>
+                    <div class="tip-box">
+                        <div class="tip-box-title">💡 Know Your Numbers</div>
+                        Know your team's fully-loaded cost (salary + benefits + overhead ≈ 1.4–1.8× base salary). When you ask for a $200K engineer, the real ask is ~$300K. Frame your ROI accordingly.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Engineering Culture & AI -->
+        <section class="section" id="culture">
+            <h2 class="section-title">🏛️ Engineering Culture & AI in .NET</h2>
+            <p class="section-subtitle">Culture eats strategy for breakfast — and AI is changing what's on the menu</p>
+
+            <div class="funny-quote">
+                "Your team won't remember the sprints you shipped. They'll remember how you made them feel when the production was down at 2 AM and you were calm, clear, and blameless."
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🧱 Building Psychological Safety</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>Amy Edmondson's 4-Stage Safety Ladder:</h4>
+                    <div class="cheat-sheet">
+                        <table>
+                            <thead>
+                                <tr><th>Stage</th><th>Team Behavior</th><th>EM Signal</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1. Inclusion Safety</td><td>Feel welcome on the team</td><td>All voices heard in retro</td></tr>
+                                <tr><td>2. Learner Safety</td><td>Safe to ask questions &amp; fail</td><td>No punishment for mistakes</td></tr>
+                                <tr><td>3. Contributor Safety</td><td>Safe to add value in own way</td><td>Engineers propose solutions</td></tr>
+                                <tr><td>4. Challenger Safety</td><td>Safe to challenge the status quo</td><td>Team pushes back on bad ideas</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>Daily EM Practices That Build Safety:</h4>
+                    <ul>
+                        <li>Model vulnerability: admit your own mistakes publicly</li>
+                        <li>Blameless post-mortems: "What failed in the system?" not "Who failed?"</li>
+                        <li>Celebrate "good failures" — fast experiments that revealed something valuable</li>
+                        <li>Follow through on every concern raised — even if the answer is "not now, because..."</li>
+                    </ul>
+                    <div class="tip-box danger">
+                        <div class="tip-box-title">⚠️ Safety Destroyers to Avoid</div>
+                        <ul>
+                            <li>Interrupting or dismissing ideas in meetings</li>
+                            <li>Rewarding a "brilliant jerk" who makes others feel stupid</li>
+                            <li>Shoot-the-messenger responses to bad news</li>
+                            <li>Inconsistent standards — calling out some but not others</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🤖 AI Tooling & GitHub Copilot in .NET Teams</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>What Changes When Your Team Uses AI Coding Tools:</h4>
+                    <div class="comparison">
+                        <div class="before">
+                            <h4>❌ Without AI Guardrails</h4>
+                            <ul>
+                                <li>Copilot suggestions merged without review</li>
+                                <li>Sensitive data in prompts</li>
+                                <li>AI-generated tests that pass but don't test anything meaningful</li>
+                                <li>"The AI wrote it" as an excuse for poor code</li>
+                            </ul>
+                        </div>
+                        <div class="after">
+                            <h4>✅ With AI Guardrails</h4>
+                            <ul>
+                                <li>AI assists; human reviews for correctness + intent</li>
+                                <li>AI use policy covering data sensitivity</li>
+                                <li>Test quality checked by mutation testing</li>
+                                <li>Engineers own and understand all code they ship</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h4>Semantic Kernel — The .NET EM Briefing:</h4>
+                    <div class="code-block" data-lang="csharp">
+<span class="comment">// Semantic Kernel: .NET SDK for building LLM-powered features</span>
+<span class="keyword">var</span> kernel = Kernel.CreateBuilder()
+    .AddAzureOpenAIChatCompletion(
+        deploymentName: <span class="string">"gpt-4o"</span>,
+        endpoint: config[<span class="string">"AzureOpenAI:Endpoint"</span>],
+        apiKey: config[<span class="string">"AzureOpenAI:Key"</span>]  <span class="comment">// Use Key Vault in prod!</span>
+    )
+    .Build();
+<span class="comment">// Your EM job: ensure the team understands cost, latency, and data boundaries</span>
+                    </div>
+                    <div class="tip-box warning">
+                        <div class="tip-box-title">🎯 EM AI Governance Checklist</div>
+                        <ul>
+                            <li>No PII or customer data sent to external LLM APIs without DPA</li>
+                            <li>API keys in Azure Key Vault — never in appsettings.json</li>
+                            <li>Token cost monitoring — AI API bills can surprise you at month-end</li>
+                            <li>AI features behind feature flags for safe rollout</li>
+                            <li>Fallback behavior defined for when the AI endpoint is unavailable</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>📐 Engineering Norms & Working Agreements</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>What Every .NET Team's Working Agreement Should Cover:</h4>
+                    <ul>
+                        <li><strong>Code style:</strong> .editorconfig checked into source control — no debates, just compliance</li>
+                        <li><strong>PR size:</strong> &lt;400 lines; larger PRs need a conversation first</li>
+                        <li><strong>Review SLA:</strong> First response within 4 hours, merge-ready within 24 hours</li>
+                        <li><strong>On-call rotation:</strong> Published, fair, and with documented runbooks</li>
+                        <li><strong>Definition of Done:</strong> Tests pass, monitoring in place, feature flag ready, docs updated</li>
+                        <li><strong>Communication defaults:</strong> Slack for async, huddles only for blockers, email for formal decisions</li>
+                    </ul>
+                    <div class="tip-box success">
+                        <div class="tip-box-title">💡 The Working Agreement Ritual</div>
+                        Review your working agreement at every team retro. If the team isn't following a norm, either enforce it or remove it — dead rules erode trust in all rules.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>🌍 Remote & Hybrid Team Leadership</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <h4>The Async-First Playbook:</h4>
+                    <div class="cheat-sheet">
+                        <table>
+                            <thead>
+                                <tr><th>Situation</th><th>Async (Default)</th><th>Sync (Exception)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Status update</td><td>Slack / Jira comment</td><td>Never — use a bot</td></tr>
+                                <tr><td>Architecture decision</td><td>ADR draft → async review</td><td>30min if stuck</td></tr>
+                                <tr><td>Feedback delivery</td><td>No — this needs sync</td><td>Always private, sync</td></tr>
+                                <tr><td>Production incident</td><td>No — this needs sync</td><td>War room immediately</td></tr>
+                                <tr><td>Sprint planning</td><td>Pre-read sent 24h early</td><td>Meeting for decisions only</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>Time Zone Fairness Rules:</h4>
+                    <ul>
+                        <li>Rotate the "inconvenient" meeting time — don't always tax one region</li>
+                        <li>Record decisions made in meetings for those who couldn't attend live</li>
+                        <li>Core hours overlap: define a 3–4 hour window where all must be reachable</li>
+                        <li>If one person is remote, treat everyone as remote (all on camera, all in chat)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Interview Questions & Answers -->
+        <section class="section" id="interviews">
+            <h2 class="section-title">🎤 Interview Questions & How to Answer</h2>
+            <p class="section-subtitle">The questions that will decide if you get the title (and the meetings that come with it)</p>
+
+            <div class="funny-quote">
+                "Interviewing for EM is weird. They ask you behavioral questions and you have to pretend you've never rage-quit a code review."
+            </div>
+
+            <div class="tip-box success">
+                <div class="tip-box-title">🌟 The STAR Method — Your Best Friend</div>
+                <p><strong>S</strong>ituation → <strong>T</strong>ask → <strong>A</strong>ction → <strong>R</strong>esult</p>
+                <p>Every behavioral answer should follow this. Add <strong>L</strong>earning at the end for bonus points (STARL).</p>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "Tell me about a time you had to deliver difficult feedback"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-medium">🔥 COMMON — Asked 90% of the time</span>
+                    <div class="example-answer">
+                        <p><strong>STAR Answer:</strong></p>
+                        <p><strong>Situation:</strong> "On my team of 6 .NET developers, a senior engineer was consistently submitting PRs with minimal test coverage, averaging 15% when our standard was 80%."</p>
+                        <p><strong>Task:</strong> "I needed to address this without damaging our relationship or their confidence, as they were otherwise a strong contributor."</p>
+                        <p><strong>Action:</strong> "I scheduled a private 1:1, started by acknowledging their strong domain knowledge, then used the SBI model: 'In the last 3 PRs, test coverage was below 20%. This caused 2 production bugs that required hotfixes, impacting the team's deployment confidence.' I asked open-ended questions to understand WHY — turned out they felt pressured by deadlines and saw tests as 'nice to have.' We co-created a plan: I adjusted sprint capacity expectations, paired them with our testing champion, and set a graduated target (50% → 65% → 80% over 6 weeks)."</p>
+                        <p><strong>Result:</strong> "Within 8 weeks, their coverage was consistently above 80%, they became an advocate for testing, and our team's change failure rate dropped by 40%."</p>
+                        <p><strong>Learning:</strong> "I learned that resistance to practices often signals resource constraints, not attitude problems."</p>
+                    </div>
+                    <div class="tip-box danger">
+                        <div class="tip-box-title">❌ Never Say This</div>
+                        <ul>
+                            <li>"I told them to do better or they'd be fired" (authoritarian)</li>
+                            <li>"I didn't really address it, they eventually improved" (avoidant)</li>
+                            <li>"I just did the tests myself" (martyr — doesn't scale)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "How would you handle a team member who wants to become a manager?"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-medium">🔥 COMMON</span>
+                    <div class="example-answer">
+                        <p><strong>Great Answer Framework:</strong></p>
+                        <p>"First, I'd explore their motivation. Do they want management because they genuinely want to grow people, or because they think it's the only way to advance? Many orgs have dual-track ladders (IC Staff/Principal track)."</p>
+                        <p>"If they're genuinely interested, I'd create a 'management rotation' opportunity:</p>
+                        <ul>
+                            <li>Lead sprint ceremonies for a month</li>
+                            <li>Own a 1:1 with a junior developer (with my oversight)</li>
+                            <li>Represent the team in cross-team planning</li>
+                            <li>Handle a small hiring loop</li>
+                        </ul>
+                        <p>"After 2-3 months of exposure, we'd have an honest conversation: Did they enjoy it? Did they miss coding? Do they understand the trade-offs? Then I'd either champion their promotion or help them find fulfillment in the IC track."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "How do you balance technical debt with feature delivery?"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-hard">🔥🔥 VERY COMMON — .NET specific angle helps</span>
+                    <div class="example-answer">
+                        <p><strong>Strong Answer:</strong></p>
+                        <p>"I use a three-pronged approach:</p>
+                        <p><strong>1. Make it visible:</strong> We maintain a tech debt backlog with business impact scores. Every item has a 'cost of delay' estimate. For example, 'Our EF Core queries have N+1 problems — if we don't fix them before Black Friday, page load times will exceed 3s, costing ~$50K in lost conversions.'</p>
+                        <p><strong>2. Budget it:</strong> 20% of each sprint is reserved for tech health. Non-negotiable. I frame it to stakeholders as 'investment in deployment speed' — because tech debt directly impacts DORA metrics.</p>
+                        <p><strong>3. Boy Scout Rule:</strong> Every PR should leave the codebase slightly better. Refactoring isn't a separate task — it's embedded in how we work. If you touch a file, you can spend 30 minutes improving it.</p>
+                        <p>"In my last role, this approach helped us migrate from .NET Framework 4.8 to .NET 8 incrementally over 6 months while STILL delivering features every sprint."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "Describe a time you had to make a decision with incomplete information"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-hard">🔥🔥 Tests Decision-Making</span>
+                    <div class="example-answer">
+                        <p><strong>STAR Answer:</strong></p>
+                        <p><strong>Situation:</strong> "We were 2 weeks from a major release when our Azure SQL database started showing intermittent deadlocks under load. We had to decide: delay the release, throw hardware at it, or ship with a risk."</p>
+                        <p><strong>Task:</strong> "I needed to make a call within 24 hours as the team lead, balancing business commitment with production stability."</p>
+                        <p><strong>Action:</strong> "I gathered what we knew: the deadlocks occurred only above 500 concurrent users (our peak was 350), and only on one specific write-heavy endpoint. I applied the 'reversibility' framework: Is this decision easily reversible? Yes — we could hotfix or feature-flag. I decided to ship with: (1) a feature flag on the risky endpoint, (2) enhanced monitoring with alerts at 400 users, and (3) a pre-written rollback runbook. I communicated the risk and mitigation to stakeholders transparently."</p>
+                        <p><strong>Result:</strong> "We shipped on time. The deadlock never materialized in production (our load modeling was conservative). The team then fixed the root cause in the following sprint without pressure."</p>
+                        <p><strong>Learning:</strong> "I learned the framework: 'What's the cost of being wrong? How quickly can we reverse? What monitoring do we need?' — this has guided every ambiguous decision since."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "How would you handle two senior engineers who can't work together?"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-hard">🔥🔥 Conflict Resolution</span>
+                    <div class="example-answer">
+                        <p><strong>Framework Answer:</strong></p>
+                        <p>"First, I'd have individual conversations with each to understand their perspective without judgment. Often conflict comes from misaligned expectations, not personal animosity."</p>
+                        <p>"Common root causes I'd investigate:</p>
+                        <ul>
+                            <li>Unclear ownership boundaries (both think they own the architecture)</li>
+                            <li>Different quality standards (one wants 'done right', other wants 'done fast')</li>
+                            <li>Communication style mismatch (one is blunt, other is sensitive)</li>
+                            <li>Career competition (both want the same promotion)</li>
+                        </ul>
+                        <p>"Then I'd facilitate a structured conversation: acknowledge both perspectives, identify shared goals, and create clear agreements. For example, if it's about architecture ownership, I'd formalize a RACI matrix."</p>
+                        <p>"If the conflict persists after good-faith intervention, I'd consider structural solutions: different projects, different pods, or — as a last resort — acknowledging that one might need to move teams."</p>
+                        <p>"I never ignore conflict. Unresolved tension is a team cancer that metastasizes."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "What's your approach to system design decisions as an EM?"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-medium">⚙️ Technical Leadership</span>
+                    <div class="example-answer">
+                        <p><strong>Answer:</strong></p>
+                        <p>"My role as an EM in system design is to be the 'decision catalyst', not the 'decision maker'. Here's my approach:</p>
+                        <p><strong>1. Create the process:</strong> We use lightweight RFCs/ADRs. Any change affecting more than one service requires a written proposal reviewed by 2+ engineers.</p>
+                        <p><strong>2. Ask the right questions:</strong> 'What are the operational implications? Who will be on-call for this? What's the failure mode? How do we rollback?'</p>
+                        <p><strong>3. Break deadlocks:</strong> If the team can't agree after reasonable debate, I'll make the call — but I'll explain my reasoning and commit to revisiting in 3 months.</p>
+                        <p><strong>4. Context from above:</strong> I bring information the team doesn't have — upcoming business pivots, budget constraints, hiring plans — that should influence architecture."</p>
+                        <p>"For example, when choosing between Azure Service Bus and Kafka, I didn't make the technical choice. But I DID provide context: 'We're merging with Team X in Q3, and they're on Kafka. Consider interoperability.' That context changed the decision."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>❓ "How do you measure engineering team success?"</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <span class="level-badge level-medium">📊 Metrics-Oriented</span>
+                    <div class="example-answer">
+                        <p><strong>Answer:</strong></p>
+                        <p>"I measure across four dimensions:</p>
+                        <p><strong>1. Delivery:</strong> DORA metrics (deployment frequency, lead time, MTTR, change failure rate). These tell me if our engineering machine is healthy.</p>
+                        <p><strong>2. Quality:</strong> Production incident rate, SLO compliance, customer-reported bugs. This tells me if we're shipping the right things well.</p>
+                        <p><strong>3. People:</strong> Engagement scores, retention rate, promotion velocity, eNPS. This tells me if the team is sustainable.</p>
+                        <p><strong>4. Business Impact:</strong> Feature adoption rates, revenue influence, time-to-market for key initiatives. This connects us to company goals.</p>
+                        <p>"I visualize these on a team health dashboard reviewed monthly. The key insight: these metrics should be used for LEARNING, not JUDGING. If deployment frequency drops, I ask 'what changed?' not 'who's slacking?'"</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Interactive Scenarios -->
+        <section class="section" id="scenarios">
+            <h2 class="section-title">🎮 Interactive Scenarios</h2>
+            <p class="section-subtitle">Test your EM instincts! Choose wisely... or don't. Learning either way.</p>
+
+            <!-- Quiz 1 -->
+            <div class="quiz-container" id="quiz1">
+                <div class="quiz-question">🤔 Scenario: A developer comes to your 1:1 and says "I'm thinking about leaving." What do you do FIRST?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="answerQuiz('quiz1', this, false)">
+                        <span class="letter">A</span>
+                        <span>Immediately offer a raise/promotion to retain them</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz1', this, false)">
+                        <span class="letter">B</span>
+                        <span>Tell them to submit their resignation if they've decided</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz1', this, true)">
+                        <span class="letter">C</span>
+                        <span>Ask "Help me understand — what's driving this feeling?" and listen</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz1', this, false)">
+                        <span class="letter">D</span>
+                        <span>Panic internally and schedule a call with HR</span>
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="quiz1-feedback"></div>
+            </div>
+
+            <!-- Quiz 2 -->
+            <div class="quiz-container" id="quiz2">
+                <div class="quiz-question">🤔 Scenario: Your VP asks you to commit to a deadline that your team says is unrealistic. What do you do?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="answerQuiz('quiz2', this, false)">
+                        <span class="letter">A</span>
+                        <span>Commit and tell the team they need to work harder</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz2', this, true)">
+                        <span class="letter">B</span>
+                        <span>Present trade-offs: "We can hit that date if we cut X and Y, or we need N more weeks for the full scope"</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz2', this, false)">
+                        <span class="letter">C</span>
+                        <span>Say "No, that's impossible" and walk out</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz2', this, false)">
+                        <span class="letter">D</span>
+                        <span>Commit publicly but secretly plan to miss it and ask forgiveness later</span>
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="quiz2-feedback"></div>
+            </div>
+
+            <!-- Quiz 3 -->
+            <div class="quiz-container" id="quiz3">
+                <div class="quiz-question">🤔 Scenario: Your strongest engineer is brilliant but toxic in code reviews (dismissive, condescending). The team is frustrated. How do you handle it?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="answerQuiz('quiz3', this, false)">
+                        <span class="letter">A</span>
+                        <span>They're 10x, so you let it slide. Output matters more.</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz3', this, false)">
+                        <span class="letter">B</span>
+                        <span>Send a team-wide Slack message about "being nicer in reviews"</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz3', this, true)">
+                        <span class="letter">C</span>
+                        <span>Direct 1:1 with specific examples, clear expectations, and consequences if unchanged</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz3', this, false)">
+                        <span class="letter">D</span>
+                        <span>Remove them from the code review process entirely</span>
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="quiz3-feedback"></div>
+            </div>
+
+            <!-- Quiz 4 -->
+            <div class="quiz-container" id="quiz4">
+                <div class="quiz-question">🤔 Scenario: It's planning week and you realize your team has more work than capacity for the next quarter. What's your FIRST move?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="answerQuiz('quiz4', this, false)">
+                        <span class="letter">A</span>
+                        <span>Ask everyone to work weekends — it's temporary</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz4', this, false)">
+                        <span class="letter">B</span>
+                        <span>Hire 3 contractors immediately</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz4', this, true)">
+                        <span class="letter">C</span>
+                        <span>Stack-rank priorities with Product, cut the bottom 30%, and present the trade-off to leadership</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz4', this, false)">
+                        <span class="letter">D</span>
+                        <span>Just commit to everything and figure it out later</span>
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="quiz4-feedback"></div>
+            </div>
+
+            <!-- Quiz 5 -->
+            <div class="quiz-container" id="quiz5">
+                <div class="quiz-question">🤔 Scenario: A production outage occurs at 2 AM. Your on-call developer resolves it. Next morning, what do you do?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="answerQuiz('quiz5', this, false)">
+                        <span class="letter">A</span>
+                        <span>Send a Slack message: "Who wrote this buggy code?" and find the guilty party</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz5', this, true)">
+                        <span class="letter">B</span>
+                        <span>Thank the on-call hero, tell them to take a late start, and schedule a blameless post-mortem</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz5', this, false)">
+                        <span class="letter">C</span>
+                        <span>Nothing — it was resolved, move on</span>
+                    </div>
+                    <div class="quiz-option" onclick="answerQuiz('quiz5', this, false)">
+                        <span class="letter">D</span>
+                        <span>Immediately implement a new process requiring 3 approvals for every deployment</span>
+                    </div>
+                </div>
+                <div class="quiz-feedback" id="quiz5-feedback"></div>
+            </div>
+
+            <!-- Scenario Game -->
+            <div class="scenario-game">
+                <h4>🎭 The "New EM's First Week" Survival Scenario</h4>
+                <p>It's your first Monday as Engineering Manager. You have 6 direct reports, 2 ongoing projects, and your calendar is already 80% full. Your inbox has 47 unread messages. What do you prioritize?</p>
+                <div id="scenario-step-1">
+                    <div class="scenario-choices">
+                        <div class="scenario-choice" onclick="advanceScenario(1, 'a')">🗓️ Start scheduling 1:1s with every direct report this week</div>
+                        <div class="scenario-choice" onclick="advanceScenario(1, 'b')">💻 Deep-dive into the codebase to understand the architecture</div>
+                        <div class="scenario-choice" onclick="advanceScenario(1, 'c')">📧 Reply to all 47 emails immediately to show responsiveness</div>
+                    </div>
+                </div>
+                <div id="scenario-result-1" class="scenario-result"></div>
+            </div>
+        </section>
+
+        <!-- Section 7: Cheat Sheet -->
+        <section class="section" id="cheatsheet">
+            <h2 class="section-title">📋 The Ultimate EM Cheat Sheet</h2>
+            <p class="section-subtitle">Print this. Laminate it. Sleep with it under your pillow.</p>
+
+            <button class="print-btn" onclick="window.print()">🖨️ Print Cheat Sheet</button>
+
+            <div class="cheat-sheet" style="margin-top: 20px;">
+                <h3>🧠 Frameworks to Know Cold</h3>
+                <table>
+                    <tr>
+                        <th>Framework</th>
+                        <th>Use Case</th>
+                        <th>Key Steps</th>
+                    </tr>
+                    <tr>
+                        <td><strong>STAR(L)</strong></td>
+                        <td>Behavioral interview answers</td>
+                        <td>Situation → Task → Action → Result → Learning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SBI</strong></td>
+                        <td>Giving feedback</td>
+                        <td>Situation → Behavior → Impact</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GROW</strong></td>
+                        <td>Coaching conversations</td>
+                        <td>Goal → Reality → Options → Will</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DESC</strong></td>
+                        <td>Difficult conversations</td>
+                        <td>Describe → Express → Suggest → Consequences</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RACI</strong></td>
+                        <td>Clarity of ownership</td>
+                        <td>Responsible → Accountable → Consulted → Informed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DORA</strong></td>
+                        <td>Measuring delivery health</td>
+                        <td>Deploy Freq → Lead Time → MTTR → Change Failure %</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SPACE</strong></td>
+                        <td>Developer productivity</td>
+                        <td>Satisfaction → Performance → Activity → Communication → Efficiency</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>💬 Magic Phrases for EMs</h3>
+                <table>
+                    <tr>
+                        <th>Situation</th>
+                        <th>What to Say</th>
+                    </tr>
+                    <tr>
+                        <td>Stakeholder wants impossible deadline</td>
+                        <td>"I can commit to X by that date, or X+Y by [later date]. Which is more valuable?"</td>
+                    </tr>
+                    <tr>
+                        <td>Developer is stuck</td>
+                        <td>"What have you tried? What would you try next if I wasn't here?"</td>
+                    </tr>
+                    <tr>
+                        <td>Team disagrees on tech choice</td>
+                        <td>"Let's timebox this decision. Write up trade-offs by Thursday, decide Friday."</td>
+                    </tr>
+                    <tr>
+                        <td>Exec asks for status</td>
+                        <td>"We're [on track/at risk]. Key risk is [X]. Mitigation is [Y]. Need your help with [Z]."</td>
+                    </tr>
+                    <tr>
+                        <td>Direct report makes a mistake</td>
+                        <td>"What happened? What did you learn? What would you do differently? How can I help?"</td>
+                    </tr>
+                    <tr>
+                        <td>Saying no to a request</td>
+                        <td>"I can't commit to that with current capacity. Here's what I CAN do, or here's what I need to make it work."</td>
+                    </tr>
+                    <tr>
+                        <td>Post-mortem discussion</td>
+                        <td>"How did the SYSTEM allow this to happen? What guardrail was missing?"</td>
+                    </tr>
+                    <tr>
+                        <td>Someone wants to leave</td>
+                        <td>"I appreciate you telling me. Help me understand what's driving this."</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>⚙️ .NET Technical Quick Reference</h3>
+                <table>
+                    <tr>
+                        <th>Topic</th>
+                        <th>What an EM Should Know</th>
+                        <th>Depth Level</th>
+                    </tr>
+                    <tr>
+                        <td>.NET 8/9</td>
+                        <td>Key features, performance improvements, migration strategy from older versions</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Minimal APIs vs Controllers</td>
+                        <td>When to use which, team familiarity considerations</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>EF Core</td>
+                        <td>Performance anti-patterns, migration strategies, when to drop to Dapper</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Azure Services</td>
+                        <td>Service Bus, Functions, App Service, AKS, Cosmos DB — cost/performance trade-offs</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Microservices Patterns</td>
+                        <td>Saga, Outbox, Circuit Breaker, Service Mesh — when each applies</td>
+                        <td>⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>CI/CD (.NET)</td>
+                        <td>GitHub Actions/Azure DevOps, build optimization, container image size</td>
+                        <td>⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Testing Strategy</td>
+                        <td>xUnit, integration testing with WebApplicationFactory, contract testing</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Observability</td>
+                        <td>OpenTelemetry, Serilog, structured logging, distributed tracing</td>
+                        <td>⭐⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>Security</td>
+                        <td>Auth (OAuth2/OIDC), secrets management, OWASP .NET risks</td>
+                        <td>⭐⭐</td>
+                    </tr>
+                    <tr>
+                        <td>.NET Aspire</td>
+                        <td>Cloud-native orchestration, service defaults, local dev experience</td>
+                        <td>⭐⭐</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>📅 Your First 90 Days Template</h3>
+                <table>
+                    <tr>
+                        <th>Phase</th>
+                        <th>Focus</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Days 1-30</strong> (Listen)</td>
+                        <td>Observe, learn, build trust</td>
+                        <td>1:1 with every team member, stakeholder coffee chats, understand current processes, read ADRs/docs, shadow on-call</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Days 31-60</strong> (Diagnose)</td>
+                        <td>Identify patterns, form hypotheses</td>
+                        <td>Team health survey, process bottleneck analysis, DORA metrics baseline, identify quick wins</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Days 61-90</strong> (Act)</td>
+                        <td>Implement 2-3 high-impact changes</td>
+                        <td>Ship one process improvement, one people win, one technical initiative. Share your 90-day findings with leadership.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>📚 Must-Read Books (Speed-Run Edition)</h3>
+                <table>
+                    <tr>
+                        <th>Book</th>
+                        <th>Key Takeaway (So You Can Fake It)</th>
+                        <th>Priority</th>
+                    </tr>
+                    <tr>
+                        <td>The Manager's Path (Fournier)</td>
+                        <td>Management is a career change, not a promotion. Each level requires new skills.</td>
+                        <td>🔴 Must Read</td>
+                    </tr>
+                    <tr>
+                        <td>An Elegant Puzzle (Larson)</td>
+                        <td>Systems thinking for engineering management. Teams have states: falling behind → treading water → innovating.</td>
+                        <td>🔴 Must Read</td>
+                    </tr>
+                    <tr>
+                        <td>Accelerate (Forsgren et al.)</td>
+                        <td>DORA metrics matter. High-performing teams deploy more AND have fewer failures.</td>
+                        <td>🟡 Should Read</td>
+                    </tr>
+                    <tr>
+                        <td>Radical Candor (Scott)</td>
+                        <td>Care Personally + Challenge Directly = best feedback culture.</td>
+                        <td>🟡 Should Read</td>
+                    </tr>
+                    <tr>
+                        <td>Team Topologies (Skelton & Pais)</td>
+                        <td>4 team types: Stream-aligned, Platform, Enabling, Complicated-subsystem. Structure shapes behavior.</td>
+                        <td>🟡 Should Read</td>
+                    </tr>
+                    <tr>
+                        <td>Staff Engineer (Larson)</td>
+                        <td>Understand the IC track so you can guide people who shouldn't become managers.</td>
+                        <td>🟢 Nice to Read</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>🚨 Common EM Anti-Patterns (Avoid These!)</h3>
+                <table>
+                    <tr>
+                        <th>Anti-Pattern</th>
+                        <th>Symptom</th>
+                        <th>Fix</th>
+                    </tr>
+                    <tr>
+                        <td>The Hero Manager</td>
+                        <td>You code all night fixing bugs your team should handle</td>
+                        <td>Coach, don't do. Ask "who on the team could grow from this?"</td>
+                    </tr>
+                    <tr>
+                        <td>The Meeting Machine</td>
+                        <td>8 hours of meetings, 0 hours of thinking</td>
+                        <td>Audit meetings quarterly. "Does this need me? Could it be async?"</td>
+                    </tr>
+                    <tr>
+                        <td>The Conflict Avoider</td>
+                        <td>Toxic behavior festers, good people leave</td>
+                        <td>Address issues within 48 hours. Discomfort now prevents disaster later.</td>
+                    </tr>
+                    <tr>
+                        <td>The Micromanager</td>
+                        <td>You review every PR, approve every decision</td>
+                        <td>Set guardrails, not gatekeeps. Trust but verify periodically.</td>
+                    </tr>
+                    <tr>
+                        <td>The Yes-Person</td>
+                        <td>Team is overloaded, nothing ships well</td>
+                        <td>Every "yes" is a "no" to something else. Make trade-offs explicit.</td>
+                    </tr>
+                    <tr>
+                        <td>The Ivory Tower</td>
+                        <td>You make architecture decisions without context</td>
+                        <td>Stay close to the work. Monthly code review, weekly design discussions.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="cheat-sheet">
+                <h3>🎯 One-Liner Principles to Live By</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">1️⃣ "Your job is to make yourself unnecessary for day-to-day operations."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">2️⃣ "Hire people smarter than you, then get out of their way."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">3️⃣ "The best managers are 'shit umbrellas' and 'credit funnels.'"</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">4️⃣ "You can't manage what you can't measure, but not everything that matters can be measured."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">5️⃣ "People don't leave companies, they leave managers. Don't be that manager."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">6️⃣ "Context over control. Trust over tracking."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">7️⃣ "The right answer delivered too late is the wrong answer."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">8️⃣ "Process should serve people, not the other way around."</li>
+                    <li style="padding: 10px 0; border-bottom: 1px solid var(--border);">9️⃣ "Your calendar reflects your priorities. Audit it."</li>
+                    <li style="padding: 10px 0;">🔟 "If your team can't function without you for 2 weeks, you've failed at delegation."</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Final Section: Fun Extras -->
+        <section class="section" id="extras">
+            <h2 class="section-title">🎉 Bonus: The EM Bingo Card</h2>
+            <p class="section-subtitle">Complete a row in your first quarter and you're officially an EM!</p>
+
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 700px; margin: 20px auto;">
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Said "let's take this offline"</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Missed lunch for a "quick sync"</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Created a Confluence page nobody will read</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Said "it depends" in a meeting</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Wished you were coding instead</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Defended sprint scope from PM</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Had a 1:1 turn into therapy session</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Explained to exec why "just add more devs" won't help</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Used the word "bandwidth" for humans</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Wrote a "team update" email longer than any PR</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Resolved conflict between devs</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">⭐ FREE SPACE ⭐ (Had meeting about a meeting)</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Said "circle back" unironically</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Fought for a team member's promotion</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Gave feedback that was hard but fair</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Realized you haven't opened VS in 3 days</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Said "we need to be more strategic"</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Shielded team from reorg chaos</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Spent 30min on a slide deck for a 5min update</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Thought "I could code this in 2 hours myself"</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Had a skip-level meeting</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Survived budget planning season</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Actually celebrated a team win publicly</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Realized management is harder than coding</div>
+                <div class="card" style="text-align: center; padding: 15px; font-size: 0.75rem; cursor: pointer; min-height: 80px; display: flex; align-items: center; justify-content: center;" onclick="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.borderColor='#10b981'">Actually enjoyed helping someone grow 🌱</div>
+            </div>
+
+            <div class="funny-quote" style="margin-top: 40px;">
+                "Remember: The best .NET code is code that's written by a well-managed, psychologically safe, properly caffeinated team. Your job is to create that environment. Now go forth and manage!" 🚀
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--muted);">
+        <p>Made with 💜 and too many meetings | © 2024 The Accidental Manager's Guide</p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">
+            <span class="easter-egg" onclick="showEasterEgg()">🥚</span>
+            Remember: You got this. Your team is lucky to have someone who cares enough to prepare.
+        </p>
+        <p style="margin-top: 15px; font-size: 0.8rem; color: var(--muted);">
+            Quiz Score: <span id="finalScore">0</span>/5 | Checklist Progress: <span id="checkProgress">0</span>/5
+        </p>
+    </footer>
+
+    <canvas class="confetti" id="confetti"></canvas>
+
+    <script>
+        // Score tracking
+        let score = 0;
+        let answeredQuizzes = new Set();
+
+        function updateScore() {
+            document.getElementById('scoreNum').textContent = score;
+            document.getElementById('finalScore').textContent = score;
+        }
+
+        // Progress Bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        // Accordion
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = header.classList.contains('active');
+
+            // Close all others in the same section
+            const section = header.closest('.section');
+            if (section) {
+                section.querySelectorAll('.accordion-header.active').forEach(h => {
+                    if (h !== header) {
+                        h.classList.remove('active');
+                        h.nextElementSibling.classList.remove('show');
+                    }
+                });
+            }
+
+            header.classList.toggle('active');
+            content.classList.toggle('show');
+        }
+
+        // Tabs
+        function switchTab(event, tabId) {
+            const tabContainer = event.target.closest('.section');
+            tabContainer.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tabContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Quiz
+        function answerQuiz(quizId, element, isCorrect) {
+            if (answeredQuizzes.has(quizId)) return;
+            answeredQuizzes.add(quizId);
+
+            const container = document.getElementById(quizId);
+            const options = container.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById(quizId + '-feedback');
+
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+                score++;
+                updateScore();
+                feedback.className = 'quiz-feedback show correct';
+
+                const feedbacks = {
+                    'quiz1': '✅ Correct! Always listen first. Understanding the root cause lets you address the real issue — which might be fixable. A raise without understanding is just a bandaid on a bullet wound.',
+                    'quiz2': '✅ Correct! Great EMs negotiate with data and trade-offs, not emotions. You protect the team AND maintain trust with leadership by being transparent about constraints.',
+                    'quiz3': '✅ Correct! No one gets a pass on toxic behavior regardless of output. A "brilliant jerk" makes the whole team 0.5x, which negates their personal 2x. Address it directly with specific examples.',
+                    'quiz4': '✅ Correct! Prioritization is your superpower. Working smarter > working harder. Help leadership understand that saying yes to everything means doing everything poorly.',
+                    'quiz5': '✅ Correct! Recognize the hero, protect their rest, and learn from the incident. Blameless post-mortems fix systems; blame fixes nothing.'
+                };
+                feedback.innerHTML = feedbacks[quizId];
+
+                if (score === 5) {
+                    launchConfetti();
+                }
+            } else {
+                element.classList.add('wrong');
+                // Highlight correct answer
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.className = 'quiz-feedback show wrong';
+
+                const wrongFeedbacks = {
+                    'quiz1': '❌ Not quite. The best first move is to listen and understand. Counter-offers without understanding the root cause rarely work — they just delay the inevitable.',
+                    'quiz2': '❌ Not quite. The best approach is to present trade-offs. Never commit to impossible deadlines (your team suffers) and never flatly refuse (you lose political capital).',
+                    'quiz3': '❌ Not quite. Toxic behavior must be addressed directly. The "brilliant jerk" costs more in team morale and attrition than their code contribution.',
+                    'quiz4': '❌ Not quite. The sustainable answer is to prioritize ruthlessly and present trade-offs. Overwork leads to burnout and turnover. Contractors take months to ramp up.',
+                    'quiz5': '❌ Not quite. The right move is to appreciate the responder, protect their wellbeing, and hold a blameless post-mortem to prevent recurrence.'
+                };
+                feedback.innerHTML = wrongFeedbacks[quizId];
+            }
+        }
+
+        // Checklist
+        let checkedItems = 0;
+
+        function toggleCheck(li) {
+            li.classList.toggle('checked');
+            checkedItems = document.querySelectorAll('.checklist li.checked').length;
+            document.getElementById('checkProgress').textContent = checkedItems;
+        }
+
+        // Scenario Game
+        function advanceScenario(step, choice) {
+            const resultDiv = document.getElementById('scenario-result-' + step);
+            const stepDiv = document.getElementById('scenario-step-' + step);
+
+            stepDiv.style.display = 'none';
+
+            if (step === 1) {
+                if (choice === 'a') {
+                    resultDiv.innerHTML = `
+                        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: 10px; padding: 20px;">
+                            <p><strong>✅ Excellent choice!</strong></p>
+                            <p>People first. Always. Your 1:1s will tell you everything you need to know about the team, the code, and the real problems. In those conversations you'll learn:</p>
+                            <ul>
+                                <li>What the actual pain points are (not what's in the wiki)</li>
+                                <li>Who's about to leave (and why)</li>
+                                <li>What the real technical debt situation is</li>
+                                <li>Team dynamics and hidden conflicts</li>
+                            </ul>
+                            <p style="margin-top: 10px; color: #34d399;"><strong>Pro move:</strong> In your first 1:1s, ask: "If you were in my role, what would you change first?"</p>
+                        </div>
+                    `;
+                } else if (choice === 'b') {
+                    resultDiv.innerHTML = `
+                        <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 20px;">
+                            <p><strong>⚠️ Not bad, but not optimal.</strong></p>
+                            <p>Understanding the codebase is valuable, but as an EM, your primary instrument is people, not code. The codebase will make more sense AFTER you understand the humans who wrote it (and their constraints).</p>
+                            <p>Better approach: Ask your tech lead to give you a 1-hour architecture tour. Use the saved time for people conversations.</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 20px;">
+                            <p><strong>❌ Danger zone!</strong></p>
+                            <p>47 emails on day 1 will still be there on day 2. If you start by being reactive to your inbox, you'll never be proactive about what matters. Most of those emails don't need YOUR response — they need you to understand who SHOULD respond.</p>
+                            <p>Instead: Scan for anything truly urgent (production down, HR issues), then close the inbox. People > Email. Always.</p>
+                        </div>
+                    `;
+                }
+                resultDiv.classList.add('show');
+            }
+        }
+
+        // Easter Egg
+        function showEasterEgg() {
+            alert("🥚 You found the easter egg!\n\nHere's a secret tip:\n\nThe #1 thing that separates good EMs from great EMs?\n\nGreat EMs keep a 'brag doc' for EACH team member.\nEvery win, every growth moment, every positive feedback.\n\nWhen promo time comes, you have RECEIPTS. 📝\n\nYour team will love you forever.");
+        }
+
+        // Confetti
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#512bd4', '#e91e8c', '#10b981', '#f59e0b', '#ef4444', '#82aaff'];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 3 + 2,
+                    angle: Math.random() * Math.PI * 2,
+                    spin: (Math.random() - 0.5) * 0.2
+                });
+            }
+
+            let frame = 0;
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speed;
+                    p.x += Math.sin(p.angle) * 2;
+                    p.angle += p.spin;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.angle);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size / 2);
+                    ctx.restore();
+                });
+
+                frame++;
+                if (frame < 180) {
+                    requestAnimationFrame(animate);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animate();
+        }
+
+        // Smooth scroll for nav
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Active nav highlighting
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Fun console message
+        console.log(`
+%c🚀 Hey there, future Engineering Manager!
+%cIf you're reading this console, you're still a developer at heart.
+That's a GOOD thing. Never lose it.
+
+Pro tip: The best EMs are the ones who remember what it felt like
+to be in the trenches. Use that empathy as your superpower.
+
+Now close DevTools and go practice your STAR answers! 😄
+        `, 'font-size: 16px; font-weight: bold; color: #512bd4;', 'font-size: 12px; color: #94a3b8;');
+    </script>
+</body>
+</html>
