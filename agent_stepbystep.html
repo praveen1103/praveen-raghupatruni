@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🛠️ Step-by-Step: Build SDLC AI Agents with GitHub Copilot</title>
+  <style>
+    :root {
+      --primary: #6e40c9;
+      --secondary: #00d4ff;
+      --accent: #ff6b6b;
+      --green: #00e676;
+      --yellow: #ffd740;
+      --orange: #ff9800;
+      --dark: #0d1117;
+      --card: #161b22;
+      --card2: #1c2128;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    /* ── STICKY NAV ── */
+    .sticky-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,17,23,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      font-weight: 700;
+      font-size: .95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand span { color: var(--secondary); }
+    .nav-steps {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      max-width: 70vw;
+    }
+    .nav-step-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: .72rem;
+      padding: 4px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+    .nav-step-btn:hover, .nav-step-btn.active {
+      background: rgba(110,64,201,.2);
+      border-color: var(--primary);
+      color: #c084fc;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0d1117, #150d2e, #0a1628);
+      padding: 100px 24px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(110,64,201,.35) 0%, transparent 65%);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0,212,255,.1);
+      border: 1px solid rgba(0,212,255,.3);
+      border-radius: 20px;
+      padding: 6px 20px;
+      font-size: .78rem;
+      color: var(--secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(2rem,5vw,3.5rem);
+      font-weight: 900;
+      line-height: 1.15;
+      position: relative;
+    }
+    .hero h1 .hl { color: var(--secondary); }
+    .hero h1 .hl2 { color: var(--yellow); }
+    .hero p.sub {
+      max-width: 640px;
+      margin: 20px auto 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      position: relative;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-top: 36px;
+      position: relative;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .n { font-size: 2rem; font-weight: 800; color: var(--secondary); }
+    .hero-stat .l { font-size: .78rem; color: var(--muted); }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .progress-bar-outer {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--border);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      width: 0;
+      transition: width .8s ease;
+    }
+    .progress-label {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .progress-label span { color: var(--secondary); font-weight: 700; }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── STEP BLOCK ── */
+    .step-block {
+      padding: 64px 0 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .step-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .step-number {
+      flex-shrink: 0;
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 900;
+      position: relative;
+    }
+    .step-number.s1  { background: linear-gradient(135deg,#f59e0b22,#f59e0b44); border: 2px solid #f59e0b; color: #f59e0b; }
+    .step-number.s2  { background: linear-gradient(135deg,#3b82f622,#3b82f644); border: 2px solid #3b82f6; color: #3b82f6; }
+    .step-number.s3  { background: linear-gradient(135deg,#ef444422,#ef444444); border: 2px solid #ef4444; color: #ef4444; }
+    .step-number.s4  { background: linear-gradient(135deg,#8b5cf622,#8b5cf644); border: 2px solid #8b5cf6; color: #8b5cf6; }
+    .step-number.s5  { background: linear-gradient(135deg,#10b98122,#10b98144); border: 2px solid #10b981; color: #10b981; }
+    .step-number.s6  { background: linear-gradient(135deg,#f9731622,#f9731644); border: 2px solid #f97316; color: #f97316; }
+    .step-number.s7  { background: linear-gradient(135deg,#ec489922,#ec489944); border: 2px solid #ec4899; color: #ec4899; }
+    .step-number.s8  { background: linear-gradient(135deg,#06b6d422,#06b6d444); border: 2px solid #06b6d4; color: #06b6d4; }
+    .step-number.s9  { background: linear-gradient(135deg,#84cc1622,#84cc1644); border: 2px solid #84cc16; color: #84cc16; }
+    .step-number.s10 { background: linear-gradient(135deg,#6e40c922,#6e40c944); border: 2px solid #6e40c9; color: #c084fc; }
+    .step-number.s11 { background: linear-gradient(135deg,#00d4ff22,#00d4ff44); border: 2px solid #00d4ff; color: #00d4ff; }
+    .step-number.s12 { background: linear-gradient(135deg,#00e67622,#00e67644); border: 2px solid #00e676; color: #00e676; }
+
+    .step-meta { flex: 1; }
+    .step-tag {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .step-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .step-subtitle { color: var(--muted); font-size: .95rem; line-height: 1.6; }
+
+    /* ── SUB-STEPS ── */
+    .substeps { display: flex; flex-direction: column; gap: 16px; }
+    .substep {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .substep:hover { border-color: rgba(110,64,201,.5); }
+    .substep-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      cursor: pointer;
+    }
+    .substep-num {
+      width: 28px; height: 28px;
+      background: rgba(110,64,201,.25);
+      border: 1px solid rgba(110,64,201,.5);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: #c084fc;
+      flex-shrink: 0;
+    }
+    .substep-content { flex: 1; }
+    .substep-title { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
+    .substep-desc { color: var(--muted); font-size: .88rem; line-height: 1.55; }
+    .substep-body {
+      padding: 0 20px 18px 62px;
+      display: none;
+    }
+    .substep.open .substep-body { display: block; }
+    .substep-toggle {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 1.2rem;
+      transition: transform .2s;
+    }
+    .substep.open .substep-toggle { transform: rotate(90deg); color: var(--secondary); }
+
+    /* ── CODE BLOCKS ── */
+    .code-block {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .code-header {
+      background: #161b22;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-lang { font-size: .72rem; color: var(--muted); font-family: monospace; }
+    .code-tag { font-size: .7rem; background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.3); color: #00e676; border-radius: 4px; padding: 1px 8px; }
+    .code-body {
+      padding: 16px 18px;
+      font-family: 'Cascadia Code','Fira Code',monospace;
+      font-size: .85rem;
+      line-height: 1.9;
+      overflow-x: auto;
+    }
+    .kw  { color: #ff7b72; }
+    .str { color: #a5d6ff; }
+    .cmt { color: #8b949e; font-style: italic; }
+    .fn  { color: #d2a8ff; }
+    .val { color: #79c0ff; }
+    .hl  { background: rgba(110,64,201,.2); border-radius: 4px; padding: 1px 4px; }
+    .grn { color: #7ee787; }
+    .ylw { color: #e3b341; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .callout.info    { background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.25); }
+    .callout.warn    { background: rgba(255,215,64,.06); border: 1px solid rgba(255,215,64,.25); }
+    .callout.success { background: rgba(0,230,118,.06); border: 1px solid rgba(0,230,118,.25); }
+    .callout.danger  { background: rgba(255,107,107,.06); border: 1px solid rgba(255,107,107,.25); }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+    .callout-text { font-size: .9rem; line-height: 1.6; }
+    .callout.info    .callout-text { color: #cce7ff; }
+    .callout.warn    .callout-text { color: #fff3cd; }
+    .callout.success .callout-text { color: #ccffeb; }
+    .callout.danger  .callout-text { color: #ffe0e0; }
+    .callout-text strong { font-weight: 700; }
+
+    /* ── CHECK LIST ── */
+    .checklist { list-style: none; margin: 12px 0; }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      font-size: .9rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      line-height: 1.5;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .check-icon { flex-shrink: 0; margin-top: 2px; }
+
+    /* ── PILLS ── */
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .p-pill {
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: .78rem;
+      border: 1px solid;
+    }
+    .p-pill.blue   { background: rgba(59,130,246,.1); border-color: rgba(59,130,246,.4); color: #93c5fd; }
+    .p-pill.purple { background: rgba(139,92,246,.1); border-color: rgba(139,92,246,.4); color: #c4b5fd; }
+    .p-pill.green  { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.4); color: #6ee7b7; }
+    .p-pill.red    { background: rgba(239,68,68,.1);  border-color: rgba(239,68,68,.4);  color: #fca5a5; }
+    .p-pill.yellow { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.4); color: #fcd34d; }
+    .p-pill.cyan   { background: rgba(6,182,212,.1);  border-color: rgba(6,182,212,.4);  color: #67e8f9; }
+
+    /* ── FUNNY BOX ── */
+    .funny {
+      background: rgba(255,215,64,.06);
+      border-left: 3px solid var(--yellow);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: .88rem;
+      color: #fde68a;
+      font-style: italic;
+    }
+    .funny::before { content: '😂 '; }
+
+    /* ── AGENT FLOW ── */
+    .agent-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 16px 0;
+    }
+    .af-item {
+      display: flex;
+      gap: 0;
+    }
+    .af-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 40px;
+      flex-shrink: 0;
+    }
+    .af-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid var(--dark);
+      flex-shrink: 0;
+    }
+    .af-line {
+      flex: 1;
+      width: 2px;
+      background: linear-gradient(180deg, var(--primary), rgba(110,64,201,.2));
+      min-height: 20px;
+    }
+    .af-content {
+      flex: 1;
+      padding: 0 0 20px 16px;
+    }
+    .af-label { font-size: .72rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+    .af-text { font-size: .9rem; color: var(--text); margin-top: 4px; line-height: 1.5; }
+    .af-sub { font-size: .8rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── RUN SECTION ── */
+    .run-section {
+      background: linear-gradient(135deg, #0d1117, #150d2e, #0a1628);
+      border-top: 1px solid var(--border);
+      padding: 64px 24px;
+      text-align: center;
+    }
+    .run-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 12px; }
+    .run-title span { color: var(--yellow); }
+    .run-desc { color: var(--muted); max-width: 580px; margin: 0 auto 36px; font-size: 1rem; line-height: 1.7; }
+    .run-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, #00e676, #00c853);
+      border: none;
+      border-radius: 16px;
+      padding: 20px 52px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 0 40px rgba(0,230,118,.5);
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+    }
+    .run-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(0,230,118,.8);
+    }
+    .run-terminal {
+      max-width: 700px;
+      margin: 40px auto 0;
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      text-align: left;
+    }
+    .rt-header {
+      background: #161b22;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rt-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .rt-title { font-size: .8rem; color: var(--muted); margin-left: 8px; }
+    .rt-body {
+      padding: 20px 18px;
+      font-family: monospace;
+      font-size: .85rem;
+      line-height: 2.2;
+    }
+    .rt-line { display: flex; gap: 8px; }
+    .rt-prompt { color: var(--green); flex-shrink: 0; }
+    .rt-cmd { color: var(--text); }
+    .rt-out { color: var(--muted); padding-left: 16px; }
+    .rt-out.ok { color: var(--green); }
+    .rt-out.info { color: var(--secondary); }
+    .rt-out.warn { color: var(--yellow); }
+    .rt-cursor { display: inline-block; width: 8px; height: 16px; background: var(--green); animation: blink 1s step-end infinite; vertical-align: middle; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── TIPS GRID ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .tip-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .tip-card:hover { border-color: var(--primary); }
+    .tip-card .tip-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .tip-card .tip-title { font-weight: 700; font-size: .95rem; margin-bottom: 6px; }
+    .tip-card .tip-desc { color: var(--muted); font-size: .85rem; line-height: 1.6; }
+
+    /* ── PREREQ GRID ── */
+    .prereq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .prereq-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .prereq-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .prereq-name { font-weight: 600; font-size: .9rem; }
+    .prereq-ver  { font-size: .75rem; color: var(--secondary); margin-top: 2px; }
+    .prereq-desc { font-size: .78rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+    /* ── DIVIDER ── */
+    hr.div { border: none; border-top: 1px solid var(--border); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #010409;
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    footer strong { color: var(--secondary); }
+
+    @media(max-width:600px) {
+      .step-header { flex-direction: column; gap: 12px; }
+      .sticky-nav .nav-steps { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ STICKY NAV ═══ -->
+<nav class="sticky-nav">
+  <div class="nav-brand">🤖 <span>Agent</span> Build Guide</div>
+  <div class="nav-steps">
+    <button class="nav-step-btn" onclick="scrollTo('prereq')">📋 Prereqs</button>
+    <button class="nav-step-btn" onclick="scrollTo('step1')">1 · Setup</button>
+    <button class="nav-step-btn" onclick="scrollTo('step2')">2 · Orchestrator</button>
+    <button class="nav-step-btn" onclick="scrollTo('step3')">3 · Architecture</button>
+    <button class="nav-step-btn" onclick="scrollTo('step4')">4 · Frontend</button>
+    <button class="nav-step-btn" onclick="scrollTo('step5')">5 · Backend</button>
+    <button class="nav-step-btn" onclick="scrollTo('step6')">6 · Database</button>
+    <button class="nav-step-btn" onclick="scrollTo('step7')">7 · QA</button>
+    <button class="nav-step-btn" onclick="scrollTo('step8')">8 · Security</button>
+    <button class="nav-step-btn" onclick="scrollTo('step9')">9 · DevOps</button>
+    <button class="nav-step-btn" onclick="scrollTo('step10')">10 · Docs</button>
+    <button class="nav-step-btn" onclick="scrollTo('step11')">11 · Connect</button>
+    <button class="nav-step-btn" onclick="scrollTo('step12')">12 · Run!</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-badge">📖 Complete Step-by-Step Guide · GitHub Copilot Agents</div>
+  <h1>
+    Build <span class="hl">SDLC AI Agents</span><br/>
+    for Your <span class="hl2">E-Commerce App</span><br/>
+    — Step by Step
+  </h1>
+  <p class="sub">
+    12 steps. 9 agents. 1 e-commerce app. 0 all-nighters.
+    By the end of this guide, you'll have an AI crew that builds, tests,
+    secures, and deploys your app — while you exist as a human being. ✨
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="n">12</div><div class="l">Steps Total</div></div>
+    <div class="hero-stat"><div class="n">9</div><div class="l">AI Agents</div></div>
+    <div class="hero-stat"><div class="n">1</div><div class="l">Final Click</div></div>
+    <div class="hero-stat"><div class="n">∞</div><div class="l">Bragging Rights</div></div>
+  </div>
+</section>
+
+<!-- ═══ PROGRESS ═══ -->
+<div class="progress-wrap" id="prereq">
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="progressBar"></div>
+  </div>
+  <div class="progress-label">Your progress: <span id="progressLabel">0%</span> — don't give up now!</div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="container">
+
+  <!-- ──────────────────── PREREQUISITES ──────────────────── -->
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-number s1">📋</div>
+      <div class="step-meta">
+        <div class="step-tag">Before You Start</div>
+        <div class="step-title">Prerequisites — Don't Skip This</div>
+        <div class="step-subtitle">
+          These are the tools you need installed before any agent touches a keyboard.
+          Yes, you still need to install things. Agents don't install agents. Yet.
+        </div>
+      </div>
+    </div>
+
+    <div class="prereq-grid">
+      <div class="prereq-card">
+        <div class="prereq-icon">🐙</div>
+        <div>
+          <div class="prereq-name">GitHub Account</div>
+          <div class="prereq-ver">With Copilot Business/Enterprise</div>
+          <div class="prereq-desc">You need GitHub Copilot with Agent Mode enabled. Free tier won't cut it here. Time to expense that subscription.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">💻</div>
+        <div>
+          <div class="prereq-name">VS Code</div>
+          <div class="prereq-ver">v1.90+ recommended</div>
+          <div class="prereq-desc">Install the GitHub Copilot extension AND the GitHub Copilot Chat extension. Both. Don't argue.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">🔷</div>
+        <div>
+          <div class="prereq-name">.NET SDK 8+</div>
+          <div class="prereq-ver">dotnet --version</div>
+          <div class="prereq-desc">The backend agent will need this to scaffold, build, and run the WebAPI project. Go get it.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">🅰</div>
+        <div>
+          <div class="prereq-name">Node.js 20+ &amp; Angular CLI</div>
+          <div class="prereq-ver">ng version</div>
+          <div class="prereq-desc">Frontend agent scaffolds using Angular CLI. Node 20 LTS is the sweet spot between "too new" and "why?"</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">🐘</div>
+        <div>
+          <div class="prereq-name">PostgreSQL 16 / Docker</div>
+          <div class="prereq-ver">psql --version</div>
+          <div class="prereq-desc">Either install Postgres locally or just use Docker. Docker is recommended so you don't ruin your laptop.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">🐳</div>
+        <div>
+          <div class="prereq-name">Docker Desktop</div>
+          <div class="prereq-ver">docker --version</div>
+          <div class="prereq-desc">DevOps agent will build Docker images and run containers. Required for the full pipeline experience.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">🔑</div>
+        <div>
+          <div class="prereq-name">GitHub CLI (gh)</div>
+          <div class="prereq-ver">gh --version</div>
+          <div class="prereq-desc">Agents use the GitHub CLI to create PRs, manage workflows, and push changes. Install and authenticate it.</div>
+        </div>
+      </div>
+      <div class="prereq-card">
+        <div class="prereq-icon">☕</div>
+        <div>
+          <div class="prereq-name">Coffee / Tea</div>
+          <div class="prereq-ver">Any version. Hot or iced.</div>
+          <div class="prereq-desc">Once you hit the final button, you'll have 12 minutes to sip something. Be prepared.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:20px;">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text">
+        <strong>Enable Copilot Agent Mode:</strong> In VS Code → Settings → Search "copilot agent" → Enable "Agent Mode" toggle.
+        Also enable "Copilot: Workspace" feature flag if you're on Insider builds.
+        If you can't find it, update VS Code. It's always "update VS Code."
+      </div>
+    </div>
+
+    <div class="funny">Real talk: if you skip prerequisites and jump to Step 2, you'll spend 3 hours debugging why nothing works. We've all been there. We're not going back.</div>
+  </div>
+
+  <!-- ──────────────────── STEP 1 ──────────────────── -->
+  <div class="step-block" id="step1">
+    <div class="step-header">
+      <div class="step-number s1">1</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 1 · Foundation</div>
+        <div class="step-title">Create the Repository &amp; Project Structure</div>
+        <div class="step-subtitle">
+          Before any agent does anything, you need a home for them to live in.
+          Think of this as building the office before hiring employees.
+          A very, very smart office.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">1.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Create a new GitHub Repository</div>
+            <div class="substep-desc">Go to github.com → New Repository → Name it <code>ecommerce-ai-agents</code></div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <ul class="checklist">
+            <li><span class="check-icon">✅</span> Go to <strong>github.com/new</strong> and create a repository named <code>ecommerce-ai-agents</code></li>
+            <li><span class="check-icon">✅</span> Set visibility to <strong>Private</strong> (unless you enjoy the world seeing your half-baked agent experiments)</li>
+            <li><span class="check-icon">✅</span> Initialize with a <strong>README</strong> (don't worry, Doc Agent will replace it with something better)</li>
+            <li><span class="check-icon">✅</span> Add a <strong>.gitignore</strong> — choose "VisualStudio" template to cover both .NET and Node</li>
+            <li><span class="check-icon">✅</span> Clone the repo locally: open terminal, run <code>git clone https://github.com/YOUR_USER/ecommerce-ai-agents</code></li>
+            <li><span class="check-icon">✅</span> Open the cloned folder in VS Code: <code>code ecommerce-ai-agents</code></li>
+          </ul>
+          <div class="callout warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-text"><strong>Repository name matters!</strong> Agents will reference the repo name in generated configs. Avoid spaces, special chars, or names like "my-final-final-v2-REAL".</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">1.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create the folder skeleton</div>
+            <div class="substep-desc">Agents work best when there's already a directory structure to write into</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:10px;">Open VS Code terminal and create these folders. Agents will fill them, but they need the buckets first.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">bash · Terminal</span><span class="code-tag">Run This</span></div>
+            <div class="code-body">
+<span class="cmt"># From inside your cloned repo folder</span>
+<span class="fn">mkdir</span> -p frontend backend database tests docs .github/workflows .github/agents
+<span class="fn">touch</span> .github/copilot-agents.yml
+<span class="fn">touch</span> docs/requirements.md
+<span class="fn">touch</span> openapi.yaml
+<span class="fn">echo</span> <span class="str">"# E-Commerce AI Agent Project"</span> >> README.md
+<span class="fn">git</span> add . && git commit -m <span class="str">"chore: initial scaffold for AI agents"</span>
+<span class="fn">git</span> push
+            </div>
+          </div>
+          <div class="funny">You just created empty folders. Congratulations. Now the agents have a place to live. It's like building a really fancy haunted house but the ghosts are helpful.</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">1.3</div>
+          <div class="substep-content">
+            <div class="substep-title">Enable GitHub Copilot Workspace on your repo</div>
+            <div class="substep-desc">Flip the switch that gives Copilot write access to your repository</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <ul class="checklist">
+            <li><span class="check-icon">✅</span> Go to your repo on GitHub → <strong>Settings</strong> → <strong>Copilot</strong> (left sidebar)</li>
+            <li><span class="check-icon">✅</span> Enable <strong>"Copilot in your repository"</strong></li>
+            <li><span class="check-icon">✅</span> Under Permissions, enable: <strong>Read &amp; Write for code, issues, pull requests, workflows</strong></li>
+            <li><span class="check-icon">✅</span> In VS Code: Press <strong>Ctrl+Shift+P</strong> → type "Copilot: Sign In" → authenticate</li>
+            <li><span class="check-icon">✅</span> Verify Copilot icon appears in VS Code bottom status bar (little robot face 🤖)</li>
+          </ul>
+          <div class="callout success">
+            <div class="callout-icon">✅</div>
+            <div class="callout-text"><strong>You're done with Step 1!</strong> Your repo exists, your folders are created, and Copilot has the keys to the kingdom. Don't panic. It's a trustworthy robot.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 2 ──────────────────── -->
+  <div class="step-block" id="step2">
+    <div class="step-header">
+      <div class="step-number s2">2</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 2 · The Boss Agent</div>
+        <div class="step-title">Create the Orchestrator Agent</div>
+        <div class="step-subtitle">
+          The Orchestrator is the PM of your AI team. It reads your one-sentence prompt,
+          builds a plan, and dispatches worker agents. It's like a conductor —
+          except it never takes a bow and works 24/7 for free.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">2.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Define the Orchestrator in copilot-agents.yml</div>
+            <div class="substep-desc">Open <code>.github/copilot-agents.yml</code> — this is the master config file for ALL agents</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:10px;">
+            Open <code>.github/copilot-agents.yml</code> in VS Code and define the Orchestrator block.
+            This tells Copilot <em>who is in charge</em> and what triggers the whole pipeline.
+          </p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · .github/copilot-agents.yml</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># ═══════════════════════════════════════════════════</span>
+<span class="cmt"># GitHub Copilot Multi-Agent Configuration</span>
+<span class="cmt"># E-Commerce SDLC Automation</span>
+<span class="cmt"># ═══════════════════════════════════════════════════</span>
+
+<span class="val">version</span>: <span class="str">"1.0"</span>
+<span class="val">project</span>: <span class="str">"ecommerce-app"</span>
+<span class="val">description</span>: <span class="str">"AI-powered SDLC for Angular + .NET + Postgres"</span>
+
+<span class="cmt"># ── ORCHESTRATOR (The Boss) ──────────────────────────</span>
+<span class="val">orchestrator</span>:
+  <span class="val">name</span>: <span class="str">"pm-agent"</span>
+  <span class="val">display_name</span>: <span class="str">"PM Orchestrator"</span>
+  <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+  <span class="val">persona</span>: <span class="str">|</span>
+    <span class="str">You are a senior project manager and system orchestrator.</span>
+    <span class="str">Parse requirements into structured tasks. Assign tasks to</span>
+    <span class="str">the right agents. Track completion. Report status clearly.</span>
+    <span class="str">Never do work meant for other agents.</span>
+  <span class="val">triggers</span>:
+    - <span class="str">on_copilot_chat_prompt</span>    <span class="cmt"># triggered from Copilot Chat</span>
+    - <span class="str">on_issue_created</span>          <span class="cmt"># triggered when a GH Issue is filed</span>
+    - <span class="str">on_manual_dispatch</span>        <span class="cmt"># triggered by the "one click" button</span>
+  <span class="val">inputs</span>:
+    - <span class="val">type</span>: <span class="str">natural_language_prompt</span>
+      <span class="val">description</span>: <span class="str">"Describe what to build"</span>
+  <span class="val">outputs</span>:
+    - <span class="str">docs/requirements.md</span>
+    - <span class="str">docs/task-graph.json</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">2.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create the Orchestrator's system prompt file</div>
+            <div class="substep-desc">The persona block tells the Orchestrator HOW to think and behave</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:10px;">
+            Create <code>.github/agents/orchestrator.prompt.md</code> — this is the detailed
+            instruction set for the Orchestrator. Think of it as an extremely detailed job description
+            that the agent actually reads (unlike most employees).
+          </p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/orchestrator.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Orchestrator Agent — System Instructions</span>
+
+<span class="grn">## Your Role</span>
+You are the PM Orchestrator. You receive a natural language prompt
+describing a feature or project. Your job is to:
+
+<span class="grn">## Step-by-Step Process</span>
+<span class="ylw">1.</span> Parse the user prompt into structured requirements
+<span class="ylw">2.</span> Create user stories in format: "As a [user], I want [action]"
+<span class="ylw">3.</span> Break stories into technical tasks per layer (FE, BE, DB)
+<span class="ylw">4.</span> Build a task dependency graph (JSON format)
+<span class="ylw">5.</span> Write requirements to docs/requirements.md
+<span class="ylw">6.</span> Write task graph to docs/task-graph.json
+<span class="ylw">7.</span> Emit AGENT_START signal with the task-graph as context
+
+<span class="grn">## Agent Routing Rules</span>
+- Architecture tasks → architecture-agent
+- Angular/UI tasks  → frontend-agent
+- .NET API tasks    → backend-agent
+- Database tasks    → database-agent
+- Test tasks        → qa-agent
+- Security review   → security-agent
+- Docker/CI tasks   → devops-agent
+- Docs tasks        → doc-agent
+
+<span class="grn">## Context Object Structure (emit this to all agents)</span>
+Provide a shared context JSON containing:
+- project_name, description, stack
+- user_stories[], technical_tasks[]
+- api_contract_path, db_schema_path
+- agent_assignments{}
+            </div>
+          </div>
+          <div class="callout info">
+            <div class="callout-icon">💡</div>
+            <div class="callout-text"><strong>Why a separate .md file?</strong> It keeps your YAML clean and lets you version-control agent instructions separately. When the Orchestrator starts making weird decisions, you edit this file — not the entire config. Debugging AI is already hard enough.</div>
+          </div>
+          <div class="funny">The Orchestrator reads this file every time it runs. It's the only employee who actually reads the employee handbook.</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">2.3</div>
+          <div class="substep-content">
+            <div class="substep-title">Test the Orchestrator in Copilot Chat</div>
+            <div class="substep-desc">Before wiring up all agents, verify the Orchestrator parses prompts correctly</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <ul class="checklist">
+            <li><span class="check-icon">✅</span> Press <strong>Ctrl+Shift+I</strong> to open Copilot Chat in VS Code</li>
+            <li><span class="check-icon">✅</span> Switch mode to <strong>"Agent"</strong> using the dropdown at the top of the chat panel</li>
+            <li><span class="check-icon">✅</span> Type: <em>"@pm-agent Parse this: Build a product listing page for an e-commerce app"</em></li>
+            <li><span class="check-icon">✅</span> Verify it responds with structured user stories and task breakdowns</li>
+            <li><span class="check-icon">✅</span> Check that <code>docs/requirements.md</code> was created with content</li>
+            <li><span class="check-icon">✅</span> Check that <code>docs/task-graph.json</code> was created with agent assignments</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 3 ──────────────────── -->
+  <div class="step-block" id="step3">
+    <div class="step-header">
+      <div class="step-number s3">3</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 3 · System Design</div>
+        <div class="step-title">Create the Architecture Agent</div>
+        <div class="step-subtitle">
+          This agent reads the requirements and decides HOW the system is built —
+          what talks to what, where data lives, and what the API looks like.
+          It's the person who draws boxes and arrows on whiteboards,
+          except it actually finishes in time.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">3.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Architecture Agent to copilot-agents.yml</div>
+            <div class="substep-desc">Append the architecture-agent block under the <code>agents:</code> section</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · .github/copilot-agents.yml — append under agents:</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+<span class="val">agents</span>:
+
+  <span class="cmt"># ── AGENT 1: ARCHITECTURE ─────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"architecture-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"Solutions Architect"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/architecture.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"pm-agent"</span>        <span class="cmt"># waits for requirements.md</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"docs/requirements.md"</span>
+      - <span class="str">"docs/task-graph.json"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">create_openapi_spec</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"ARCHITECTURE.md"</span>          <span class="cmt"># architecture decisions</span>
+      - <span class="str">"openapi.yaml"</span>             <span class="cmt"># THE shared API contract</span>
+      - <span class="str">"docs/db-erd.md"</span>           <span class="cmt"># DB entity diagram in mermaid</span>
+    <span class="val">emit_signal</span>: <span class="str">"ARCHITECTURE_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">3.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create architecture.prompt.md — The agent's brain</div>
+            <div class="substep-desc">Tell the agent how to design the system and what to produce</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/architecture.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Architecture Agent — System Instructions</span>
+
+<span class="grn">## Stack (NEVER deviate from this)</span>
+- Frontend : Angular 17 with standalone components
+- Backend  : .NET Core 8 WebAPI, Clean Architecture
+- Database : PostgreSQL 16
+- Auth     : JWT Bearer tokens
+
+<span class="grn">## Your Tasks (in order)</span>
+<span class="ylw">1.</span> Read docs/requirements.md
+<span class="ylw">2.</span> Design the system architecture
+<span class="ylw">3.</span> Define all API endpoints based on user stories
+<span class="ylw">4.</span> Generate openapi.yaml (OpenAPI 3.0 spec)
+   - Every endpoint must have: path, method, request body, response
+   - This file is LAW for frontend and backend agents
+<span class="ylw">5.</span> Design PostgreSQL schema (all tables, columns, FKs, indexes)
+<span class="ylw">6.</span> Write ARCHITECTURE.md with: component diagram, tech decisions
+
+<span class="grn">## API Endpoints Required for E-Commerce</span>
+- GET/POST/PUT/DELETE /api/products
+- GET /api/products/{id}
+- GET/POST /api/cart
+- POST /api/cart/items, DELETE /api/cart/items/{id}
+- POST /api/orders, GET /api/orders, GET /api/orders/{id}
+- POST /api/auth/login, POST /api/auth/register
+
+<span class="grn">## Output Quality Rules</span>
+- openapi.yaml must be valid and parseable
+- Every DTO must match OpenAPI schema exactly
+- Never invent endpoints that weren't in requirements
+            </div>
+          </div>
+          <div class="callout warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-text"><strong>openapi.yaml is sacred!</strong> Every agent downstream will read this file. If the Architecture Agent produces garbage here, the Frontend and Backend agents will build garbage on top of garbage. Garbage lasagna. Not what we want.</div>
+          </div>
+          <div class="funny">The Architecture Agent is the only one who gets to make design decisions. All other agents must respect them. It's like a constitution — if you don't like it, you file a PR.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 4 ──────────────────── -->
+  <div class="step-block" id="step4">
+    <div class="step-header">
+      <div class="step-number s4">4</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 4 · Frontend</div>
+        <div class="step-title">Create the Frontend Agent</div>
+        <div class="step-subtitle">
+          This agent builds your entire Angular application. Components, services, routing,
+          state management, HTTP calls — all of it. It reads <code>openapi.yaml</code> and
+          knows exactly what the backend will return. Finally, frontend-backend peace.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">4.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Frontend Agent to copilot-agents.yml</div>
+            <div class="substep-desc">Append below the architecture-agent block</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 2: FRONTEND ─────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"frontend-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"Angular Developer"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/frontend.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"architecture-agent"</span>  <span class="cmt"># needs openapi.yaml first</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"openapi.yaml"</span>             <span class="cmt"># THE source of truth</span>
+      - <span class="str">"docs/requirements.md"</span>
+      - <span class="str">"ARCHITECTURE.md"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_terminal</span>              <span class="cmt"># to run: ng generate component</span>
+    <span class="val">working_directory</span>: <span class="str">"frontend/"</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"frontend/**"</span>
+    <span class="val">emit_signal</span>: <span class="str">"FRONTEND_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">4.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create frontend.prompt.md — Angular instructions</div>
+            <div class="substep-desc">Tell the agent which Angular patterns to follow and what components to create</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/frontend.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Frontend Agent — Angular Developer Instructions</span>
+
+<span class="grn">## Framework Rules (STRICT)</span>
+- Angular 17+ with standalone components only
+- No NgModules (we're not living in 2018)
+- Use Angular Signals for state management
+- Use HttpClient with typed responses from openapi.yaml DTOs
+- Angular Material for UI components
+- Lazy-loaded routes for each feature
+
+<span class="grn">## Step-by-Step Build Process</span>
+<span class="ylw">Step 1:</span> Scaffold Angular project
+  - Run: ng new ecommerce-frontend --standalone --routing --style=scss
+  - Move output to frontend/ directory
+
+<span class="ylw">Step 2:</span> Parse openapi.yaml
+  - Read every response schema
+  - Create TypeScript interfaces matching each DTO exactly
+  - Place in frontend/src/app/core/models/
+
+<span class="ylw">Step 3:</span> Create API services (one per domain)
+  - product.service.ts   → wraps /api/products endpoints
+  - cart.service.ts      → wraps /api/cart endpoints
+  - order.service.ts     → wraps /api/orders endpoints
+  - auth.service.ts      → wraps /api/auth endpoints
+
+<span class="ylw">Step 4:</span> Create feature components
+  - products/ → product-list, product-detail, product-card
+  - cart/     → cart-sidebar, cart-item, cart-summary
+  - checkout/ → checkout-form, order-confirm
+  - orders/   → order-history, order-detail
+  - auth/     → login, register
+
+<span class="ylw">Step 5:</span> Setup routing in app.routes.ts
+  - /products     → ProductListComponent
+  - /products/:id → ProductDetailComponent
+  - /cart         → CartComponent
+  - /checkout     → CheckoutComponent (guard: isLoggedIn)
+  - /orders       → OrderHistoryComponent (guard: isLoggedIn)
+  - /auth/login   → LoginComponent
+  - /auth/register→ RegisterComponent
+
+<span class="ylw">Step 6:</span> Add HTTP Interceptor for JWT token injection
+
+<span class="grn">## Quality Standards</span>
+- Every component must have a unit test file (.spec.ts)
+- No hardcoded URLs — use environment.ts
+- Loading states and error handling for all HTTP calls
+            </div>
+          </div>
+          <div class="pill-row" style="margin-top:12px;">
+            <div class="p-pill red">Standalone Components</div>
+            <div class="p-pill blue">Angular Signals</div>
+            <div class="p-pill purple">Lazy Loading</div>
+            <div class="p-pill yellow">JWT Interceptor</div>
+            <div class="p-pill green">Typed HTTP</div>
+          </div>
+          <div class="funny">Frontend Agent never argues about whether to use pixels or rems. It picks rems and moves on. Life is short. Ship the CSS.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 5 ──────────────────── -->
+  <div class="step-block" id="step5">
+    <div class="step-header">
+      <div class="step-number s5">5</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 5 · Backend</div>
+        <div class="step-title">Create the Backend Agent</div>
+        <div class="step-subtitle">
+          This agent builds the entire .NET Core 8 WebAPI — controllers, services,
+          repositories, DTOs, middleware. It reads the same openapi.yaml as the
+          frontend agent, so they both speak the same language.
+          Groundbreaking. Revolutionary. Should have happened years ago.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">5.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Backend Agent to copilot-agents.yml</div>
+            <div class="substep-desc">This agent depends on BOTH architecture-agent AND database-agent</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 3: BACKEND ──────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"backend-agent"</span>
+    <span class="val">display_name</span>: <span class="str">.NET Core Developer"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/backend.prompt.md"</span>
+    <span class="val">depends_on</span>:              <span class="cmt"># TWO dependencies!</span>
+      - <span class="str">"architecture-agent"</span>  <span class="cmt"># needs openapi.yaml</span>
+      - <span class="str">"database-agent"</span>      <span class="cmt"># needs DB schema + models</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"openapi.yaml"</span>
+      - <span class="str">"database/001_schema.sql"</span>
+      - <span class="str">"docs/requirements.md"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_terminal</span>          <span class="cmt"># to run: dotnet new, dotnet add package</span>
+    <span class="val">working_directory</span>: <span class="str">"backend/"</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"backend/**"</span>
+    <span class="val">emit_signal</span>: <span class="str">"BACKEND_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">5.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create backend.prompt.md — .NET instructions</div>
+            <div class="substep-desc">Define Clean Architecture patterns, naming conventions, and required packages</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/backend.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Backend Agent — .NET Core Developer Instructions</span>
+
+<span class="grn">## Architecture (Clean Architecture — non-negotiable)</span>
+- ECommerce.Api          → Controllers, Program.cs, middleware
+- ECommerce.Application  → Services, DTOs, interfaces
+- ECommerce.Domain       → Entities, domain logic
+- ECommerce.Infrastructure → DbContext, Repositories, Migrations
+
+<span class="grn">## Build Process (in order)</span>
+<span class="ylw">Step 1:</span> Scaffold solution
+  - dotnet new sln -n ECommerce
+  - dotnet new webapi -n ECommerce.Api
+  - Create remaining projects, add to solution
+
+<span class="ylw">Step 2:</span> Install NuGet packages
+  - Npgsql.EntityFrameworkCore.PostgreSQL
+  - Microsoft.AspNetCore.Authentication.JwtBearer
+  - AutoMapper.Extensions.Microsoft.DependencyInjection
+  - Swashbuckle.AspNetCore (Swagger)
+  - FluentValidation.AspNetCore
+
+<span class="ylw">Step 3:</span> Read openapi.yaml — create DTOs that match EXACTLY
+  - ProductDto, CreateProductDto, UpdateProductDto
+  - CartDto, CartItemDto, AddToCartDto
+  - OrderDto, CreateOrderDto, OrderItemDto
+  - LoginDto, RegisterDto, AuthResponseDto
+  - PagedResultDto&lt;T&gt; for list endpoints
+
+<span class="ylw">Step 4:</span> Create Domain Entities (match DB schema from database-agent)
+
+<span class="ylw">Step 5:</span> Create Controllers — one per resource, REST conventions
+  - Return IActionResult with proper HTTP status codes
+  - Use [Authorize] on protected endpoints
+  - Global exception handler middleware
+
+<span class="ylw">Step 6:</span> Configure Program.cs
+  - Add CORS for Angular (localhost:4200 + prod domain)
+  - Add JWT auth
+  - Add Swagger with JWT auth header support
+  - Add AutoMapper profiles
+
+<span class="grn">## Code Standards</span>
+- Async/await everywhere (no .Result or .Wait())
+- Constructor injection only
+- No business logic in controllers
+- No raw SQL — use EF Core LINQ only
+            </div>
+          </div>
+          <div class="funny">Backend Agent doesn't put business logic in controllers. It read the Clean Architecture book AND retained the information. Hire this agent immediately.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 6 ──────────────────── -->
+  <div class="step-block" id="step6">
+    <div class="step-header">
+      <div class="step-number s6">6</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 6 · Database</div>
+        <div class="step-title">Create the Database Agent</div>
+        <div class="step-subtitle">
+          This agent designs the PostgreSQL schema, writes migration scripts, creates indexes,
+          and seeds test data. It runs before the Backend Agent so the EF Core models
+          have something to map to. Dependency management is beautiful when it works.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">6.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Database Agent to copilot-agents.yml</div>
+            <div class="substep-desc">This agent runs right after architecture, before backend</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 4: DATABASE ─────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"database-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"PostgreSQL DBA"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/database.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"architecture-agent"</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"docs/db-erd.md"</span>           <span class="cmt"># from architecture-agent</span>
+      - <span class="str">"openapi.yaml"</span>             <span class="cmt"># to align DB types with DTOs</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_sql</span>                   <span class="cmt"># connects to local Postgres</span>
+    <span class="val">environment</span>:
+      <span class="val">PGHOST</span>: <span class="str">"localhost"</span>
+      <span class="val">PGPORT</span>: <span class="str">"5432"</span>
+      <span class="val">PGDATABASE</span>: <span class="str">"ecommerce_dev"</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"database/001_schema.sql"</span>
+      - <span class="str">"database/002_indexes.sql"</span>
+      - <span class="str">"database/003_seed.sql"</span>
+      - <span class="str">"backend/ECommerce.Infrastructure/Migrations/"</span>
+    <span class="val">emit_signal</span>: <span class="str">"DATABASE_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">6.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create database.prompt.md — DBA instructions</div>
+            <div class="substep-desc">Define schema design rules, naming conventions, and what tables to create</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/database.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Database Agent — PostgreSQL DBA Instructions</span>
+
+<span class="grn">## Tables to Create</span>
+- users        (id, email, password_hash, full_name, created_at)
+- categories   (id, name, slug, description)
+- products     (id, name, description, price, stock_qty,
+                category_id FK, image_url, created_at)
+- carts        (id, user_id FK, created_at, updated_at)
+- cart_items   (id, cart_id FK, product_id FK, quantity, unit_price)
+- orders       (id, user_id FK, status, total_amount,
+                shipping_address JSONB, created_at)
+- order_items  (id, order_id FK, product_id FK, quantity, unit_price)
+
+<span class="grn">## Schema Rules</span>
+- Use UUID for all primary keys (gen_random_uuid())
+- All timestamps in UTC with DEFAULT NOW()
+- All money columns as NUMERIC(10,2) — never FLOAT
+- Add CHECK constraints (price > 0, quantity >= 0)
+- snake_case for all table and column names
+
+<span class="grn">## Indexes to Create</span>
+- idx_products_category_id
+- idx_products_price (for sorting/filtering)
+- idx_cart_items_cart_id
+- idx_orders_user_id
+- idx_orders_status
+- Unique index on users.email
+
+<span class="grn">## Seed Data</span>
+- 3 categories (Electronics, Clothing, Books)
+- 30 products across categories (realistic names + prices)
+- 2 test users (customer, admin)
+
+<span class="grn">## EF Core Migrations</span>
+- Generate InitialCreate migration matching the SQL schema
+- Ensure column types map correctly to .NET types
+            </div>
+          </div>
+          <div class="funny">Database Agent uses NUMERIC(10,2) for prices. It has seen things. It has seen FLOAT used for currency. It will not speak of what it witnessed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 7 ──────────────────── -->
+  <div class="step-block" id="step7">
+    <div class="step-header">
+      <div class="step-number s7">7</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 7 · Quality</div>
+        <div class="step-title">Create the QA Agent</div>
+        <div class="step-subtitle">
+          The QA Agent writes tests, runs them, finds failures,
+          tells the responsible agents to fix them, and re-runs.
+          It loops until green. It has no concept of "good enough."
+          You'll love it and fear it simultaneously. That's normal.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">7.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add QA Agent to copilot-agents.yml</div>
+            <div class="substep-desc">QA depends on both frontend and backend being complete</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 5: QA ───────────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"qa-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"QA Engineer"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/qa.prompt.md"</span>
+    <span class="val">depends_on</span>:
+      - <span class="str">"frontend-agent"</span>
+      - <span class="str">"backend-agent"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_terminal</span>
+      - <span class="str">run_tests</span>
+    <span class="val">loop_on_failure</span>: <span class="val">true</span>      <span class="cmt"># retries until all tests pass ♻️</span>
+    <span class="val">max_retries</span>: <span class="val">3</span>
+    <span class="val">failure_escalation</span>:      <span class="cmt"># who to ping if still failing</span>
+      - <span class="str">"backend-agent"</span>
+      - <span class="str">"frontend-agent"</span>
+    <span class="val">coverage_threshold</span>: <span class="val">80</span>   <span class="cmt"># fail if coverage drops below 80%</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"tests/**"</span>
+      - <span class="str">"coverage-report.xml"</span>
+    <span class="val">emit_signal</span>: <span class="str">"QA_DONE"</span>
+            </div>
+          </div>
+          <div class="callout info">
+            <div class="callout-icon">🔁</div>
+            <div class="callout-text"><strong>loop_on_failure: true</strong> is the magic. If tests fail, the QA Agent tells the relevant agent to fix the issue, then re-runs. It doesn't give up. It doesn't file a bug ticket for "someone else to handle." It finishes what it started.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">7.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create qa.prompt.md — Testing instructions</div>
+            <div class="substep-desc">Define what tests to write, tools to use, and coverage expectations</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/qa.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># QA Agent — Test Engineer Instructions</span>
+
+<span class="grn">## Test Layers to Create</span>
+
+<span class="ylw">Layer 1: Unit Tests (.NET — xUnit)</span>
+- ProductServiceTests → test all service methods
+- OrderServiceTests   → test order creation, status changes
+- CartServiceTests    → test add/remove/clear
+- AuthServiceTests    → test login, register, token gen
+- Run with: dotnet test --collect:"XPlat Code Coverage"
+
+<span class="ylw">Layer 2: Unit Tests (Angular — Jest)</span>
+- ProductService: mock HTTP calls, test CRUD methods
+- CartStore: test signal state transitions
+- AuthService: test login/logout/token storage
+- Run with: ng test --watch=false --code-coverage
+
+<span class="ylw">Layer 3: Integration Tests (.NET)</span>
+- Use WebApplicationFactory for real HTTP calls
+- Use Testcontainers for real Postgres DB
+- Test complete request→response cycles for each endpoint
+
+<span class="ylw">Layer 4: E2E Tests (Playwright)</span>
+- Product browsing flow: visit /products, see grid, click product
+- Cart flow: add product, view cart, update quantity
+- Checkout flow: fill form, submit order, see confirmation
+- Auth flow: register, login, access protected pages
+
+<span class="grn">## After Writing Tests</span>
+1. Run all unit tests — fix failures before proceeding
+2. Run integration tests against test DB
+3. Generate coverage report
+4. If coverage &lt; 80% — write more tests, do not skip
+5. Run Playwright E2E tests against running app
+
+<span class="grn">## Escalation Protocol</span>
+If a test reveals a bug in backend code → message backend-agent with:
+- File path and line number
+- Expected vs actual behavior
+- The failing test case
+            </div>
+          </div>
+          <div class="funny">QA Agent uses Testcontainers for real Postgres. It will not test against SQLite "just for tests." It has standards. It has lived through the "but it passed in dev" incident. Never again.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 8 ──────────────────── -->
+  <div class="step-block" id="step8">
+    <div class="step-header">
+      <div class="step-number s8">8</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 8 · Security</div>
+        <div class="step-title">Create the Security Agent</div>
+        <div class="step-subtitle">
+          The Security Agent is paranoid by design. It runs after QA and scans
+          everything — OWASP Top 10, hardcoded secrets, dependency vulnerabilities,
+          JWT misconfigurations. If it finds something bad, the pipeline stops.
+          Full stop. No "we'll fix it later." Later never comes.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">8.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Security Agent to copilot-agents.yml</div>
+            <div class="substep-desc">Security is a hard gate — it blocks deployment if it fails</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 6: SECURITY ─────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"security-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"Security Researcher"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/security.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"qa-agent"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_security_scan</span>         <span class="cmt"># runs semgrep, npm audit, dotnet-outdated</span>
+      - <span class="str">run_terminal</span>
+    <span class="val">blocking</span>: <span class="val">true</span>               <span class="cmt"># STOPS ENTIRE PIPELINE on critical findings</span>
+    <span class="val">auto_fix</span>:
+      <span class="val">severity</span>: <span class="str">"low,medium"</span>    <span class="cmt"># auto-fix these</span>
+    <span class="val">escalate_on</span>:
+      <span class="val">severity</span>: <span class="str">"high,critical"</span>  <span class="cmt"># halt pipeline on these</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"SECURITY.md"</span>
+      - <span class="str">"security-report.json"</span>
+    <span class="val">emit_signal</span>: <span class="str">"SECURITY_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">8.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create security.prompt.md — Security checklist</div>
+            <div class="substep-desc">Define OWASP checks, JWT validation rules, and scan commands</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/security.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># Security Agent — Paranoid Professional Instructions</span>
+
+<span class="grn">## Scan Commands to Run</span>
+- Semgrep: semgrep --config=auto backend/ frontend/
+- npm audit: npm audit --audit-level=high (in frontend/)
+- dotnet: dotnet list package --vulnerable --include-transitive
+- Secret scan: grep -r "password\|secret\|apikey\|connstring" --include="*.cs" --include="*.ts"
+
+<span class="grn">## OWASP Top 10 Checks</span>
+A01 Broken Access Control    → verify [Authorize] on all user endpoints
+A02 Cryptographic Failures   → JWT secret must be 256-bit min, HTTPS only in prod
+A03 Injection                → verify all DB calls use parameterized queries (EF Core = ✅)
+A05 Security Misconfiguration→ CORS not set to wildcard (*) in prod
+A07 Auth Failures            → password hashing uses BCrypt (not MD5/SHA1)
+A09 Logging Issues           → no passwords or tokens logged anywhere
+
+<span class="grn">## Auto-Fix Rules</span>
+- If HTTPS not enforced in prod → add UseHttpsRedirection() to Program.cs
+- If CORS is wildcard → restrict to specific origins
+- If JWT expiry &gt; 24h → reduce to 1h access token
+- If password plain text → replace with BCrypt hash
+
+<span class="grn">## Hard Blockers (pipeline stops)</span>
+- Hardcoded credentials in any file
+- SQL injection via raw string concatenation
+- JWT secret less than 32 characters
+- Any critical CVE in dependencies
+
+<span class="grn">## Outputs</span>
+- Write SECURITY.md with findings summary
+- Write security-report.json with machine-readable results
+            </div>
+          </div>
+          <div class="funny">Security Agent once found a JWT secret of "secret123". It didn't say anything. It just replaced it silently and went home early. We don't talk about that day.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 9 ──────────────────── -->
+  <div class="step-block" id="step9">
+    <div class="step-header">
+      <div class="step-number s9">9</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 9 · DevOps</div>
+        <div class="step-title">Create the DevOps Agent</div>
+        <div class="step-subtitle">
+          This agent creates Dockerfiles, docker-compose, and GitHub Actions pipelines.
+          It only runs after the Security Agent gives the green light —
+          because we don't ship insecure containers. That's called being an adult.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">9.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add DevOps Agent to copilot-agents.yml</div>
+            <div class="substep-desc">DevOps runs last in the build chain — only after security approval</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 7: DEVOPS ───────────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"devops-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"Platform Engineer"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/devops.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"security-agent"</span>  <span class="cmt"># only after security clears it</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"ARCHITECTURE.md"</span>
+      - <span class="str">"security-report.json"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+      - <span class="str">run_terminal</span>
+      - <span class="str">create_github_actions</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"frontend/Dockerfile"</span>
+      - <span class="str">"backend/Dockerfile"</span>
+      - <span class="str">"docker-compose.yml"</span>
+      - <span class="str">"docker-compose.override.yml"</span>
+      - <span class="str">".github/workflows/ci.yml"</span>
+      - <span class="str">".github/workflows/cd.yml"</span>
+      - <span class="str">".env.example"</span>
+    <span class="val">emit_signal</span>: <span class="str">"DEVOPS_DONE"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">9.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Create devops.prompt.md — Pipeline instructions</div>
+            <div class="substep-desc">Define Docker, CI/CD, and environment config requirements</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">markdown · .github/agents/devops.prompt.md</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+<span class="cmt"># DevOps Agent — Platform Engineer Instructions</span>
+
+<span class="grn">## Docker Requirements</span>
+
+<span class="ylw">Backend Dockerfile (multi-stage):</span>
+Stage 1 (build): mcr.microsoft.com/dotnet/sdk:8.0
+  - Restore, build, publish in Release mode
+Stage 2 (runtime): mcr.microsoft.com/dotnet/aspnet:8.0
+  - Copy only published output
+  - Run as non-root user
+  - EXPOSE 8080
+  - HEALTHCHECK /health endpoint
+
+<span class="ylw">Frontend Dockerfile (multi-stage):</span>
+Stage 1 (build): node:20-alpine
+  - npm ci, ng build --configuration=production
+Stage 2 (serve): nginx:alpine
+  - Copy dist/ to nginx html dir
+  - Custom nginx.conf for SPA routing (try_files fallback)
+  - EXPOSE 80
+
+<span class="grn">## docker-compose.yml</span>
+Services:
+- postgres     → image: postgres:16-alpine, health check, volume
+- backend      → build from ./backend, depends on postgres:healthy
+- frontend     → build from ./frontend, depends on backend
+- pgadmin      → for dev convenience (profile: dev only)
+
+<span class="grn">## GitHub Actions CI Pipeline (.github/workflows/ci.yml)</span>
+Triggers: push to main, pull_request to main
+
+Jobs (run in parallel where possible):
+1. test-backend   → dotnet test with coverage
+2. test-frontend  → ng test --watch=false
+3. security-scan  → semgrep + npm audit + dotnet-outdated
+4. build-images   → docker build (both images, no push)
+
+<span class="grn">## GitHub Actions CD Pipeline (.github/workflows/cd.yml)</span>
+Triggers: push tag matching v*.*.* (semver)
+Steps:
+1. Build and push images to GitHub Container Registry (ghcr.io)
+2. Deploy to production (using SSH or cloud CLI)
+3. Run smoke tests against prod URL
+4. Notify Slack on success/failure
+
+<span class="grn">## Environment Variables</span>
+Never hardcode — generate .env.example with all required vars:
+DATABASE_URL, JWT_SECRET, JWT_EXPIRY_MINUTES,
+CORS_ORIGINS, ASPNETCORE_ENVIRONMENT, PORT
+            </div>
+          </div>
+          <div class="funny">DevOps Agent creates a non-root user in the Docker container without being asked. It has read every postmortem. Every single one. It will not be in the next one.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 10 ──────────────────── -->
+  <div class="step-block" id="step10">
+    <div class="step-header">
+      <div class="step-number s10">10</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 10 · Documentation</div>
+        <div class="step-title">Create the Documentation Agent</div>
+        <div class="step-subtitle">
+          Doc Agent runs last because it reads everything that was built and documents it.
+          Not hallucinated documentation — actual documentation based on actual code.
+          This is the agent that prevents future-you from crying at 2am wondering
+          what this endpoint does.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">10.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Add Documentation Agent to copilot-agents.yml</div>
+            <div class="substep-desc">Last agent in the chain — reads everything, documents everything</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Append to agents: list</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+  <span class="cmt"># ── AGENT 8: DOCUMENTATION ────────────────────────</span>
+  - <span class="val">name</span>: <span class="str">"doc-agent"</span>
+    <span class="val">display_name</span>: <span class="str">"Technical Writer"</span>
+    <span class="val">model</span>: <span class="str">"gpt-4o"</span>
+    <span class="val">prompt_file</span>: <span class="str">".github/agents/doc.prompt.md"</span>
+    <span class="val">depends_on</span>: <span class="str">"devops-agent"</span>    <span class="cmt"># reads everything after all is built</span>
+    <span class="val">reads_context</span>:
+      - <span class="str">"**/*.cs"</span>              <span class="cmt"># reads all C# files</span>
+      - <span class="str">"**/*.ts"</span>              <span class="cmt"># reads all TypeScript files</span>
+      - <span class="str">"openapi.yaml"</span>
+      - <span class="str">"ARCHITECTURE.md"</span>
+      - <span class="str">"docker-compose.yml"</span>
+      - <span class="str">".github/workflows/*.yml"</span>
+    <span class="val">tools</span>:
+      - <span class="str">read_files</span>
+      - <span class="str">write_files</span>
+    <span class="val">runs_last</span>: <span class="val">true</span>
+    <span class="val">outputs</span>:
+      - <span class="str">"README.md"</span>            <span class="cmt"># replaces the placeholder</span>
+      - <span class="str">"CONTRIBUTING.md"</span>
+      - <span class="str">"CHANGELOG.md"</span>
+      - <span class="str">"docs/api-guide.md"</span>
+      - <span class="str">"docs/setup-guide.md"</span>
+    <span class="val">emit_signal</span>: <span class="str">"ALL_DONE"</span>     <span class="cmt"># signals the orchestrator to finalize</span>
+            </div>
+          </div>
+          <div class="funny">Doc Agent replaces the original README.md which said "# E-Commerce AI Agent Project" and nothing else. The README you get from Doc Agent has 400 lines, badges, screenshots, and a troubleshooting section. Doc Agent goes hard.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────── STEP 11 ──────────────────── -->
+  <div class="step-block" id="step11">
+    <div class="step-header">
+      <div class="step-number s11">11</div>
+      <div class="step-meta">
+        <div class="step-tag">Step 11 · The Glue</div>
+        <div class="step-title">Wire All Agents Together — The Context Bus</div>
+        <div class="step-subtitle">
+          This is where agents stop being isolated scripts and become a
+          <strong>team</strong>. The Context Bus is a shared JSON object that every agent
+          reads from and writes to. It's the group chat. The shared brain.
+          The thing that prevents agents from building the same component twice.
+        </div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">11.1</div>
+          <div class="substep-content">
+            <div class="substep-title">Create the Shared Context Schema</div>
+            <div class="substep-desc">Define the JSON structure that all agents share as their "workspace memory"</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:10px;">
+            Create <code>.github/agents/context-schema.json</code> — this defines
+            the shape of the shared memory object. The Orchestrator creates it, every agent updates it.
+          </p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">json · .github/agents/context-schema.json</span><span class="code-tag">Create This</span></div>
+            <div class="code-body">
+{
+  <span class="val">"project"</span>: {
+    <span class="str">"name"</span>: <span class="str">"ecommerce-app"</span>,
+    <span class="str">"description"</span>: <span class="str">"[filled by pm-agent]"</span>,
+    <span class="str">"status"</span>: <span class="str">"IN_PROGRESS"</span>
+  },
+  <span class="val">"requirements"</span>: {
+    <span class="str">"user_stories"</span>: <span class="str">"[filled by pm-agent]"</span>,
+    <span class="str">"technical_tasks"</span>: <span class="str">"[filled by pm-agent]"</span>
+  },
+  <span class="val">"architecture"</span>: {
+    <span class="str">"api_contract_path"</span>: <span class="str">"openapi.yaml"</span>,  <span class="cmt">// ← THE CONTRACT</span>
+    <span class="str">"db_schema_path"</span>: <span class="str">"database/001_schema.sql"</span>,
+    <span class="str">"decisions"</span>: <span class="str">"[filled by architecture-agent]"</span>
+  },
+  <span class="val">"agent_status"</span>: {
+    <span class="str">"pm-agent"</span>:           <span class="str">"PENDING"</span>,  <span class="cmt">// updates to DONE when complete</span>
+    <span class="str">"architecture-agent"</span>: <span class="str">"PENDING"</span>,
+    <span class="str">"database-agent"</span>:     <span class="str">"PENDING"</span>,
+    <span class="str">"frontend-agent"</span>:     <span class="str">"PENDING"</span>,
+    <span class="str">"backend-agent"</span>:      <span class="str">"PENDING"</span>,
+    <span class="str">"qa-agent"</span>:           <span class="str">"PENDING"</span>,
+    <span class="str">"security-agent"</span>:     <span class="str">"PENDING"</span>,
+    <span class="str">"devops-agent"</span>:       <span class="str">"PENDING"</span>,
+    <span class="str">"doc-agent"</span>:          <span class="str">"PENDING"</span>
+  },
+  <span class="val">"shared_files"</span>: {
+    <span class="str">"openapi_yaml"</span>: <span class="str">"[path after architecture-agent completes]"</span>,
+    <span class="str">"db_schema"</span>:    <span class="str">"[path after database-agent completes]"</span>,
+    <span class="str">"test_report"</span>:  <span class="str">"[path after qa-agent completes]"</span>,
+    <span class="str">"sec_report"</span>:   <span class="str">"[path after security-agent completes]"</span>
+  },
+  <span class="val">"messages"</span>: []  <span class="cmt">// agents post messages here — inter-agent comms</span>
+}
+            </div>
+          </div>
+          <div class="callout success">
+            <div class="callout-icon">🔗</div>
+            <div class="callout-text">
+              <strong>How agents communicate:</strong> When Backend Agent needs to ask Database Agent about a column type, it writes a message object to <code>messages[]</code> with a <code>to</code> field. The Orchestrator routes it. It's like Slack but everyone actually responds and nobody posts a GIF when the prod DB is down.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">11.2</div>
+          <div class="substep-content">
+            <div class="substep-title">Add the execution_order block to copilot-agents.yml</div>
+            <div class="substep-desc">This is the final section — defines the DAG execution order explicitly</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">yaml · Final section of .github/copilot-agents.yml</span><span class="code-tag">Append This</span></div>
+            <div class="code-body">
+<span class="cmt"># ── EXECUTION GRAPH ───────────────────────────────</span>
+<span class="cmt"># Defines the order agents run (DAG)</span>
+<span class="val">execution_graph</span>:
+  <span class="val">phase_1_requirements</span>:   <span class="cmt"># Run first, sequentially</span>
+    - <span class="str">pm-agent</span>
+
+  <span class="val">phase_2_design</span>:          <span class="cmt"># Run after phase_1, sequentially</span>
+    - <span class="str">architecture-agent</span>
+
+  <span class="val">phase_3_build</span>:           <span class="cmt"># Run after phase_2, IN PARALLEL 🚀</span>
+    parallel:
+      - <span class="str">database-agent</span>
+      - <span class="str">frontend-agent</span>
+
+  <span class="val">phase_4_api_layer</span>:       <span class="cmt"># Needs DB done, runs after phase_3</span>
+    - <span class="str">backend-agent</span>
+
+  <span class="val">phase_5_quality</span>:         <span class="cmt"># Needs FE + BE done, sequential</span>
+    - <span class="str">qa-agent</span>
+    - <span class="str">security-agent</span>
+
+  <span class="val">phase_6_ship</span>:             <span class="cmt"># Only after security green light</span>
+    - <span class="str">devops-agent</span>
+
+  <span class="val">phase_7_docs</span>:             <span class="cmt"># Always last</span>
+    - <span class="str">doc-agent</span>
+
+<span class="cmt"># ── GLOBAL SETTINGS ───────────────────────────────</span>
+<span class="val">global</span>:
+  <span class="val">context_file</span>: <span class="str">".github/agents/context-schema.json"</span>
+  <span class="val">timeout_per_agent_minutes</span>: <span class="val">10</span>
+  <span class="val">on_agent_failure</span>: <span class="str">"halt_and_report"</span>
+  <span class="val">commit_after_each_agent</span>: <span class="val">true</span>   <span class="cmt"># creates a git commit per agent</span>
+  <span class="val">create_pr_on_completion</span>: <span class="val">true</span>    <span class="cmt"># final PR with all changes</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <p style="color:var(--muted);font-size:.85rem;margin-bottom:12px;">Here's the visual execution flow:</p>
+            <div class="agent-flow">
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 1</div>
+                  <div class="af-text">🧑‍💼 <strong>PM Agent</strong> — parses your prompt, creates requirements.md + task-graph.json</div>
+                  <div class="af-sub">⏱ ~1 min</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 2</div>
+                  <div class="af-text">🏗️ <strong>Architecture Agent</strong> — generates openapi.yaml (the sacred contract), ARCHITECTURE.md</div>
+                  <div class="af-sub">⏱ ~2 min</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 3 — PARALLEL 🚀</div>
+                  <div class="af-text">🎨 <strong>Frontend Agent</strong> + 🐘 <strong>Database Agent</strong> run simultaneously. No waiting. Maximum chaos. Maximum efficiency.</div>
+                  <div class="af-sub">⏱ ~3-4 min (parallel)</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 4</div>
+                  <div class="af-text">⚙️ <strong>Backend Agent</strong> — builds .NET API using openapi.yaml + DB schema from phases 2 &amp; 3</div>
+                  <div class="af-sub">⏱ ~3 min</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 5</div>
+                  <div class="af-text">🧪 <strong>QA Agent</strong> → 🛡️ <strong>Security Agent</strong> — test, scan, fix, approve</div>
+                  <div class="af-sub">⏱ ~2 min</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div><div class="af-line"></div></div>
+                <div class="af-content">
+                  <div class="af-label">Phase 6</div>
+                  <div class="af-text">🚢 <strong>DevOps Agent</strong> — Dockerfiles, GitHub Actions, docker-compose</div>
+                  <div class="af-sub">⏱ ~1 min</div>
+                </div>
+              </div>
+              <div class="af-item">
+                <div class="af-left"><div class="af-dot"></div></div>
+                <div class="af-content" style="padding-bottom:0;">
+                  <div class="af-label">Phase 7 — THE FINALE</div>
+                  <div class="af-text">📝 <strong>Documentation Agent</strong> — reads everything, writes the docs nobody else would write</div>
+                  <div class="af-sub">⏱ ~1 min → <strong>ALL_DONE signal emitted 🎉</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<!-- ──────────────────── STEP 12 · THE FINALE ──────────────────── -->
+<div id="step12"></div>
+<section class="run-section">
+  <h2 class="run-title">Step 12 · <span>The One Click</span> 🚀</h2>
+  <p class="run-desc">
+    Your agents are defined. Your prompts are written. Your context bus is wired.
+    You have coffee. Everything is ready. This is the moment.
+    One prompt. Nine agents. One complete e-commerce app.
+  </p>
+  <button class="run-btn" onclick="runDemo(this)">
+    ▶ &nbsp; Run All Agents Now
+  </button>
+  <p style="margin-top:14px;color:var(--muted);font-size:.85rem;font-style:italic;" id="runNote">
+    Three ways to trigger: Copilot Chat · GitHub Issue · GitHub Actions "Run workflow"
+  </p>
+
+  <div class="run-terminal">
+    <div class="rt-header">
+      <div class="rt-dot" style="background:#ff5f57;"></div>
+      <div class="rt-dot" style="background:#febc2e;"></div>
+      <div class="rt-dot" style="background:#28c840;"></div>
+      <span class="rt-title">GitHub Copilot Agent Runner — Live Output</span>
+    </div>
+    <div class="rt-body" id="terminal">
+      <div class="rt-line"><span class="rt-prompt">$</span><span class="rt-cmd">gh copilot agent run "Build a complete e-commerce app: Angular + .NET + Postgres with cart and checkout"</span></div>
+      <div class="rt-out info">🤖 Orchestrator agent starting...</div>
+      <div class="rt-out ok">✅ [00:12] PM Agent: requirements.md created — 47 user stories</div>
+      <div class="rt-out ok">✅ [01:03] Architecture Agent: openapi.yaml + ARCHITECTURE.md generated</div>
+      <div class="rt-out info">⚡ [01:04] Running in parallel: database-agent + frontend-agent</div>
+      <div class="rt-out ok">✅ [02:41] Database Agent: schema, indexes, seed data, EF migrations done</div>
+      <div class="rt-out ok">✅ [03:58] Frontend Agent: 24 Angular components, 6 services, routing complete</div>
+      <div class="rt-out info">⚙️ [03:59] Backend Agent starting (has schema + contract now)...</div>
+      <div class="rt-out ok">✅ [06:11] Backend Agent: 4 controllers, 5 services, 8 repos, JWT auth done</div>
+      <div class="rt-out info">🧪 [06:12] QA Agent: writing and running 142 tests...</div>
+      <div class="rt-out warn">⚠️ [07:44] QA Agent: 3 tests failed — messaging backend-agent...</div>
+      <div class="rt-out ok">✅ [08:02] Backend Agent: 3 fixes applied</div>
+      <div class="rt-out ok">✅ [08:31] QA Agent: 142/142 passing. Coverage: 84%. Grudgingly satisfied.</div>
+      <div class="rt-out info">🛡️ [08:32] Security Agent: scanning...</div>
+      <div class="rt-out ok">✅ [09:14] Security Agent: 0 critical, 2 medium (auto-fixed). LGTM.</div>
+      <div class="rt-out ok">✅ [10:02] DevOps Agent: Dockerfiles + CI/CD + docker-compose complete</div>
+      <div class="rt-out ok">✅ [10:44] Documentation Agent: README + 4 docs files generated</div>
+      <div class="rt-out" style="color:var(--yellow);">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+      <div class="rt-out ok" style="font-weight:700;font-size:1rem;">🎉 ALL AGENTS COMPLETE — 10m 44s</div>
+      <div class="rt-out info">📋 Pull Request #1 created: "feat: complete e-commerce app (AI generated)"</div>
+      <div class="rt-out info">📦 60 files created across 9 directories</div>
+      <div class="rt-out info">🔗 PR ready for your review at github.com/your-org/ecommerce-ai-agents/pull/1</div>
+      <span class="rt-cursor"></span>
+    </div>
+  </div>
+
+  <div style="max-width:700px;margin:32px auto 0;">
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-icon">💬</div>
+        <div class="tip-title">Method 1: Copilot Chat</div>
+        <div class="tip-desc">Open Copilot Chat in VS Code (Ctrl+Shift+I) → Switch to Agent mode → Type your feature request. Best for interactive development.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🐛</div>
+        <div class="tip-title">Method 2: GitHub Issue</div>
+        <div class="tip-desc">Create a GitHub Issue with the label <code>copilot-agent</code>. The Orchestrator triggers automatically via the <code>on_issue_created</code> webhook. Best for async work.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">⚙️</div>
+        <div class="tip-title">Method 3: Actions Dispatch</div>
+        <div class="tip-desc">GitHub → Actions → "Run Agent Pipeline" workflow → Run workflow → Enter your prompt. Best for scheduled builds or batch generation.</div>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔁</div>
+        <div class="tip-title">Iterating After First Run</div>
+        <div class="tip-desc">Once the PR is open, you can chat with individual agents: "@frontend-agent add a dark mode toggle to the header". They pick up where they left off.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────── TIPS & TROUBLESHOOTING ──────────────────── -->
+<div class="container">
+  <div class="step-block">
+    <div class="step-header">
+      <div class="step-number s12">💡</div>
+      <div class="step-meta">
+        <div class="step-tag">Bonus · Pro Tips</div>
+        <div class="step-title">Things Nobody Tells You (Until It's Too Late)</div>
+        <div class="step-subtitle">Hard-won wisdom from the agent-whispering trenches</div>
+      </div>
+    </div>
+
+    <div class="substeps">
+      <div class="substep open">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">💡</div>
+          <div class="substep-content">
+            <div class="substep-title">Prompt Quality = Output Quality (No Surprises There)</div>
+            <div class="substep-desc">Your one-sentence prompt is the seed of everything. Make it count.</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <div class="callout danger">
+            <div class="callout-icon">❌</div>
+            <div class="callout-text"><strong>Bad prompt:</strong> "Build an e-commerce app" — Agents will make 47 decisions you didn't ask for. Some of them will be wrong. You'll have opinions about it later.</div>
+          </div>
+          <div class="callout success">
+            <div class="callout-icon">✅</div>
+            <div class="callout-text"><strong>Good prompt:</strong> "Build an e-commerce app with: product listing with search and filter, shopping cart with quantity management, Stripe checkout, and order history. Users log in via email. Admin can add/edit products." — Now the agents have context. Now they can shine.</div>
+          </div>
+          <div class="funny">The more specific your prompt, the less specific your regrets.</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">🔍</div>
+          <div class="substep-content">
+            <div class="substep-title">Review the openapi.yaml Before Letting Other Agents Run</div>
+            <div class="substep-desc">This one file is the source of truth for ALL agents — get it right first</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <ul class="checklist">
+            <li><span class="check-icon">👀</span> After the Architecture Agent finishes, STOP and review <code>openapi.yaml</code> before proceeding</li>
+            <li><span class="check-icon">👀</span> Check: are all endpoints correct? Are response shapes right? Are required fields marked?</li>
+            <li><span class="check-icon">👀</span> If something is wrong, tell the Architecture Agent to fix it via chat BEFORE frontend/backend run</li>
+            <li><span class="check-icon">👀</span> Once frontend and backend are built from a wrong spec, fixing it means rebuilding both. Pain.</li>
+          </ul>
+          <div class="funny">Reviewing openapi.yaml before the build is like checking the blueprint before constructing a skyscraper. Obvious in retrospect. Never done in practice. Do it.</div>
+        </div>
+      </div>
+
+      <div class="substep">
+        <div class="substep-header" onclick="toggleSubstep(this)">
+          <div class="substep-num">🛠️</div>
+          <div class="substep-content">
+            <div class="substep-title">Use Incremental Runs for Complex Features</div>
+            <div class="substep-desc">Don't try to build everything in one shot for large projects</div>
+          </div>
+          <div class="substep-toggle">›</div>
+        </div>
+        <div class="substep-body">
+          <p style="font-size:.9rem;color:var(--muted);margin-bottom:10px;">
+            For a real production app, break it into runs:
+          </p>
+          <ul class="checklist">
+            <li><span class="check-icon">🏃</span> <strong>Run 1:</strong> Core auth + products listing (foundation)</li>
+            <li><span class="check-icon">🏃</span> <strong>Run 2:</strong> Shopping cart + checkout (commerce core)</li>
+            <li><span class="check-icon">🏃</span> <strong>Run 3:</strong> Order management + admin panel (management)</li>
+            <li><span class="check-icon">🏃</span> <strong>Run 4:</strong> Email notifications + payment webhooks (advanced)</li>
+          </ul>
+          <div class="callout info">
+            <div class="callout-icon">💡</div>
+            <div class="callout-text">Each run creates a PR. You review. You merge. You run the next. This gives you control checkpoints without slowing down the agents. Best of both worlds.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <p>
+    <strong>🤖 SDLC Automation with GitHub Copilot AI Agents</strong><br/>
+    Angular · .NET Core · PostgreSQL · GitHub Actions
+  </p>
+  <p style="margin-top:14px;font-size:.82rem;">
+    12 steps · 9 agents · 1 prompt · Infinite possibilities
+  </p>
+  <p style="margin-top:10px;font-size:.78rem;color:var(--border);">
+    "The best SDLC is the one you don't have to manually run." — Every developer, eventually.
+  </p>
+</footer>
+
+<script>
+  function scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function toggleSubstep(header) {
+    const substep = header.closest('.substep');
+    substep.classList.toggle('open');
+  }
+
+  // Progress tracking
+  const stepIds = ['prereq','step1','step2','step3','step4','step5','step6','step7','step8','step9','step10','step11','step12'];
+  function updateProgress() {
+    const scrollPos = window.scrollY + window.innerHeight * 0.4;
+    let current = 0;
+    stepIds.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= scrollPos) current = i + 1;
+    });
+    const pct = Math.round((current / stepIds.length) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = pct + '% — ' + (pct < 50 ? "keep going!" : pct < 90 ? "almost there!" : pct === 100 ? "YOU DID IT! 🎉" : "so close!");
+
+    // Update nav buttons
+    document.querySelectorAll('.nav-step-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === current - 1);
+    });
+  }
+  window.addEventListener('scroll', updateProgress);
+  updateProgress();
+
+  // Run demo animation
+  function runDemo(btn) {
+    btn.textContent = '🌀 Agents Running... (grab that coffee)';
+    btn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+    btn.disabled = true;
+    const note = document.getElementById('runNote');
+    note.textContent = '⏱️ Estimated time: ~12 minutes. Your agents are working harder than you ever have.';
+    note.style.color = '#fcd34d';
+    setTimeout(() => {
+      btn.textContent = '✅ App Deployed! Check your PR 🎉';
+      btn.style.background = 'linear-gradient(135deg, #6e40c9, #9333ea)';
+      btn.style.color = '#fff';
+      btn.disabled = false;
+      note.textContent = '🎊 PR created! 60 files generated. Tests passing. Security clean. README written. You\'re done.';
+      note.style.color = '#86efac';
+    }, 4000);
+  }
+</script>
+</body>
+</html>
