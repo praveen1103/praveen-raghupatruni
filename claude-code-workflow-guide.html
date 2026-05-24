@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code: Agentic Workflow on Windows 11</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0f;
+    --surface: #18181b;
+    --surface2: #222226;
+    --border: #2e2e34;
+    --text: #f0eff4;
+    --muted: #8b8b99;
+    --accent: #c9f542;
+    --accent2: #42f5d8;
+    --accent3: #f542a4;
+    --orange: #f5a742;
+    --step1: #c9f542;
+    --step2: #42f5d8;
+    --step3: #f542a4;
+    --step4: #f5a742;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'Lora', serif;
+    --font-code: 'DM Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 50%, rgba(201,245,66,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 50%, rgba(66,245,216,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--font-code);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 14px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    opacity: 0.85;
+  }
+  .hero h1 {
+    font-family: var(--font-head);
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 820px;
+    margin: 0 auto 24px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero h1 em { font-style: normal; color: var(--accent2); }
+  .hero p.sub {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--muted);
+    font-size: 19px;
+    max-width: 560px;
+    margin: 0 auto 40px;
+  }
+  .win-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-family: var(--font-code);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .win-pill .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+  /* PREREQS */
+  .prereq-section {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 56px 0;
+  }
+  .section-label {
+    font-family: var(--font-code);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .prereq-section h2 {
+    font-family: var(--font-head);
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 32px;
+  }
+  .prereq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .prereq-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .prereq-card:hover { border-color: var(--accent); }
+  .prereq-card .icon { font-size: 24px; margin-bottom: 10px; }
+  .prereq-card h3 {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .prereq-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .prereq-card code {
+    font-family: var(--font-code);
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(66,245,216,0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* STEPS */
+  .steps-section { padding: 70px 0; }
+  .steps-section > .container > h2 {
+    font-family: var(--font-head);
+    font-size: 38px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .steps-intro { color: var(--muted); font-style: italic; margin-bottom: 56px; font-size: 16px; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 0 28px;
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 31px;
+    top: 64px;
+    bottom: -56px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--step-color), transparent);
+    opacity: 0.3;
+  }
+  .step[data-n="1"] { --step-color: var(--step1); }
+  .step[data-n="2"] { --step-color: var(--step2); }
+  .step[data-n="3"] { --step-color: var(--step3); }
+  .step[data-n="4"] { --step-color: var(--step4); }
+
+  .step-num {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--step-color);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--step-color);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    background: var(--bg);
+  }
+
+  .step-body { padding-top: 12px; }
+
+  .step-tag {
+    font-family: var(--font-code);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--step-color);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+  .step-body h3 {
+    font-family: var(--font-head);
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .step-joke {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 18px;
+    border-left: 2px solid var(--step-color);
+    padding-left: 14px;
+    opacity: 0.8;
+  }
+  .step-desc { font-size: 16px; color: #c8c7d4; margin-bottom: 20px; line-height: 1.75; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: #0a0a0b;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .code-dots { display: flex; gap: 6px; }
+  .code-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #ffbd2e; }
+  .code-dots span:nth-child(3) { background: #28ca42; }
+  .code-label {
+    font-family: var(--font-code);
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .code-block pre {
+    padding: 20px;
+    font-family: var(--font-code);
+    font-size: 13.5px;
+    line-height: 1.65;
+    overflow-x: auto;
+    color: #d4d3e0;
+  }
+  .code-block pre .cmd { color: var(--accent2); }
+  .code-block pre .flag { color: var(--orange); }
+  .code-block pre .str { color: var(--accent); }
+  .code-block pre .comment { color: #555565; font-style: italic; }
+  .code-block pre .path { color: #a78cf5; }
+
+  /* TIP BOX */
+  .tip {
+    background: rgba(201,245,66,0.05);
+    border: 1px solid rgba(201,245,66,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #b8d960;
+    margin-top: 4px;
+  }
+  .tip strong { color: var(--accent); font-family: var(--font-code); font-style: normal; }
+  .tip.warn {
+    background: rgba(245,167,66,0.06);
+    border-color: rgba(245,167,66,0.2);
+    color: #d4a355;
+  }
+  .tip.warn strong { color: var(--orange); }
+  .tip.info {
+    background: rgba(66,245,216,0.05);
+    border-color: rgba(66,245,216,0.2);
+    color: #6dcfbf;
+  }
+  .tip.info strong { color: var(--accent2); }
+
+  /* WORKFLOW DEMO */
+  .workflow-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 70px 0;
+  }
+  .workflow-section h2 {
+    font-family: var(--font-head);
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .workflow-section p.intro { color: var(--muted); font-style: italic; margin-bottom: 36px; }
+  .workflow-vis {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .wf-step {
+    flex: 1;
+    padding: 24px 18px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .wf-step:last-child { border-right: none; }
+  .wf-step .wf-n {
+    font-family: var(--font-head);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .wf-step[data-n="1"] .wf-n { color: var(--step1); }
+  .wf-step[data-n="2"] .wf-n { color: var(--step2); }
+  .wf-step[data-n="3"] .wf-n { color: var(--step3); }
+  .wf-step[data-n="4"] .wf-n { color: var(--step4); }
+  .wf-step h4 { font-family: var(--font-head); font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+  .wf-step p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .arrow {
+    position: absolute;
+    right: -10px; top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* FULL EXAMPLE */
+  .full-example { padding: 70px 0; }
+  .full-example h2 { font-family: var(--font-head); font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .full-example p.intro { color: var(--muted); font-style: italic; margin-bottom: 28px; }
+  .full-code .code-block pre { font-size: 13px; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+  footer strong { color: var(--accent); font-style: normal; font-family: var(--font-code); }
+  footer a { color: var(--accent2); text-decoration: none; }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: #c0bfcc;
+  }
+  .check-icon {
+    width: 20px; height: 20px; flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(201,245,66,0.12);
+    border: 1px solid rgba(201,245,66,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .workflow-vis { flex-direction: column; }
+    .wf-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .wf-step:last-child { border-bottom: none; }
+    .arrow { display: none; }
+    .checklist { grid-template-columns: 1fr; }
+    .step { grid-template-columns: 48px 1fr; gap: 0 16px; }
+    .step-num { width: 48px; height: 48px; font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">🤖 Windows 11 · Claude Code · Agentic Workflow</div>
+  <h1>Your first <span>agentic</span> workflow<br>with <em>Claude Code</em></h1>
+  <p class="sub">Because making AI do your work is the most productive thing you'll do today. Probably.</p>
+  <div class="win-pill">
+    <span class="dot"></span>
+    PowerShell · Windows 11 · Node.js required
+  </div>
+</section>
+
+<!-- PREREQS -->
+<section class="prereq-section">
+  <div class="container">
+    <div class="section-label">// before we begin</div>
+    <h2>What you'll need (don't skip this, seriously)</h2>
+    <div class="prereq-grid">
+
+      <div class="prereq-card">
+        <div class="icon">⬡</div>
+        <h3>Node.js ≥ 18</h3>
+        <p>Download from <strong>nodejs.org</strong>. When it asks if you want to install Chocolatey too — live a little, say yes.</p>
+      </div>
+
+      <div class="prereq-card">
+        <div class="icon">🔑</div>
+        <h3>Anthropic API Key</h3>
+        <p>Get one at <strong>console.anthropic.com</strong>. Guard it like your Netflix password. Unlike your Netflix password, actually rotate it.</p>
+      </div>
+
+      <div class="prereq-card">
+        <div class="icon">💻</div>
+        <h3>PowerShell or Terminal</h3>
+        <p>Windows Terminal from the Microsoft Store. Dark theme optional but recommended — we're professionals here. <code>Win + X → Terminal</code></p>
+      </div>
+
+      <div class="prereq-card">
+        <div class="icon">📦</div>
+        <h3>Claude Code CLI</h3>
+        <p>We'll install it in Step 1. Just making sure npm works. Type <code>npm -v</code> in your terminal. If it prints numbers: you're a winner.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW VISUAL -->
+<section class="workflow-section">
+  <div class="container">
+    <div class="section-label">// the big picture</div>
+    <h2>Your 4-step agentic workflow</h2>
+    <p class="intro">Here's what we're building — an agent that reads a folder, summarises files, runs a task, and saves the results. Groundbreaking? Maybe. Useful? Absolutely.</p>
+    <div class="workflow-vis">
+      <div class="wf-step" data-n="1">
+        <div class="wf-n">Step 01</div>
+        <h4>Install &amp; Auth</h4>
+        <p>Install Claude Code CLI and hand it your API key. Awkward first date energy.</p>
+        <span class="arrow">›</span>
+      </div>
+      <div class="wf-step" data-n="2">
+        <div class="wf-n">Step 02</div>
+        <h4>Set Up Project</h4>
+        <p>Create a folder, an input file, and a <code>CLAUDE.md</code> to instruct your agent.</p>
+        <span class="arrow">›</span>
+      </div>
+      <div class="wf-step" data-n="3">
+        <div class="wf-n">Step 03</div>
+        <h4>Define the Prompt</h4>
+        <p>Write a clear multi-step task prompt. Claude reads it and plans accordingly.</p>
+        <span class="arrow">›</span>
+      </div>
+      <div class="wf-step" data-n="4">
+        <div class="wf-n">Step 04</div>
+        <h4>Run &amp; Verify</h4>
+        <p>Fire the agent. Watch in awe. Check the output. Take all the credit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps-section">
+  <div class="container">
+    <h2>Step-by-step guide</h2>
+    <p class="steps-intro">Follow these in order. Don't be a hero. Steps are sequential for a reason.</p>
+
+    <!-- STEP 1 -->
+    <div class="step" data-n="1">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-tag">// install &amp; authenticate</div>
+        <h3>Install Claude Code &amp; Log In</h3>
+        <div class="step-joke">"Installing software is the developer's version of 'some assembly required.' At least there are no leftover screws." 🪛</div>
+        <p class="step-desc">Open <strong>Windows Terminal</strong> (PowerShell is fine) and run the following. This installs the Claude Code CLI globally on your machine. You'll need npm working for this — if it doesn't, go back and install Node.js properly.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — install Claude Code</div>
+          </div>
+          <pre><span class="comment"># Install Claude Code CLI globally</span>
+<span class="cmd">npm</span> install <span class="flag">-g</span> <span class="str">@anthropic-ai/claude-code</span>
+
+<span class="comment"># Verify installation — should print a version number</span>
+<span class="cmd">claude</span> <span class="flag">--version</span></pre>
+        </div>
+
+        <p class="step-desc">Now set your API key as an environment variable. Do this once and it persists across sessions. Claude Code will pick it up automatically.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — set API key</div>
+          </div>
+          <pre><span class="comment"># Set permanently for your user (not just this session)</span>
+[System.Environment]::SetEnvironmentVariable(
+  <span class="str">"ANTHROPIC_API_KEY"</span>,
+  <span class="str">"sk-ant-YOUR_KEY_HERE"</span>,
+  <span class="str">"User"</span>
+)
+
+<span class="comment"># Reload env vars in current terminal</span>
+$env:ANTHROPIC_API_KEY = <span class="str">"sk-ant-YOUR_KEY_HERE"</span>
+
+<span class="comment"># Confirm it's set</span>
+<span class="cmd">echo</span> $env:ANTHROPIC_API_KEY</pre>
+        </div>
+
+        <div class="tip warn"><strong>⚠️ Warning:</strong> Never paste your API key into a public repo, Discord, or a Teams message to your whole company. We've all seen how that story ends.</div>
+
+        <div class="tip" style="margin-top:10px;"><strong>✓ Success check:</strong> Running <code>claude --version</code> should print something like <code>1.x.x</code>. If it says "command not found", close and reopen your terminal — npm global bin path needs a refresh.</div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" data-n="2">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-tag">// project setup</div>
+        <h3>Create Your Project Folder &amp; Input Files</h3>
+        <div class="step-joke">"A place for everything, everything in its place. Unless you're a developer, in which case everything's on the Desktop." 🗂️</div>
+        <p class="step-desc">Create a clean project folder. We'll build a workflow where Claude reads some raw meeting notes, summarises them, and writes a to-do list to a new file. Classic, useful, and impressive at demos.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — scaffold the project</div>
+          </div>
+          <pre><span class="comment"># Create project directory and navigate into it</span>
+<span class="cmd">mkdir</span> <span class="path">C:\Users\$env:USERNAME\Documents\my-agent</span>
+<span class="cmd">cd</span> <span class="path">C:\Users\$env:USERNAME\Documents\my-agent</span>
+
+<span class="comment"># Create an input file with raw meeting notes</span>
+<span class="cmd">New-Item</span> <span class="flag">-Name</span> <span class="str">"meeting_notes.txt"</span> <span class="flag">-ItemType</span> <span class="str">"File"</span>
+<span class="cmd">Add-Content</span> <span class="str">"meeting_notes.txt"</span> <span class="str">"Meeting: Q3 Planning. Attendees: Sarah, Dev, Priya.
+Action items: Launch new dashboard by Aug 15, fix login bug,
+review pricing page copy, schedule user interviews."</span>
+
+<span class="comment"># Create the CLAUDE.md — this is Claude's instruction manual</span>
+<span class="cmd">New-Item</span> <span class="flag">-Name</span> <span class="str">"CLAUDE.md"</span> <span class="flag">-ItemType</span> <span class="str">"File"</span></pre>
+        </div>
+
+        <p class="step-desc">Now open <code>CLAUDE.md</code> in Notepad (or VS Code) and add this content. This file tells Claude who it is, what it's allowed to do, and how to behave in this project — think of it as Claude's employee handbook, but one it actually reads.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">CLAUDE.md — agent instructions</div>
+          </div>
+          <pre><span class="comment"># Agent: Meeting Notes Processor
+
+## Role
+You are a helpful productivity agent. You read meeting notes,
+extract action items, and write structured summaries.
+
+## Rules
+- Only read files in this project directory
+- Write output to files named clearly (e.g. summary_output.md)
+- Be concise. Nobody reads novels in Slack.
+- Format todos as a numbered list with owners if mentioned</span></pre>
+        </div>
+
+        <div class="tip info"><strong>ℹ️ CLAUDE.md:</strong> Claude Code reads this automatically when launched from the folder. It's how you configure agent behaviour without changing your prompt every time. Think of it as the world's most obedient config file.</div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" data-n="3">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-tag">// define the prompt</div>
+        <h3>Write Your Multi-Step Agent Prompt</h3>
+        <div class="step-joke">"Talking to an AI is like writing a wish for a genie — be specific, or you'll get exactly what you asked for and nothing like what you wanted." 🧞</div>
+        <p class="step-desc">Create a <code>task.txt</code> file with your full agentic prompt. This is what Claude will execute step-by-step. Unlike a single-shot prompt, an agentic prompt tells Claude to plan, execute multiple sub-tasks, and produce file outputs.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — create the task prompt file</div>
+          </div>
+          <pre><span class="cmd">New-Item</span> <span class="flag">-Name</span> <span class="str">"task.txt"</span> <span class="flag">-ItemType</span> <span class="str">"File"</span>
+<span class="cmd">Add-Content</span> <span class="str">"task.txt"</span> <span class="str">"Please do the following:
+1. Read the file meeting_notes.txt
+2. Extract all action items and owners
+3. Write a clean markdown summary to summary_output.md
+4. Write a prioritised todo list to todos.md with due dates estimated"</span></pre>
+        </div>
+
+        <p class="step-desc">Here's what a well-written agentic prompt looks like (and why it works). Notice it's specific about inputs, outputs, and format — no vague hand-waving allowed.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">task.txt — full example (paste this in)</div>
+          </div>
+          <pre>Please do the following in order:
+
+<span class="comment">1. READ meeting_notes.txt from the current directory</span>
+
+<span class="comment">2. EXTRACT all action items. For each item, identify:
+   - The task description
+   - The owner (if mentioned)
+   - Any deadline (if mentioned)</span>
+
+<span class="comment">3. WRITE a file called summary_output.md with:
+   - A one-paragraph executive summary
+   - A formatted table of action items</span>
+
+<span class="comment">4. WRITE a file called todos.md with:
+   - A numbered priority list
+   - Estimated due dates if not explicit
+   - A note if any task is missing an owner</span>
+
+When done, print a one-line confirmation: <span class="str">"✓ Workflow complete. 2 files written."</span></pre>
+        </div>
+
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> Prompt lists steps numerically — Claude treats this as a plan</li>
+          <li><span class="check-icon">✓</span> Specifies exact filenames for output — no guessing</li>
+          <li><span class="check-icon">✓</span> Tells Claude what format each output should be in</li>
+          <li><span class="check-icon">✓</span> Ends with a completion signal — great for automation</li>
+        </ul>
+
+        <div class="tip"><strong>✓ Pro tip:</strong> The more specific your steps, the less "creative" Claude gets with the output format. Creativity is great for poetry. Not so great for structured data files your scripts depend on.</div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" data-n="4">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-tag">// run &amp; verify</div>
+        <h3>Launch the Agent &amp; Check Your Outputs</h3>
+        <div class="step-joke">"Running an AI agent for the first time is like sending your intern to do a task unsupervised. Mostly it goes well. Sometimes there's a surprise." 🚀</div>
+        <p class="step-desc">Navigate to your project folder in the terminal and run Claude Code. Pass your task prompt as the <code>--print</code> argument or pipe it from the file. Claude will read your project, pick up <code>CLAUDE.md</code>, and execute the workflow autonomously.</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — run the agent</div>
+          </div>
+          <pre><span class="comment"># Navigate to project folder (skip if already there)</span>
+<span class="cmd">cd</span> <span class="path">C:\Users\$env:USERNAME\Documents\my-agent</span>
+
+<span class="comment"># Run Claude Code with your task prompt piped from file</span>
+<span class="cmd">Get-Content</span> task.txt | <span class="cmd">claude</span> <span class="flag">--print</span>
+
+<span class="comment"># Or run interactively (Claude will ask clarifying questions)</span>
+<span class="cmd">claude</span>
+
+<span class="comment"># Or pass the task directly as a string</span>
+<span class="cmd">claude</span> <span class="flag">--print</span> <span class="str">"Read task.txt and execute the workflow inside it"</span></pre>
+        </div>
+
+        <p class="step-desc">Once it finishes, verify your outputs. You should see two new files in the folder. If you don't — check the error message, check your API key, and check if Claude went off on a creative tangent (it happens).</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots"><span></span><span></span><span></span></div>
+            <div class="code-label">PowerShell — verify outputs</div>
+          </div>
+          <pre><span class="comment"># List files in the project directory</span>
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Name</span>
+
+<span class="comment"># Expected output should include:</span>
+<span class="comment"># CLAUDE.md, meeting_notes.txt, task.txt</span>
+<span class="comment"># summary_output.md  ← new!</span>
+<span class="comment"># todos.md           ← new!</span>
+
+<span class="comment"># Read the summary</span>
+<span class="cmd">Get-Content</span> summary_output.md
+
+<span class="comment"># Read the todo list</span>
+<span class="cmd">Get-Content</span> todos.md</pre>
+        </div>
+
+        <div class="tip"><strong>✓ It worked!</strong> You now have an agentic workflow. Claude read a file, reasoned about the content, made decisions, and wrote structured outputs — all autonomously. You have officially entered the future. You're welcome.</div>
+
+        <div class="tip warn" style="margin-top:10px;"><strong>⚠️ If something went wrong:</strong> Common culprits: API key not set (check <code>echo $env:ANTHROPIC_API_KEY</code>), typo in file path, or Claude creatively renamed your output file. Claude Code shows detailed logs — read them. They're surprisingly helpful.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FULL EXAMPLE -->
+<section class="full-example">
+  <div class="container full-code">
+    <div class="section-label">// putting it all together</div>
+    <h2>One-shot setup script</h2>
+    <p class="intro">Feeling lazy? (Respect.) Here's a single PowerShell script that does Steps 2–4 in one shot. Paste into PowerShell, run it, and skip straight to the victory lap.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <div class="code-label">setup-and-run.ps1 — full automated setup</div>
+      </div>
+      <pre><span class="comment"># ─── Claude Code Agentic Workflow — Quick Setup ───────────────────</span>
+
+<span class="comment"># Step 1: Make sure Claude Code is installed</span>
+<span class="cmd">npm</span> install <span class="flag">-g</span> <span class="str">@anthropic-ai/claude-code</span>
+
+<span class="comment"># Step 2: Create and enter project folder</span>
+<span class="cmd">mkdir</span> <span class="path">$env:USERPROFILE\Documents\my-agent</span> <span class="flag">-ErrorAction</span> SilentlyContinue
+<span class="cmd">cd</span> <span class="path">$env:USERPROFILE\Documents\my-agent</span>
+
+<span class="comment"># Create input file with sample meeting notes</span>
+<span class="str">@"
+Meeting: Q3 Planning. Attendees: Sarah, Dev, Priya.
+Action items: Launch new dashboard by Aug 15, fix login bug (Dev),
+review pricing page copy (Sarah), schedule user interviews (Priya).
+"@</span> | <span class="cmd">Out-File</span> meeting_notes.txt <span class="flag">-Encoding</span> utf8
+
+<span class="comment"># Create CLAUDE.md — agent instruction manual</span>
+<span class="str">@"
+# Agent: Meeting Notes Processor
+## Role
+You are a helpful productivity agent.
+You read meeting notes, extract action items, and write structured summaries.
+## Rules
+- Only read files in this project directory
+- Write output to clearly named files
+- Format todos as a numbered list with owners
+"@</span> | <span class="cmd">Out-File</span> CLAUDE.md <span class="flag">-Encoding</span> utf8
+
+<span class="comment"># Step 3: Write the multi-step task prompt</span>
+<span class="str">@"
+Please do the following in order:
+1. READ meeting_notes.txt
+2. EXTRACT action items with owners and any deadlines
+3. WRITE summary_output.md with a summary + formatted action item table
+4. WRITE todos.md with a priority list and estimated due dates
+Print "Done!" when complete.
+"@</span> | <span class="cmd">Out-File</span> task.txt <span class="flag">-Encoding</span> utf8
+
+<span class="comment"># Step 4: Run the agent!</span>
+<span class="cmd">Write-Host</span> <span class="str">"🚀 Launching Claude Code agent..."</span> <span class="flag">-ForegroundColor</span> Green
+<span class="cmd">Get-Content</span> task.txt | <span class="cmd">claude</span> <span class="flag">--print</span>
+
+<span class="comment"># Verify outputs</span>
+<span class="cmd">Write-Host</span> <span class="str">"`n📁 Files in project folder:"</span> <span class="flag">-ForegroundColor</span> Cyan
+<span class="cmd">Get-ChildItem</span> <span class="flag">-Name</span>
+
+<span class="cmd">Write-Host</span> <span class="str">"`n✅ Done! Check summary_output.md and todos.md"</span> <span class="flag">-ForegroundColor</span> Yellow</pre>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Built for <strong>Windows 11</strong> · Uses <a href="https://docs.anthropic.com/en/docs/claude-code/overview">Claude Code CLI</a> · Requires an Anthropic API key</p>
+  <p style="margin-top:10px;">Remember: the AI does the work. You take the credit. That's the deal. 🤝</p>
+</footer>
+
+</body>
+</html>
